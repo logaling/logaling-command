@@ -6,10 +6,10 @@ Gem::Specification.new do |s|
   s.name        = "logaling-command"
   s.version     = Logaling::Command::VERSION
   s.authors     = ["SHIMADA Koji"]
-  s.email       = ["snoozer.05@gmail.com"]
+  s.email       = ["koji.shimada@enishi-tech.com"]
   s.homepage    = ""
-  s.summary     = %q{TODO: Write a gem summary}
-  s.description = %q{TODO: Write a gem description}
+  s.summary     = %q{A command line interface for logaling.}
+  s.description = %q{A command line interface for logaling.}
 
   s.rubyforge_project = "logaling-command"
 
