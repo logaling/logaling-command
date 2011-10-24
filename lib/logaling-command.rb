@@ -1,6 +1,7 @@
 #require "logaling-command/version"
 # -*- encoding: utf-8 -*-
 
+require 'psych'
 require "yaml"
 require "fileutils"
 
@@ -11,6 +12,8 @@ module Logaling
     case action
     when "create"
       create(options)
+    when "add"
+      add(options)
     else
       puts "command '#{action}' not found."
     end
@@ -27,7 +30,33 @@ module Logaling
     end
   end
 
-  def check_options(options)
+  def add(options)
+    unless File.exists?(options[:path])
+      puts "glossary #{options[:glossary]} not found"
+      return
+    end
+    return if !check_options(options, true)
+
+    list = translations(options[:path], options[:keyword])
+    list.each do |data|
+      if data[:translation] == options[:translation]
+        # 既に存在するキーワード&訳文
+        puts "[#{options[:keyword]}] [#{options[:translation]}] pair is already exist}"
+        return
+      end
+    end
+
+    File.open(options[:path], "a") do |f|
+      glossary = [
+        options[:keyword] => {
+        :translation => options[:translation],
+        :note => options[:note],
+      }]
+      f.puts(glossary.to_yaml.gsub("---\n", ""))
+    end
+  end
+
+  def check_options(options, check_keyword=false)
     if options[:glossary].empty?
       puts "input glossary name '-g <glossary name>'"
       return false
@@ -39,6 +68,17 @@ module Logaling
     if options[:to].empty?
       puts "input translation-language code '-T <translation-language code>'"
       return false
+    end
+
+    if check_keyword
+      if options[:keyword].empty?
+        puts "input keyword '-k <keyword>'"
+        return false
+      end
+      if options[:translation].empty?
+        puts "input translation '-t <translation>'"
+        return false
+      end
     end
 
     return true
@@ -54,5 +94,17 @@ module Logaling
     end
   end
 
-  module_function :exec, :create, :check_options, :glossary_path
+  def translations(path, key)
+    yaml = YAML::load_file(path)
+
+    translations = []
+    return translations if !yaml
+
+    yaml.each do |arr|
+      translations << arr[key] if arr[key]
+    end
+    return translations
+  end
+
+  module_function :exec, :create, :check_options, :glossary_path, :add, :translations
 end
