@@ -25,7 +25,7 @@ module Logaling
       puts "glossary #{options[:glossary]} is already exists"
     else
       dirname = File::dirname(options[:path])
-      Dir::mkdir(dirname) unless FileTest::directory?(dirname)
+      FileUtils.mkdir_p(dirname)
       FileUtils.touch(options[:path])
     end
   end
