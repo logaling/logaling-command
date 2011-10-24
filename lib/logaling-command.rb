@@ -6,6 +6,8 @@ require "yaml"
 require "fileutils"
 
 module Logaling
+  class CommandFailed < RuntimeError; end
+
   def exec(action, options)
     options[:path] = glossary_path(options)
 
@@ -19,10 +21,13 @@ module Logaling
     else
       puts "command '#{action}' not found."
     end
+  rescue CommandFailed => e
+    STDERR.puts(e.message)
+    exit 1
   end
 
   def create(options)
-    return if !check_options(options)
+    check_options(options)
     if File.exists?(options[:path])
       puts "glossary #{options[:glossary]} is already exists"
     else
@@ -33,8 +38,8 @@ module Logaling
   end
 
   def add(options)
-    return if !check_glossary(options)
-    return if !check_options(options, true, true)
+    check_glossary(options)
+    check_options(options, true, true)
 
     list = translations(options[:path], options[:keyword])
     list.each do |data|
@@ -56,8 +61,8 @@ module Logaling
   end
 
   def lookup(options)
-    return if !check_glossary(options)
-    return if !check_options(options, true)
+    check_glossary(options)
+    check_options(options, true)
 
     list = translations(options[:path], options[:keyword])
     if list.empty?
@@ -74,40 +79,31 @@ module Logaling
 
   def check_glossary(options)
     unless File.exists?(options[:path])
-      puts "glossary #{options[:glossary]} not found"
-      return false
+      raise CommandFailed, "glossary #{options[:glossary]} not found"
     end
-    return true
   end
 
   def check_options(options, check_keyword=false, check_translation=false)
     if options[:glossary].empty?
-      puts "input glossary name '-g <glossary name>'"
-      return false
+      raise CommandFailed, "input glossary name '-g <glossary name>'"
     end
     if options[:from].empty?
-      puts "input source-language code '-F <source-language code>'"
-      return false
+      raise CommandFailed, "input source-language code '-F <source-language code>'"
     end
     if options[:to].empty?
-      puts "input translation-language code '-T <translation-language code>'"
-      return false
+      raise CommandFailed, "input translation-language code '-T <translation-language code>'"
     end
 
     if check_keyword
       if options[:keyword].empty?
-        puts "input keyword '-k <keyword>'"
-        return false
+        raise CommandFailed, "input keyword '-k <keyword>'"
       end
     end
     if check_translation
       if options[:translation].empty?
-        puts "input translation '-t <translation>'"
-        return false
+        raise CommandFailed, "input translation '-t <translation>'"
       end
     end
-
-    return true
   end
 
   def glossary_path(options)
