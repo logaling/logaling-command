@@ -30,7 +30,11 @@ opts.on("-T", "--to <TRANSLATION LANGUAGE CODE>") {|to|
 }
 opts.parse!
 
-exit if ARGV.empty?
+if ARGV.empty?
+  puts opts
+  exit
+end
+
 action = ARGV[0] if ARGV.size > 0
 
 Logaling.exec(action, options)
