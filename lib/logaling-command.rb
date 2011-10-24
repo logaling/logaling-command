@@ -14,6 +14,8 @@ module Logaling
       create(options)
     when "add"
       add(options)
+    when "lookup"
+      lookup(options)
     else
       puts "command '#{action}' not found."
     end
@@ -31,11 +33,8 @@ module Logaling
   end
 
   def add(options)
-    unless File.exists?(options[:path])
-      puts "glossary #{options[:glossary]} not found"
-      return
-    end
-    return if !check_options(options, true)
+    return if !check_glossary(options)
+    return if !check_options(options, true, true)
 
     list = translations(options[:path], options[:keyword])
     list.each do |data|
@@ -56,7 +55,32 @@ module Logaling
     end
   end
 
-  def check_options(options, check_keyword=false)
+  def lookup(options)
+    return if !check_glossary(options)
+    return if !check_options(options, true)
+
+    list = translations(options[:path], options[:keyword])
+    if list.empty?
+      puts "keyword '#{options[:keyword]}' not found"
+      return
+    end
+
+    puts "keyword: #{options[:keyword]}\n"
+    list.each do |data|
+      puts "  translation: #{data[:translation]}\n"
+      puts "    note: #{data[:note]}\n"
+    end
+  end
+
+  def check_glossary(options)
+    unless File.exists?(options[:path])
+      puts "glossary #{options[:glossary]} not found"
+      return false
+    end
+    return true
+  end
+
+  def check_options(options, check_keyword=false, check_translation=false)
     if options[:glossary].empty?
       puts "input glossary name '-g <glossary name>'"
       return false
@@ -75,6 +99,8 @@ module Logaling
         puts "input keyword '-k <keyword>'"
         return false
       end
+    end
+    if check_translation
       if options[:translation].empty?
         puts "input translation '-t <translation>'"
         return false
@@ -106,5 +132,5 @@ module Logaling
     return translations
   end
 
-  module_function :exec, :create, :check_options, :glossary_path, :add, :translations
+  module_function :exec, :create, :check_options, :glossary_path, :add, :translations, :lookup, :check_glossary
 end
