@@ -9,30 +9,28 @@ require "logaling-command"
 
 options = Hash.new("")
 
-if __FILE__ == $0
-  opts = OptionParser.new
-  opts.on("-g", "--glossary <GLOSSARY NAME>") {|glossary|
-    options[:glossary] = glossary
-  }
-  opts.on("-k", "--keyword <KEYWORD>") {|keyword|
-    options[:keyword] = keyword
-  }
-  opts.on("-t", "--translation <TRANSLATION>") {|translation|
-    options[:translation] = translation
-  }
-  opts.on("-n", "--note <NOTE>") {|note|
-    options[:note] = note
-  }
-  opts.on("-F", "--from <SOURCE LANGUAGE CODE>") {|from|
-    options[:from] = from
-  }
-  opts.on("-T", "--to <TRANSLATION LANGUAGE CODE>") {|to|
-    options[:to] = to
-  }
-  opts.parse!
+opts = OptionParser.new
+opts.on("-g", "--glossary <GLOSSARY NAME>") {|glossary|
+  options[:glossary] = glossary
+}
+opts.on("-k", "--keyword <KEYWORD>") {|keyword|
+  options[:keyword] = keyword
+}
+opts.on("-t", "--translation <TRANSLATION>") {|translation|
+  options[:translation] = translation
+}
+opts.on("-n", "--note <NOTE>") {|note|
+  options[:note] = note
+}
+opts.on("-F", "--from <SOURCE LANGUAGE CODE>") {|from|
+  options[:from] = from
+}
+opts.on("-T", "--to <TRANSLATION LANGUAGE CODE>") {|to|
+  options[:to] = to
+}
+opts.parse!
 
-  exit if ARGV.empty?
-  action = ARGV[0] if ARGV.size > 0
+exit if ARGV.empty?
+action = ARGV[0] if ARGV.size > 0
 
-  Logaling.exec(action, options)
-end
+Logaling.exec(action, options)
