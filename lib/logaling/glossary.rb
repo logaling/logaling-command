@@ -62,6 +62,29 @@ module Logaling
         end
       end
 
+      def delete(keyword, translation)
+        check_glossary_exists
+        check_keyword(keyword)
+        check_translation(translation)
+
+        glossaries = YAML::load_file(@path)
+        delete = false
+        glossaries.each_with_index do |hash, i|
+          if hash[keyword] && hash[keyword][:translation] == translation
+            glossaries.delete_at(i)
+            delete = true
+          end
+        end
+
+        if delete
+          File.open(@path, "w") do |f|
+            f.puts glossaries.to_yaml.gsub("---\n", "")
+          end
+        else
+          puts "keyword:#{keyword} translation:#{translation} not found in glossary #{@path}"
+        end
+      end
+
       def lookup(keyword)
         check_glossary_exists
         check_keyword(keyword)
