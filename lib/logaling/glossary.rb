@@ -67,18 +67,14 @@ module Logaling
         check_keyword(keyword)
         check_translation(translation)
 
-        glossaries = YAML::load_file(@path)
-        delete = false
-        glossaries.each_with_index do |hash, i|
-          if hash[keyword] && hash[keyword][:translation] == translation
-            glossaries.delete_at(i)
-            delete = true
-          end
+        glossary = YAML::load_file(@path)
+        target_index = glossary.find_index do |term|
+          term[keyword] && term[keyword][:translation] == translation
         end
-
-        if delete
+        if target_index
+          glossary.delete_at(target_index)
           File.open(@path, "w") do |f|
-            f.puts glossaries.to_yaml.gsub("---\n", "")
+            f.puts glossary.to_yaml
           end
         else
           puts "keyword:#{keyword} translation:#{translation} not found in glossary #{@path}"
