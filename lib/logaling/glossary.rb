@@ -47,13 +47,10 @@ module Logaling
         check_keyword(keyword)
         check_translation(translation)
 
-        list = translations(keyword)
-        list.each do |data|
-          if data[:translation] == translation
-            # 既に存在するキーワード&訳文
-            puts "[#{keyword}] [#{translation}] pair is already exist}"
-            return
-          end
+        if translations(keyword).any?{|data| data[:translation] == translation }
+          # key-translation pair that already exist
+          puts "[#{keyword}] [#{translation}] pair is already exist}"
+          return
         end
 
         File.open(@path, "a") do |f|
