@@ -1,9 +1,5 @@
 # -*- encoding: utf-8 -*-
 
-require 'psych'
-require "yaml"
-require "fileutils"
-
 require "logaling/glossary"
 
 module Logaling::Command
