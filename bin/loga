@@ -37,4 +37,4 @@ end
 
 action = ARGV[0] if ARGV.size > 0
 
-Logaling.exec(action, options)
+Logaling::Command.exec(action, options)
