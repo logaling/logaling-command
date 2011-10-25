@@ -4,8 +4,8 @@ require 'psych'
 require "yaml"
 require "fileutils"
 
-require "logaling-command/version"
-require "logaling-command/glossary"
+require "logaling/version"
+require "logaling/glossary"
 
 module Logaling
   module Command
@@ -17,6 +17,8 @@ module Logaling
         glossary.create
       when "add"
         glossary.add(options[:keyword], options[:translation], options[:note])
+      when "delete"
+        glossary.delete(options[:keyword], options[:translation])
       when "lookup"
         glossary.lookup(options[:keyword])
       else
