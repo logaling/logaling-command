@@ -22,6 +22,9 @@ opts.on("-t", "--translation <TRANSLATION>") {|translation|
 opts.on("-n", "--note <NOTE>") {|note|
   options[:note] = note
 }
+opts.on("-N", "--new <NEW TRANSLATION>") {|new_translation|
+  options[:new_translation] = new_translation
+}
 opts.on("-F", "--from <SOURCE LANGUAGE CODE>") {|from|
   options[:from] = from
 }

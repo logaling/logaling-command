@@ -59,6 +59,36 @@ module Logaling
         end
       end
 
+      def update(keyword, translation, new_translation, note)
+        check_glossary_exists
+        check_keyword(keyword)
+        check_translation(translation)
+        check_newtranslation_note(new_translation, note)
+
+        if translations(keyword).any?{|data| data[:translation] == new_translation }
+          # key-new_translation pair that already exist
+          puts "[#{keyword}] [#{new_translation}] pair is already exist}"
+          return
+        end
+
+        glossary = YAML::load_file(@path)
+        target_index = glossary.find_index do |term|
+          term[keyword] && term[keyword][:translation] == translation
+        end
+        if target_index
+          note = glossary[target_index][keyword][:note] if note == ""
+          new_translation = glossary[target_index][keyword][:translation] if new_translation == ""
+          glossary[target_index] = { keyword => { translation: new_translation, note: note } }
+          File.open(@path, "w") do |f|
+            f.puts glossary.to_yaml
+          end
+        else
+          puts "keyword:#{keyword} translation:#{translation} not found in glossary #{@path}"
+        end
+
+
+      end
+
       def delete(keyword, translation)
         check_glossary_exists
         check_keyword(keyword)
@@ -117,6 +147,12 @@ module Logaling
       def check_translation(translation)
         if translation.empty?
           raise CommandFailed, "input translation '-t <translation>'"
+        end
+      end
+
+      def check_newtranslation_note(new_translation, note)
+        if new_translation.empty? && note.empty?
+          raise CommandFailed, "input new translation '-nt <new translation>' or note '-n <note>'"
         end
       end
 

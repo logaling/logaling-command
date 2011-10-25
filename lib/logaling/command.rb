@@ -13,6 +13,8 @@ module Logaling::Command
       glossary.add(options[:keyword], options[:translation], options[:note])
     when "delete"
       glossary.delete(options[:keyword], options[:translation])
+    when "update"
+      glossary.update(options[:keyword], options[:translation], options[:new_translation], options[:note])
     when "lookup"
       glossary.lookup(options[:keyword])
     else
