@@ -112,16 +112,19 @@ module Logaling
         check_glossary_exists
         check_keyword(keyword)
 
-        list = translations(keyword)
-        if list.empty?
-          puts "keyword '#{keyword}' not found"
-          return
-        end
+        puts "\nkeyword: #{keyword}\n\n"
 
-        puts "keyword: #{keyword}\n"
-        list.each do |data|
-          puts "  translation: #{data[:translation]}\n"
-          puts "    note: #{data[:note]}\n"
+        lookup_files.each do |path|
+          puts "  [#{path}]"
+          list = translations(keyword, path)
+          if list.empty?
+            puts "  not found\n\n"
+          else
+            list.each do |data|
+              puts "  translation: #{data[:translation]}\n"
+              puts "    note: #{data[:note]}\n\n"
+            end
+          end
         end
       end
 
@@ -156,8 +159,8 @@ module Logaling
         end
       end
 
-      def translations(keyword)
-        yaml = YAML::load_file(@path)
+      def translations(keyword, path=@path)
+        yaml = YAML::load_file(path)
 
         translations = []
         return translations if !yaml
@@ -166,6 +169,17 @@ module Logaling
           translations << arr[keyword] if arr[keyword]
         end
         return translations
+      end
+
+      def lookup_files
+        file_list = Dir.glob("#{LOGALING_HOME}/*.yml")
+        if glossary_index = file_list.index(@path)
+          file_list.delete_at(glossary_index)
+          file_list.unshift(@path)
+        else
+          file_list.unshift(@path)
+        end
+        return file_list
       end
     end
   end
