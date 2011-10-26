@@ -75,10 +75,10 @@ class Logaling::Command < Thor
 
   desc 'index', 'Index glossaries to groonga DB.'
   def index
-    glossarydb = Logaling::GlossaryDB.new()
-    glossarydb.open(LOGALING_DB_HOME, "utf8")
-    glossarydb.load_glossaries(LOGALING_HOME)
-    glossarydb.close()
+    glossarydb = Logaling::GlossaryDB.new
+    glossarydb.open(LOGALING_DB_HOME, "utf8") do |db|
+      db.load_glossaries(LOGALING_HOME)
+    end
   end
 
   private
