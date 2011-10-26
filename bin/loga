@@ -4,40 +4,7 @@ lib = File.expand_path(File.dirname(__FILE__) + '/../lib')
 $LOAD_PATH.unshift(lib) if File.directory?(lib) && !$LOAD_PATH.include?(lib)
 LOGALING_HOME = File.expand_path("~/.logaling")
 
-require "optparse"
 require "logaling"
 
-options = Hash.new("")
+Logaling::Command.start
 
-opts = OptionParser.new
-opts.on("-g", "--glossary <GLOSSARY NAME>") {|glossary|
-  options[:glossary] = glossary
-}
-opts.on("-k", "--keyword <KEYWORD>") {|keyword|
-  options[:keyword] = keyword
-}
-opts.on("-t", "--translation <TRANSLATION>") {|translation|
-  options[:translation] = translation
-}
-opts.on("-n", "--note <NOTE>") {|note|
-  options[:note] = note
-}
-opts.on("-N", "--new <NEW TRANSLATION>") {|new_translation|
-  options[:new_translation] = new_translation
-}
-opts.on("-F", "--from <SOURCE LANGUAGE CODE>") {|from|
-  options[:from] = from
-}
-opts.on("-T", "--to <TRANSLATION LANGUAGE CODE>") {|to|
-  options[:to] = to
-}
-opts.parse!
-
-if ARGV.empty?
-  puts opts
-  exit
-end
-
-action = ARGV[0] if ARGV.size > 0
-
-Logaling::Command.exec(action, options)
