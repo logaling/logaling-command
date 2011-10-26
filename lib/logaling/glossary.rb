@@ -121,15 +121,10 @@ module Logaling
     end
 
     def translations(keyword, path=@path)
-      yaml = YAML::load_file(path)
-
-      translations = []
-      return translations if !yaml
-
-      yaml.each do |arr|
+      yaml = YAML::load_file(path) || []
+      yaml.inject(Array.new) do |translations, arr|
         translations << arr[keyword] if arr[keyword]
       end
-      return translations
     end
 
     def lookup_files
