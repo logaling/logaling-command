@@ -136,10 +136,8 @@ module Logaling
       file_list = Dir.glob("#{LOGALING_HOME}/*.#{@from_language}.#{@to_language}.yml")
       if glossary_index = file_list.index(@path)
         file_list.delete_at(glossary_index)
-        file_list.unshift(@path)
-      else
-        file_list.unshift(@path)
       end
+      file_list.unshift(@path)
       return file_list
     end
   end
