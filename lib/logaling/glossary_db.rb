@@ -7,8 +7,6 @@ require "fileutils"
 require 'groonga'
 
 module Logaling
-  class CommandFailed < RuntimeError; end
-
   class GlossaryDB
     def initialize()
       @database = nil
