@@ -32,6 +32,8 @@ module Logaling
         end
 
         @path = Glossary.build_path(glossary, from, to)
+        @from_language = from
+        @to_language = to
       end
 
       def create
@@ -172,7 +174,7 @@ module Logaling
       end
 
       def lookup_files
-        file_list = Dir.glob("#{LOGALING_HOME}/*.yml")
+        file_list = Dir.glob("#{LOGALING_HOME}/*.#{@from_language}.#{@to_language}.yml")
         if glossary_index = file_list.index(@path)
           file_list.delete_at(glossary_index)
           file_list.unshift(@path)
