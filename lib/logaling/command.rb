@@ -14,38 +14,63 @@ class Logaling::Command < Thor
       '-l' => :lookup
 
   desc 'create', 'Create glossary.'
-  method_options glossary: :string, from: :string, to: :string
+  method_option :glossary, type: :string, required: true
+  method_option :from, type: :string, required: true
+  method_option :to, type: :string, required: true
   def create
-    glossary = Logaling::Glossary.new(options[:glossary], options[:from], options[:to])
     glossary.create
+  rescue Logaling::CommandFailed => e
+    error(e.message)
   end
 
   desc 'add', 'Add term to glossary.'
-  method_options glossary: :string, from: :string, to: :string, keyword: :string, translation: :string, note: :string
+  method_option :glossary, type: :string, required: true
+  method_option :from, type: :string, required: true
+  method_option :to, type: :string, required: true
+  method_option :keyword, type: :string, required: true
+  method_option :translation, type: :string, required: true
+  method_option :note, type: :string
   def add
-    glossary = Logaling::Glossary.new(options[:glossary], options[:from], options[:to])
     glossary.add(options[:keyword], options[:translation], options[:note])
+  rescue Logaling::CommandFailed => e
+    error(e.message)
   end
 
   desc 'delete', 'Delete term.'
-  method_options glossary: :string, from: :string, to: :string, keyword: :string, translation: :string
+  method_option :glossary, type: :string, required: true
+  method_option :from, type: :string, required: true
+  method_option :to, type: :string, required: true
+  method_option :keyword, type: :string, required: true
+  method_option :translation, type: :string, required: true
   def delete
-    glossary = Logaling::Glossary.new(options[:glossary], options[:from], options[:to])
     glossary.delete(options[:keyword], options[:translation])
+  rescue Logaling::CommandFailed => e
+    error(e.message)
   end
 
   desc 'update', 'Update term.'
-  method_options glossary: :string, from: :string, to: :string, keyword: :string, translation: :string, new_translation: :string
+  method_option :glossary, type: :string, required: true
+  method_option :from, type: :string, required: true
+  method_option :to, type: :string, required: true
+  method_option :keyword, type: :string, required: true
+  method_option :translation, type: :string, required: true
+  method_option :new_translation, type: :string, required: true
+  method_option :note, type: :string, required: true
   def update
-    glossary = Logaling::Glossary.new(options[:glossary], options[:from], options[:to])
     glossary.update(options[:keyword], options[:translation], options[:new_translation], options[:note])
+  rescue Logaling::CommandFailed => e
+    error(e.message)
   end
 
   desc 'lookup', 'Lookup terms.'
-  method_options glossary: :string, from: :string, to: :string, keyword: :string
+  method_option :glossary, type: :string, required: true
+  method_option :from, type: :string, required: true
+  method_option :to, type: :string, required: true
+  method_option :keyword, type: :string, required: true
   def lookup
-    glossary = Logaling::Glossary.new(options[:glossary], options[:from], options[:to])
     glossary.lookup(options[:keyword])
+  rescue Logaling::CommandFailed => e
+    error(e.message)
   end
 
   desc 'index', 'Index glossaries to groonga DB.'
@@ -56,4 +81,13 @@ class Logaling::Command < Thor
     glossarydb.close()
   end
 
+  private
+  def glossary
+    Logaling::Glossary.new(options[:glossary], options[:from], options[:to])
+  end
+
+  def error(msg)
+    STDERR.puts(msg)
+    exit 1
+  end
 end

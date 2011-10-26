@@ -2,4 +2,6 @@
 
 require "logaling/command"
 
-module Logaling; end
+module Logaling
+  class CommandFailed < RuntimeError; end
+end

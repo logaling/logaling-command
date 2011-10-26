@@ -6,8 +6,6 @@ require "yaml"
 require "fileutils"
 
 module Logaling
-  class CommandFailed < RuntimeError; end
-
   class Glossary
     def self.build_path(glossary, from, to)
       dir, file = File::split(glossary)
@@ -20,16 +18,6 @@ module Logaling
     end
 
     def initialize(glossary, from, to)
-      if glossary.empty?
-        raise CommandFailed, "input glossary name '-g <glossary name>'"
-      end
-      if from.empty?
-        raise CommandFailed, "input source-language code '-F <source-language code>'"
-      end
-      if to.empty?
-        raise CommandFailed, "input translation-language code '-T <translation-language code>'"
-      end
-
       @path = Glossary.build_path(glossary, from, to)
       @from_language = from
       @to_language = to
@@ -45,8 +33,6 @@ module Logaling
 
     def add(keyword, translation, note)
       check_glossary_exists
-      check_keyword(keyword)
-      check_translation(translation)
 
       if translations(keyword).any?{|data| data[:translation] == translation }
         # key-translation pair that already exist
@@ -62,9 +48,6 @@ module Logaling
 
     def update(keyword, translation, new_translation, note)
       check_glossary_exists
-      check_keyword(keyword)
-      check_translation(translation)
-      check_newtranslation_note(new_translation, note)
 
       if translations(keyword).any?{|data| data[:translation] == new_translation }
         # key-new_translation pair that already exist
@@ -86,14 +69,10 @@ module Logaling
       else
         puts "keyword:#{keyword} translation:#{translation} not found in glossary #{@path}"
       end
-
-
     end
 
     def delete(keyword, translation)
       check_glossary_exists
-      check_keyword(keyword)
-      check_translation(translation)
 
       glossary = YAML::load_file(@path)
       target_index = glossary.find_index do |term|
@@ -111,7 +90,6 @@ module Logaling
 
     def lookup(keyword)
       check_glossary_exists
-      check_keyword(keyword)
 
       puts "\nkeyword: #{keyword}\n\n"
 
@@ -130,34 +108,16 @@ module Logaling
     end
 
     private
+    def exist?
+      File.exists?(@path)
+    end
+
     def check_glossary_unexists
-      if File.exists?(@path)
-        raise CommandFailed, "glossary #{@path} is already exists"
-      end
+      raise CommandFailed, "glossary #{@path} is already exists" if exist?
     end
 
     def check_glossary_exists
-      unless File.exists?(@path)
-        raise CommandFailed, "glossary #{@path} not found"
-      end
-    end
-
-    def check_keyword(keyword)
-      if keyword.empty?
-        raise CommandFailed, "input keyword '-k <keyword>'"
-      end
-    end
-
-    def check_translation(translation)
-      if translation.empty?
-        raise CommandFailed, "input translation '-t <translation>'"
-      end
-    end
-
-    def check_newtranslation_note(new_translation, note)
-      if new_translation.empty? && note.empty?
-        raise CommandFailed, "input new translation '-nt <new translation>' or note '-n <note>'"
-      end
+      raise CommandFailed, "glossary #{@path} not found" unless exist?
     end
 
     def translations(keyword, path=@path)
