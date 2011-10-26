@@ -2,6 +2,7 @@
 
 require 'thor'
 require "logaling/glossary"
+require "logaling/glossary_db"
 
 class Logaling::Command < Thor
   VERSION = "0.0.1"
@@ -46,4 +47,13 @@ class Logaling::Command < Thor
     glossary = Logaling::Glossary.new(options[:glossary], options[:from], options[:to])
     glossary.lookup(options[:keyword])
   end
+
+  desc 'index', 'Index glossaries to groonga DB.'
+  def index
+    glossarydb = Logaling::GlossaryDB.new()
+    glossarydb.open(LOGALING_DB_HOME, "utf8")
+    glossarydb.load_glossaries(LOGALING_HOME)
+    glossarydb.close()
+  end
+
 end
