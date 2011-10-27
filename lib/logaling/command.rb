@@ -15,7 +15,6 @@ class Logaling::Command < Thor
       '-u' => :update,
       '-l' => :lookup
 
-
   desc 'create', 'Create glossary.'
   method_option :glossary, type: :string, aliases: "-g"
   method_option :from, type: :string, aliases: "-F"
@@ -92,9 +91,15 @@ class Logaling::Command < Thor
 
   private
   def glossary
-    glossary = options[:glossary] ? options[:glossary] : DOT_OPTIONS["glossary"]
-    from     = options[:from] ? options[:from] : DOT_OPTIONS["from"]
-    to       = options[:to] ? options[:to] : DOT_OPTIONS["to"]
+    glossary = options[:glossary] ? options[:glossary] :
+                 DOT_OPTIONS["glossary"] ? DOT_OPTIONS["glossary"] :
+                   raise(Logaling::CommandFailed, "input glossary name '-g <glossary name>'")
+    from     = options[:from] ? options[:from] :
+                 DOT_OPTIONS["from"] ? DOT_OPTIONS["from"] :
+                   raise(Logaling::CommandFailed, "input source-language code '-F <source-language code>'")
+    to       = options[:to] ? options[:to] :
+                 DOT_OPTIONS["to"] ? DOT_OPTIONS["to"] :
+                   raise(Logaling::CommandFailed, "input translation-language code '-T <translation-language code>'")
 
     Logaling::Glossary.new(glossary, from, to)
   end
