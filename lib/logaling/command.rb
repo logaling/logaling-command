@@ -68,7 +68,7 @@ class Logaling::Command < Thor
   method_option :to, type: :string, required: true
   method_option :keyword, type: :string, required: true
   def lookup
-    glossary.lookup(options[:keyword])
+    glossary.lookup(options[:keyword], options[:glossary])
   rescue Logaling::CommandFailed => e
     error(e.message)
   end

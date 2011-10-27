@@ -58,6 +58,23 @@ module Logaling
       end
     end
 
+    def lookup(name, keyword, from_language, to_language)
+      records = Groonga["glossaries"].select do |record|
+        record.keyword =~ keyword
+      end
+      terms = []
+      records.map do |record|
+        term = record.key
+        terms << {:name => term.name,
+                  :from_language => term.from_language,
+                  :to_language => term.to_language,
+                  :keyword => term.keyword,
+                  :translation => term.translation,
+                  :note => term.note,}
+      end
+      terms
+    end
+
     private
     def add_glossary(name, from_language, to_language, keyword, translation, note)
       attributes = {

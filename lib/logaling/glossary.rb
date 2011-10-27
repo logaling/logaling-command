@@ -82,21 +82,20 @@ module Logaling
       end
     end
 
-    def lookup(keyword)
+    def lookup(keyword, glossary)
       check_glossary_exists
 
-      puts "\nkeyword: #{keyword}\n\n"
+      glossarydb = Logaling::GlossaryDB.new
+      glossarydb.open(LOGALING_DB_HOME, "utf8") do |db|
+        glossaries = db.lookup(glossary, keyword, @from_language, @to_language)
 
-      lookup_files.each do |path|
-        puts "  [#{path}]"
-        list = translations(keyword, path)
-        if list.empty?
-          puts "  not found\n\n"
-        else
-          list.each do |data|
-            puts "  translation: #{data['translation']}\n"
-            puts "    note: #{data['note']}\n\n"
-          end
+        puts "\n#{keyword}\n"
+        puts "  not found\n\n" if glossaries.empty?
+
+        glossaries.each do |term|
+          puts "\n  #{term[:translation]}\n"
+          puts "    備考:#{term[:note]}"
+          puts "    用語集:#{term[:name]}"
         end
       end
     end
