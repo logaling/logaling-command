@@ -48,7 +48,6 @@ module Logaling
         glossary = YAML::load_file(file)
         next if !glossary
         glossary.each do |term|
-          p term
           keyword = term.keys[0]
           translation = term[keyword][:translation]
           note = term[keyword][:note]
