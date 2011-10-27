@@ -101,7 +101,6 @@ class Logaling::Command < Thor
   end
 end
 
-
 def load_config
   if File.exists?(".logaling")
     dot_options = File.readlines(".logaling").map {|l| l.chomp.split " "}
