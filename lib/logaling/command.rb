@@ -4,6 +4,8 @@ require 'thor'
 require "logaling/glossary"
 require "logaling/glossary_db"
 
+DOT_OPTIONS = Hash.new
+
 class Logaling::Command < Thor
   VERSION = "0.0.1"
 
@@ -13,10 +15,11 @@ class Logaling::Command < Thor
       '-u' => :update,
       '-l' => :lookup
 
+
   desc 'create', 'Create glossary.'
-  method_option :glossary, type: :string, required: true, aliases: "-g"
-  method_option :from, type: :string, required: true, aliases: "-F"
-  method_option :to, type: :string, required: true, aliases: "-T"
+  method_option :glossary, type: :string, required: false, aliases: "-g"
+  method_option :from, type: :string, required: false, aliases: "-F"
+  method_option :to, type: :string, required: false, aliases: "-T"
   def create
     glossary.create
   rescue Logaling::CommandFailed => e
@@ -24,22 +27,23 @@ class Logaling::Command < Thor
   end
 
   desc 'add', 'Add term to glossary.'
-  method_option :glossary, type: :string, required: true, aliases: "-g"
-  method_option :from, type: :string, required: true, aliases: "-F"
-  method_option :to, type: :string, required: true, aliases: "-T"
+  method_option :glossary, type: :string, required: false, aliases: "-g"
+  method_option :from, type: :string, required: false, aliases: "-F"
+  method_option :to, type: :string, required: false, aliases: "-T"
   method_option :keyword, type: :string, required: true, aliases: "-k"
   method_option :translation, type: :string, required: true, aliases: "-t"
   method_option :note, type: :string, aliases: "-n"
   def add
+
     glossary.add(options[:keyword], options[:translation], options[:note])
   rescue Logaling::CommandFailed => e
     error(e.message)
   end
 
   desc 'delete', 'Delete term.'
-  method_option :glossary, type: :string, required: true, aliases: "-g"
-  method_option :from, type: :string, required: true, aliases: "-F"
-  method_option :to, type: :string, required: true, aliases: "-T"
+  method_option :glossary, type: :string, required: false, aliases: "-g"
+  method_option :from, type: :string, required: false, aliases: "-F"
+  method_option :to, type: :string, required: false, aliases: "-T"
   method_option :keyword, type: :string, required: true, aliases: "-k"
   method_option :translation, type: :string, required: true, aliases: "-t"
   def delete
@@ -49,9 +53,9 @@ class Logaling::Command < Thor
   end
 
   desc 'update', 'Update term.'
-  method_option :glossary, type: :string, required: true, aliases: "-g"
-  method_option :from, type: :string, required: true, aliases: "-F"
-  method_option :to, type: :string, required: true, aliases: "-T"
+  method_option :glossary, type: :string, required: false, aliases: "-g"
+  method_option :from, type: :string, required: false, aliases: "-F"
+  method_option :to, type: :string, required: false, aliases: "-T"
   method_option :keyword, type: :string, required: true, aliases: "-k"
   method_option :translation, type: :string, required: true, aliases: "-t"
   method_option :new_translation, type: :string, required: true, aliases: "-nt"
@@ -63,9 +67,9 @@ class Logaling::Command < Thor
   end
 
   desc 'lookup', 'Lookup terms.'
-  method_option :glossary, type: :string, required: true, aliases: "-g"
-  method_option :from, type: :string, required: true, aliases: "-F"
-  method_option :to, type: :string, required: true, aliases: "-T"
+  method_option :glossary, type: :string, required: false, aliases: "-g"
+  method_option :from, type: :string, required: false, aliases: "-F"
+  method_option :to, type: :string, required: false, aliases: "-T"
   method_option :keyword, type: :string, required: true, aliases: "-k"
   def lookup
     glossary.lookup(options[:keyword], options[:glossary])
@@ -84,7 +88,11 @@ class Logaling::Command < Thor
 
   private
   def glossary
-    Logaling::Glossary.new(options[:glossary], options[:from], options[:to])
+    glossary = options[:glossary] ? options[:glossary] : DOT_OPTIONS["glossary"]
+    from     = options[:from] ? options[:from] : DOT_OPTIONS["from"]
+    to       = options[:to] ? options[:to] : DOT_OPTIONS["to"]
+
+    Logaling::Glossary.new(glossary, from, to)
   end
 
   def error(msg)
@@ -92,3 +100,16 @@ class Logaling::Command < Thor
     exit 1
   end
 end
+
+
+def load_config
+  if File.exists?(".logaling")
+    dot_options = File.readlines(".logaling").map {|l| l.chomp.split " "}
+    dot_options.each do |option|
+      key = option[0].sub(/^[\-]{2}/, "")
+      value = option[1]
+      DOT_OPTIONS[key] = value
+    end
+  end
+end
+load_config
