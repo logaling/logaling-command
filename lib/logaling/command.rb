@@ -14,9 +14,9 @@ class Logaling::Command < Thor
       '-l' => :lookup
 
   desc 'create', 'Create glossary.'
-  method_option :glossary, type: :string, required: true
-  method_option :from, type: :string, required: true
-  method_option :to, type: :string, required: true
+  method_option :glossary, type: :string, required: true, aliases: "-g"
+  method_option :from, type: :string, required: true, aliases: "-F"
+  method_option :to, type: :string, required: true, aliases: "-T"
   def create
     glossary.create
   rescue Logaling::CommandFailed => e
@@ -24,12 +24,12 @@ class Logaling::Command < Thor
   end
 
   desc 'add', 'Add term to glossary.'
-  method_option :glossary, type: :string, required: true
-  method_option :from, type: :string, required: true
-  method_option :to, type: :string, required: true
-  method_option :keyword, type: :string, required: true
-  method_option :translation, type: :string, required: true
-  method_option :note, type: :string
+  method_option :glossary, type: :string, required: true, aliases: "-g"
+  method_option :from, type: :string, required: true, aliases: "-F"
+  method_option :to, type: :string, required: true, aliases: "-T"
+  method_option :keyword, type: :string, required: true, aliases: "-k"
+  method_option :translation, type: :string, required: true, aliases: "-t"
+  method_option :note, type: :string, aliases: "-n"
   def add
     glossary.add(options[:keyword], options[:translation], options[:note])
   rescue Logaling::CommandFailed => e
@@ -37,11 +37,11 @@ class Logaling::Command < Thor
   end
 
   desc 'delete', 'Delete term.'
-  method_option :glossary, type: :string, required: true
-  method_option :from, type: :string, required: true
-  method_option :to, type: :string, required: true
-  method_option :keyword, type: :string, required: true
-  method_option :translation, type: :string, required: true
+  method_option :glossary, type: :string, required: true, aliases: "-g"
+  method_option :from, type: :string, required: true, aliases: "-F"
+  method_option :to, type: :string, required: true, aliases: "-T"
+  method_option :keyword, type: :string, required: true, aliases: "-k"
+  method_option :translation, type: :string, required: true, aliases: "-t"
   def delete
     glossary.delete(options[:keyword], options[:translation])
   rescue Logaling::CommandFailed => e
@@ -49,13 +49,13 @@ class Logaling::Command < Thor
   end
 
   desc 'update', 'Update term.'
-  method_option :glossary, type: :string, required: true
-  method_option :from, type: :string, required: true
-  method_option :to, type: :string, required: true
-  method_option :keyword, type: :string, required: true
-  method_option :translation, type: :string, required: true
-  method_option :new_translation, type: :string, required: true
-  method_option :note, type: :string, required: true
+  method_option :glossary, type: :string, required: true, aliases: "-g"
+  method_option :from, type: :string, required: true, aliases: "-F"
+  method_option :to, type: :string, required: true, aliases: "-T"
+  method_option :keyword, type: :string, required: true, aliases: "-k"
+  method_option :translation, type: :string, required: true, aliases: "-t"
+  method_option :new_translation, type: :string, required: true, aliases: "-nt"
+  method_option :note, type: :string, required: true, aliases: "-n"
   def update
     glossary.update(options[:keyword], options[:translation], options[:new_translation], options[:note])
   rescue Logaling::CommandFailed => e
@@ -63,10 +63,10 @@ class Logaling::Command < Thor
   end
 
   desc 'lookup', 'Lookup terms.'
-  method_option :glossary, type: :string, required: true
-  method_option :from, type: :string, required: true
-  method_option :to, type: :string, required: true
-  method_option :keyword, type: :string, required: true
+  method_option :glossary, type: :string, required: true, aliases: "-g"
+  method_option :from, type: :string, required: true, aliases: "-F"
+  method_option :to, type: :string, required: true, aliases: "-T"
+  method_option :keyword, type: :string, required: true, aliases: "-k"
   def lookup
     glossary.lookup(options[:keyword], options[:glossary])
   rescue Logaling::CommandFailed => e
