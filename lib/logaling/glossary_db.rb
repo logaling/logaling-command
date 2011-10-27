@@ -48,9 +48,9 @@ module Logaling
         glossary = YAML::load_file(file)
         next if !glossary
         glossary.each do |term|
-          keyword = term[:keyword]
-          translation = term[:translation]
-          note = term[:note]
+          keyword = term['keyword']
+          translation = term['translation']
+          note = term['note']
           add_glossary(name, from_language, to_language, keyword, translation, note)
         end
       end
