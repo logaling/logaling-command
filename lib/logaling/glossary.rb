@@ -34,35 +34,31 @@ module Logaling
     def add(keyword, translation, note)
       check_glossary_exists
 
-      if translations(keyword).any?{|data| data['translation'] == translation }
+      if bilingual_pair_exists?(keyword, translation)
         # key-translation pair that already exist
         puts "[#{keyword}] [#{translation}] pair is already exist}"
         return
       end
 
       File.open(@path, "a") do |f|
-        glossary = [ { 'keyword' =>  keyword, 'translation' => translation, 'note' => note } ]
-        f.puts(glossary.to_yaml.gsub("---\n", ""))
+        term = [ build_term(keyword, translation, note) ]
+        f.puts(term.to_yaml.gsub("---\n", ""))
       end
     end
 
     def update(keyword, translation, new_translation, note)
       check_glossary_exists
 
-      if translations(keyword).any?{|data| data['translation'] == new_translation }
+      if bilingual_pair_exists?(keyword, new_translation)
         # key-new_translation pair that already exist
         puts "[#{keyword}] [#{new_translation}] pair is already exist}"
         return
       end
 
       glossary = YAML::load_file(@path)
-      target_index = glossary.find_index do |term|
-        term['keyword'] == keyword && term['translation'] == translation
-      end
+      target_index = find_term_index(glossary, keyword, translation)
       if target_index
-        note = glossary[target_index]['note'] if note == ""
-        new_translation = glossary[target_index]['translation'] if new_translation == ""
-        glossary[target_index] = { 'keyword' => keyword, 'translation' => new_translation, 'note' => note }
+        glossary[target_index] = rebuild_term(glossary[target_index], keyword, new_translation, note)
         File.open(@path, "w") do |f|
           f.puts glossary.to_yaml
         end
@@ -75,9 +71,7 @@ module Logaling
       check_glossary_exists
 
       glossary = YAML::load_file(@path)
-      target_index = glossary.find_index do |term|
-        term['keyword'] == keyword && term['translation'] == translation
-      end
+      target_index = find_term_index(glossary, keyword, translation)
       if target_index
         glossary.delete_at(target_index)
         File.open(@path, "w") do |f|
@@ -108,6 +102,26 @@ module Logaling
     end
 
     private
+    def build_term(keyword, translation, note)
+      {'keyword' => keyword, 'translation' => translation, 'note' => note}
+    end
+
+    def rebuild_term(current, keyword, translation, note)
+      note = current['note'] if note == ""
+      translation = current['translation'] if translation == ""
+      build_term(keyword, translation, note)
+    end
+
+    def find_term_index(glossary_yml, keyword, translation)
+      glossary_yml.find_index do |term|
+        term['keyword'] == keyword && term['translation'] == translation
+      end
+    end
+
+    def bilingual_pair_exists?(keyword, translation)
+      translations(keyword).any?{|data| data['translation'] == translation }
+    end
+
     def exist?
       File.exists?(@path)
     end
