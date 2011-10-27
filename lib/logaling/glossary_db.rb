@@ -61,7 +61,11 @@ module Logaling
     def lookup(name, keyword, from_language, to_language)
       records = Groonga["glossaries"].select do |record|
         record.keyword =~ keyword
-      end
+      end.sort([
+        {:key=>"name", :order=>'ascending'},
+        {:key=>"keyword", :order=>'ascending'},
+        {:key=>"translation", :order=>'ascending'}])
+
       terms = []
       records.map do |record|
         term = record.key
