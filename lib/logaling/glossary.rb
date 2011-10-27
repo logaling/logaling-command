@@ -88,6 +88,9 @@ module Logaling
       glossarydb = Logaling::GlossaryDB.new
       glossarydb.open(LOGALING_DB_HOME, "utf8") do |db|
         glossaries = db.lookup(glossary, keyword, @from_language, @to_language)
+        glossaries.each_with_index do |term, i|
+          glossaries.delete_at(i) if term[:from_language] != @from_language || term[:to_language] != @to_language
+        end
 
         puts "\n#{keyword}\n"
         puts "  not found\n\n" if glossaries.empty?
@@ -141,7 +144,7 @@ module Logaling
       end
       translations
     end
-
+=begin
     def lookup_files
       file_list = Dir.glob("#{LOGALING_HOME}/*.#{@from_language}.#{@to_language}.yml")
       if glossary_index = file_list.index(@path)
@@ -150,5 +153,6 @@ module Logaling
       file_list.unshift(@path)
       return file_list
     end
+=end
   end
 end
