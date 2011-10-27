@@ -16,8 +16,6 @@ module Logaling
       path = File.join(base_path, "logaling.db")
       if File.exist?(path)
         @database = Groonga::Database.open(path)
-        remove_schema
-        populate_schema
       else
         FileUtils.mkdir_p(base_path)
         populate(path)
@@ -29,6 +27,11 @@ module Logaling
           close unless closed?
         end
       end
+    end
+
+    def recreate_table
+      remove_schema
+      populate_schema
     end
 
     def close
@@ -76,13 +79,11 @@ module Logaling
 
     def populate(path)
       @database = Groonga::Database.create(:path => path)
-      populate_schema
     end
 
     def populate_schema
       Groonga::Schema.define do |schema|
-        schema.create_table("glossaries",
-                            :force => true) do |table|
+        schema.create_table("glossaries") do |table|
            table.short_text("name")
            table.short_text("from_language")
            table.short_text("to_language")
@@ -92,7 +93,6 @@ module Logaling
         end
 
         schema.create_table("terms",
-                            :force => true,
                             :type => :patricia_trie,
                             :key_type => "ShortText",
                             :key_normalize => true,

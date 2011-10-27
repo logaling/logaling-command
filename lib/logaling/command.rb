@@ -77,6 +77,7 @@ class Logaling::Command < Thor
   def index
     glossarydb = Logaling::GlossaryDB.new
     glossarydb.open(LOGALING_DB_HOME, "utf8") do |db|
+      db.recreate_table
       db.load_glossaries(LOGALING_HOME)
     end
   end
