@@ -41,7 +41,7 @@ module Logaling
       end
 
       File.open(@path, "a") do |f|
-        glossary = [ keyword => { translation: translation, note: note } ]
+        glossary = [ { keyword: keyword, translation: translation, note: note } ]
         f.puts(glossary.to_yaml.gsub("---\n", ""))
       end
     end
@@ -57,12 +57,12 @@ module Logaling
 
       glossary = YAML::load_file(@path)
       target_index = glossary.find_index do |term|
-        term[keyword] && term[keyword][:translation] == translation
+        term[:keyword] == keyword && term[:translation] == translation
       end
       if target_index
-        note = glossary[target_index][keyword][:note] if note == ""
-        new_translation = glossary[target_index][keyword][:translation] if new_translation == ""
-        glossary[target_index] = { keyword => { translation: new_translation, note: note } }
+        note = glossary[target_index][:note] if note == ""
+        new_translation = glossary[target_index][:translation] if new_translation == ""
+        glossary[target_index] = { keyword: keyword, translation: new_translation, note: note }
         File.open(@path, "w") do |f|
           f.puts glossary.to_yaml
         end
@@ -76,7 +76,7 @@ module Logaling
 
       glossary = YAML::load_file(@path)
       target_index = glossary.find_index do |term|
-        term[keyword] && term[keyword][:translation] == translation
+        term[:keyword] == keyword && term[:translation] == translation
       end
       if target_index
         glossary.delete_at(target_index)
@@ -124,7 +124,7 @@ module Logaling
       translations = []
       glossaly = YAML::load_file(path) || []
       glossaly.each do |term|
-        translations << term[keyword] if term[keyword]
+        translations << term if term[:keyword] == keyword
       end
       translations
     end
