@@ -30,7 +30,7 @@ module Logaling
     end
 
     def recreate_table(base_path)
-      path = File.join(base_path, "logaling.db/logaling.db.tables")
+      path = File.join(base_path, "logaling.db.tables")
       if File.exist?(path)
         remove_schema
       end
