@@ -17,9 +17,9 @@ class Logaling::Command < Thor
 
 
   desc 'create', 'Create glossary.'
-  method_option :glossary, type: :string, required: false, aliases: "-g"
-  method_option :from, type: :string, required: false, aliases: "-F"
-  method_option :to, type: :string, required: false, aliases: "-T"
+  method_option :glossary, type: :string, aliases: "-g"
+  method_option :from, type: :string, aliases: "-F"
+  method_option :to, type: :string, aliases: "-T"
   def create
     glossary.create
   rescue Logaling::CommandFailed => e
@@ -27,9 +27,9 @@ class Logaling::Command < Thor
   end
 
   desc 'add', 'Add term to glossary.'
-  method_option :glossary, type: :string, required: false, aliases: "-g"
-  method_option :from, type: :string, required: false, aliases: "-F"
-  method_option :to, type: :string, required: false, aliases: "-T"
+  method_option :glossary, type: :string, aliases: "-g"
+  method_option :from, type: :string, aliases: "-F"
+  method_option :to, type: :string, aliases: "-T"
   method_option :keyword, type: :string, required: true, aliases: "-k"
   method_option :translation, type: :string, required: true, aliases: "-t"
   method_option :note, type: :string, aliases: "-n"
@@ -41,9 +41,9 @@ class Logaling::Command < Thor
   end
 
   desc 'delete', 'Delete term.'
-  method_option :glossary, type: :string, required: false, aliases: "-g"
-  method_option :from, type: :string, required: false, aliases: "-F"
-  method_option :to, type: :string, required: false, aliases: "-T"
+  method_option :glossary, type: :string, aliases: "-g"
+  method_option :from, type: :string, aliases: "-F"
+  method_option :to, type: :string, aliases: "-T"
   method_option :keyword, type: :string, required: true, aliases: "-k"
   method_option :translation, type: :string, required: true, aliases: "-t"
   def delete
@@ -53,9 +53,9 @@ class Logaling::Command < Thor
   end
 
   desc 'update', 'Update term.'
-  method_option :glossary, type: :string, required: false, aliases: "-g"
-  method_option :from, type: :string, required: false, aliases: "-F"
-  method_option :to, type: :string, required: false, aliases: "-T"
+  method_option :glossary, type: :string, aliases: "-g"
+  method_option :from, type: :string, aliases: "-F"
+  method_option :to, type: :string, aliases: "-T"
   method_option :keyword, type: :string, required: true, aliases: "-k"
   method_option :translation, type: :string, required: true, aliases: "-t"
   method_option :new_translation, type: :string, required: true, aliases: "-nt"
@@ -67,9 +67,9 @@ class Logaling::Command < Thor
   end
 
   desc 'lookup', 'Lookup terms.'
-  method_option :glossary, type: :string, required: false, aliases: "-g"
-  method_option :from, type: :string, required: false, aliases: "-F"
-  method_option :to, type: :string, required: false, aliases: "-T"
+  method_option :glossary, type: :string, aliases: "-g"
+  method_option :from, type: :string, aliases: "-F"
+  method_option :to, type: :string, aliases: "-T"
   method_option :keyword, type: :string, required: true, aliases: "-k"
   def lookup
     glossary.lookup(options[:keyword], options[:glossary])
