@@ -87,10 +87,10 @@ module Logaling
 
       glossarydb = Logaling::GlossaryDB.new
       glossarydb.open(LOGALING_DB_HOME, "utf8") do |db|
-        glossaries = db.lookup(glossary, keyword, @from_language, @to_language)
-
-        puts "\n#{keyword}\n"
-        puts "  not found\n\n" if glossaries.empty?
+        glossaries = db.lookup(glossary, keyword)
+        glossaries.reject! do |term|
+          term[:from_language] != @from_language || term[:to_language] != @to_language
+        end
 
         glossaries.each do |term|
           puts "\n  #{term[:translation]}\n"

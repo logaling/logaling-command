@@ -58,7 +58,7 @@ module Logaling
       end
     end
 
-    def lookup(name, keyword, from_language, to_language)
+    def lookup(name, keyword)
       records = Groonga["glossaries"].select do |record|
         record.keyword =~ keyword
       end.sort([
