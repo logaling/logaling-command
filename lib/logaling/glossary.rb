@@ -91,11 +91,17 @@ module Logaling
         glossaries.reject! do |term|
           term[:from_language] != @from_language || term[:to_language] != @to_language
         end
+        if glossaries.empty?
+          puts "keyword <#{keyword}> not found"
+          return
+        end
 
+        puts "\nlookup word : #{keyword}"
         glossaries.each do |term|
-          puts "\n  #{term[:translation]}\n"
-          puts "    備考:#{term[:note]}"
-          puts "    用語集:#{term[:name]}"
+          puts "\n  #{term[:keyword]}\n"
+          puts "  #{term[:translation]}\n"
+          puts "    note:#{term[:note]}"
+          puts "    glossary:#{term[:name]}"
         end
       end
     end
