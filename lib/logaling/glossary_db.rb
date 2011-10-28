@@ -61,7 +61,7 @@ module Logaling
       end
     end
 
-    def lookup(name, keyword)
+    def lookup(keyword)
       records = Groonga["glossaries"].select do |record|
         record.keyword =~ keyword
       end

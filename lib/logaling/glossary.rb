@@ -88,7 +88,7 @@ module Logaling
 
       glossarydb = Logaling::GlossaryDB.new
       glossarydb.open(LOGALING_DB_HOME, "utf8") do |db|
-        glossaries = db.lookup(@glossary, keyword)
+        glossaries = db.lookup(keyword)
         glossaries.reject! do |term|
           term[:from_language] != @from_language || term[:to_language] != @to_language
         end
@@ -96,6 +96,10 @@ module Logaling
           puts "keyword <#{keyword}> not found"
           return
         end
+        # order by glossary
+        specified = glossaries.select{|term| term[:name] == @glossary}
+        other = glossaries.select{|term| term[:name] != @glossary}
+        glossaries = specified.concat(other)
 
         puts "\nlookup word : #{keyword}"
         glossaries.each do |term|
