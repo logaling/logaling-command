@@ -15,10 +15,11 @@ class Logaling::Command < Thor
       '-u' => :update,
       '-l' => :lookup
 
+  class_option :glossary, type: :string, aliases: "-g"
+  class_option :from, type: :string, aliases: "-F"
+  class_option :to, type: :string, aliases: "-T"
+
   desc 'create', 'Create glossary.'
-  method_option :glossary, type: :string, aliases: "-g"
-  method_option :from, type: :string, aliases: "-F"
-  method_option :to, type: :string, aliases: "-T"
   def create
     load_config
     glossary.create
@@ -27,9 +28,6 @@ class Logaling::Command < Thor
   end
 
   desc 'add', 'Add term to glossary.'
-  method_option :glossary, type: :string, aliases: "-g"
-  method_option :from, type: :string, aliases: "-F"
-  method_option :to, type: :string, aliases: "-T"
   method_option :keyword, type: :string, required: true, aliases: "-k"
   method_option :translation, type: :string, required: true, aliases: "-t"
   method_option :note, type: :string, aliases: "-n"
@@ -41,9 +39,6 @@ class Logaling::Command < Thor
   end
 
   desc 'delete', 'Delete term.'
-  method_option :glossary, type: :string, aliases: "-g"
-  method_option :from, type: :string, aliases: "-F"
-  method_option :to, type: :string, aliases: "-T"
   method_option :keyword, type: :string, required: true, aliases: "-k"
   method_option :translation, type: :string, required: true, aliases: "-t"
   def delete
@@ -54,9 +49,6 @@ class Logaling::Command < Thor
   end
 
   desc 'update', 'Update term.'
-  method_option :glossary, type: :string, aliases: "-g"
-  method_option :from, type: :string, aliases: "-F"
-  method_option :to, type: :string, aliases: "-T"
   method_option :keyword, type: :string, required: true, aliases: "-k"
   method_option :translation, type: :string, required: true, aliases: "-t"
   method_option :new_translation, type: :string, required: true, aliases: "-nt"
@@ -69,9 +61,6 @@ class Logaling::Command < Thor
   end
 
   desc 'lookup', 'Lookup terms.'
-  method_option :glossary, type: :string, aliases: "-g"
-  method_option :from, type: :string, aliases: "-F"
-  method_option :to, type: :string, aliases: "-T"
   method_option :keyword, type: :string, required: true, aliases: "-k"
   def lookup
     load_config
