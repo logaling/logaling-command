@@ -19,6 +19,7 @@ module Logaling
 
     def initialize(glossary, from, to)
       @path = Glossary.build_path(glossary, from, to)
+      @glossary = glossary
       @from_language = from
       @to_language = to
     end
@@ -82,12 +83,12 @@ module Logaling
       end
     end
 
-    def lookup(keyword, glossary)
+    def lookup(keyword)
       check_glossary_exists
 
       glossarydb = Logaling::GlossaryDB.new
       glossarydb.open(LOGALING_DB_HOME, "utf8") do |db|
-        glossaries = db.lookup(glossary, keyword)
+        glossaries = db.lookup(@glossary, keyword)
         glossaries.reject! do |term|
           term[:from_language] != @from_language || term[:to_language] != @to_language
         end
