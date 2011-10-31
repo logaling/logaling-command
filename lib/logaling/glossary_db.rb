@@ -70,31 +70,26 @@ module Logaling
         {:key=>"keyword", :order=>'ascending'},
         {:key=>"translation", :order=>'ascending'}])
 
-      terms = []
       records.map do |record|
         term = record.key
-        terms << {:name => term.name,
-                  :from_language => term.from_language,
-                  :to_language => term.to_language,
-                  :keyword => term.keyword,
-                  :translation => term.translation,
-                  :note => term.note,}
+        {:name => term.name,
+         :from_language => term.from_language,
+         :to_language => term.to_language,
+         :keyword => term.keyword,
+         :translation => term.translation,
+         :note => term.note,}
       end
-      terms
     end
 
     private
     def add_glossary(name, from_language, to_language, keyword, translation, note)
-      attributes = {
-        :name => name
-      }
       Groonga["glossaries"].add(:name => name,
-                             :from_language => from_language,
-                             :to_language => to_language,
-                             :keyword => keyword,
-                             :translation => translation,
-                             :note => note,
-                            )
+                                :from_language => from_language,
+                                :to_language => to_language,
+                                :keyword => keyword,
+                                :translation => translation,
+                                :note => note,
+                               )
     end
 
     def reset_context(encoding)
@@ -109,12 +104,12 @@ module Logaling
     def populate_schema
       Groonga::Schema.define do |schema|
         schema.create_table("glossaries") do |table|
-           table.short_text("name")
-           table.short_text("from_language")
-           table.short_text("to_language")
-           table.short_text("keyword")
-           table.text("translation")
-           table.text("note")
+          table.short_text("name")
+          table.short_text("from_language")
+          table.short_text("to_language")
+          table.short_text("keyword")
+          table.text("translation")
+          table.text("note")
         end
 
         schema.create_table("terms",
