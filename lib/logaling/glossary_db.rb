@@ -49,45 +49,45 @@ module Logaling
     def load_glossaries(path)
       file_list = Dir.glob("#{path}/*.yml")
       file_list.each do |file|
-        name, from_language, to_language = File::basename(file, "yml").split(".")
+        name, source_language, target_language = File::basename(file, "yml").split(".")
         glossary = YAML::load_file(file)
         next if !glossary
         glossary.each do |term|
-          keyword = term['keyword']
-          translation = term['translation']
+          source_term = term['source_term']
+          target_term = term['target_term']
           note = term['note']
-          add_glossary(name, from_language, to_language, keyword, translation, note)
+          add_glossary(name, source_language, target_language, source_term, target_term, note)
         end
       end
     end
 
-    def lookup(keyword)
+    def lookup(source_term)
       records_raw = Groonga["glossaries"].select do |record|
-        record.keyword =~ keyword
+        record.source_term =~ source_term
       end
       records = records_raw.sort([
         {:key=>"name", :order=>'ascending'},
-        {:key=>"keyword", :order=>'ascending'},
-        {:key=>"translation", :order=>'ascending'}])
+        {:key=>"source_term", :order=>'ascending'},
+        {:key=>"target_term", :order=>'ascending'}])
 
       records.map do |record|
         term = record.key
         {:name => term.name,
-         :from_language => term.from_language,
-         :to_language => term.to_language,
-         :keyword => term.keyword,
-         :translation => term.translation,
+         :source_language => term.source_language,
+         :target_language => term.target_language,
+         :source_term => term.source_term,
+         :target_term => term.target_term,
          :note => term.note,}
       end
     end
 
     private
-    def add_glossary(name, from_language, to_language, keyword, translation, note)
+    def add_glossary(name, source_language, target_language, source_term, target_term, note)
       Groonga["glossaries"].add(:name => name,
-                                :from_language => from_language,
-                                :to_language => to_language,
-                                :keyword => keyword,
-                                :translation => translation,
+                                :source_language => source_language,
+                                :target_language => target_language,
+                                :source_term => source_term,
+                                :target_term => target_term,
                                 :note => note,
                                )
     end
@@ -105,10 +105,10 @@ module Logaling
       Groonga::Schema.define do |schema|
         schema.create_table("glossaries") do |table|
           table.short_text("name")
-          table.short_text("from_language")
-          table.short_text("to_language")
-          table.short_text("keyword")
-          table.text("translation")
+          table.short_text("source_language")
+          table.short_text("target_language")
+          table.short_text("source_term")
+          table.text("target_term")
           table.text("note")
         end
 
@@ -117,7 +117,7 @@ module Logaling
                             :key_type => "ShortText",
                             :key_normalize => true,
                             :default_tokenizer => "TokenBigram") do |table|
-          table.index("glossaries.keyword")
+          table.index("glossaries.source_term")
         end
       end
     end

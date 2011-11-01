@@ -14,8 +14,8 @@ class Logaling::Command < Thor
       '-l' => :lookup
 
   class_option :glossary, type: :string, aliases: "-g"
-  class_option :from, type: :string, aliases: "-F"
-  class_option :to, type: :string, aliases: "-T"
+  class_option :source_language, type: :string, aliases: "-S"
+  class_option :target_language, type: :string, aliases: "-T"
 
   def initialize(*args)
     super
@@ -31,43 +31,43 @@ class Logaling::Command < Thor
   end
 
   desc 'add', 'Add term to glossary.'
-  method_option :keyword, type: :string, required: true, aliases: "-k"
-  method_option :translation, type: :string, required: true, aliases: "-t"
+  method_option :source_term, type: :string, required: true, aliases: "-s"
+  method_option :target_term, type: :string, required: true, aliases: "-t"
   method_option :note, type: :string, aliases: "-n"
   def add
     load_config
-    glossary.add(options[:keyword], options[:translation], options[:note])
+    glossary.add(options[:source_term], options[:target_term], options[:note])
   rescue Logaling::CommandFailed => e
     error(e.message)
   end
 
   desc 'delete', 'Delete term.'
-  method_option :keyword, type: :string, required: true, aliases: "-k"
-  method_option :translation, type: :string, required: true, aliases: "-t"
+  method_option :source_term, type: :string, required: true, aliases: "-s"
+  method_option :target_term, type: :string, required: true, aliases: "-t"
   def delete
     load_config
-    glossary.delete(options[:keyword], options[:translation])
+    glossary.delete(options[:source_term], options[:target_term])
   rescue Logaling::CommandFailed => e
     error(e.message)
   end
 
   desc 'update', 'Update term.'
-  method_option :keyword, type: :string, required: true, aliases: "-k"
-  method_option :translation, type: :string, required: true, aliases: "-t"
-  method_option :new_translation, type: :string, required: true, aliases: "-nt"
+  method_option :source_term, type: :string, required: true, aliases: "-s"
+  method_option :target_term, type: :string, required: true, aliases: "-t"
+  method_option :new_target_term, type: :string, required: true, aliases: "-nt"
   method_option :note, type: :string, required: true, aliases: "-n"
   def update
     load_config
-    glossary.update(options[:keyword], options[:translation], options[:new_translation], options[:note])
+    glossary.update(options[:source_term], options[:target_term], options[:new_target_term], options[:note])
   rescue Logaling::CommandFailed => e
     error(e.message)
   end
 
   desc 'lookup', 'Lookup terms.'
-  method_option :keyword, type: :string, required: true, aliases: "-k"
+  method_option :source_term, type: :string, required: true, aliases: "-s"
   def lookup
     load_config
-    glossary.lookup(options[:keyword])
+    glossary.lookup(options[:source_term])
   rescue Logaling::CommandFailed => e
     error(e.message)
   end
@@ -83,17 +83,20 @@ class Logaling::Command < Thor
 
   private
   def glossary
-    glossary = options[:glossary] ? options[:glossary] :
-                 @dot_options["glossary"] ? @dot_options["glossary"] :
-                   raise(Logaling::CommandFailed, "input glossary name '-g <glossary name>'")
-    from     = options[:from] ? options[:from] :
-                 @dot_options["from"] ? @dot_options["from"] :
-                   raise(Logaling::CommandFailed, "input source-language code '-F <source-language code>'")
-    to       = options[:to] ? options[:to] :
-                 @dot_options["to"] ? @dot_options["to"] :
-                   raise(Logaling::CommandFailed, "input translation-language code '-T <translation-language code>'")
+    glossary =
+      options[:glossary] ? options[:glossary] :
+        @dot_options["glossary"] ? @dot_options["glossary"] :
+          raise(Logaling::CommandFailed, "input glossary name '-g <glossary name>'")
+    source_language =
+      options[:source_language] ? options[:source_language] :
+        @dot_options["source_language"] ? @dot_options["source_language"] :
+          raise(Logaling::CommandFailed, "input source-language code '-S <source-language code>'")
+    target_language =
+      options[:target_language] ? options[:target_language] :
+        @dot_options["target_language"] ? @dot_options["target_language"] :
+          raise(Logaling::CommandFailed, "input target-language code '-T <target-language code>'")
 
-    Logaling::Glossary.new(glossary, from, to)
+    Logaling::Glossary.new(glossary, source_language, target_language)
   end
 
   def error(msg)
