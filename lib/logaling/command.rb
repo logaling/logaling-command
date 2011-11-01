@@ -16,6 +16,7 @@ class Logaling::Command < Thor
   class_option :glossary, type: :string, aliases: "-g"
   class_option :source_language, type: :string, aliases: "-S"
   class_option :target_language, type: :string, aliases: "-T"
+  class_option :logaling_home, type: :string, required: false, aliases: "-h"
 
   def initialize(*args)
     super
@@ -74,10 +75,15 @@ class Logaling::Command < Thor
 
   desc 'index', 'Index glossaries to groonga DB.'
   def index
+    load_config
+    home = options[:logaling_home] ? options[:logaling_home] :
+             @dot_options["logaling_home"] ? @dot_options["logaling_home"] :
+               LOGALING_HOME
+    db_home = File.join(home, ".logadb")
     glossarydb = Logaling::GlossaryDB.new
-    glossarydb.open(LOGALING_DB_HOME, "utf8") do |db|
-      db.recreate_table(LOGALING_DB_HOME)
-      db.load_glossaries(LOGALING_HOME)
+    glossarydb.open(db_home, "utf8") do |db|
+      db.recreate_table(db_home)
+      db.load_glossaries(home)
     end
   end
 
@@ -95,8 +101,12 @@ class Logaling::Command < Thor
       options[:target_language] ? options[:target_language] :
         @dot_options["target_language"] ? @dot_options["target_language"] :
           raise(Logaling::CommandFailed, "input target-language code '-T <target-language code>'")
+    logaling_home =
+      options[:logaling_home] ? options[:logaling_home] :
+        @dot_options["logaling_home"] ? @dot_options["logaling_home"] :
+          ""
 
-    Logaling::Glossary.new(glossary, source_language, target_language)
+    Logaling::Glossary.new(glossary, source_language, target_language, logaling_home)
   end
 
   def error(msg)

@@ -7,21 +7,23 @@ require "fileutils"
 
 module Logaling
   class Glossary
-    def self.build_path(glossary, source_language, target_language)
+    def self.build_path(glossary, source_language, target_language, logaling_home)
       dir, file = File::split(glossary)
       if dir == "."
         fname = [glossary, source_language, target_language].join(".")
-        return File.join(LOGALING_HOME, "#{fname}.yml")
+        home = logaling_home.empty? ? LOGALING_HOME : logaling_home
+        return File.join(home, "#{fname}.yml")
       else
         return glossary
       end
     end
 
-    def initialize(glossary, source_language, target_language)
-      @path = Glossary.build_path(glossary, source_language, target_language)
+    def initialize(glossary, source_language, target_language, logaling_home)
+      @path = Glossary.build_path(glossary, source_language, target_language, logaling_home)
       @glossary = glossary
       @source_language = source_language
       @target_language = target_language
+      @logaling_home = logaling_home
     end
 
     def create
@@ -87,7 +89,8 @@ module Logaling
       check_glossary_exists
 
       glossarydb = Logaling::GlossaryDB.new
-      glossarydb.open(LOGALING_DB_HOME, "utf8") do |db|
+      db_home = @logaling_home.empty? ? LOGALING_DB_HOME : File.join(@logaling_home, ".logadb")
+      glossarydb.open(db_home, "utf8") do |db|
         glossaries = db.lookup(source_term)
         glossaries.reject! do |term|
           term[:source_language] != @source_language || term[:target_language] != @target_language
@@ -154,7 +157,8 @@ module Logaling
     end
 
     def lookup_files
-      file_list = Dir.glob("#{LOGALING_HOME}/*.#{@source_language}.#{@target_language}.yml")
+      home = @logaling_home.empty? ? LOGLING_HOME : @logaling_home
+      file_list = Dir.glob("#{home}/*.#{@source_language}.#{@target_language}.yml")
       if glossary_index = file_list.index(@path)
         file_list.delete_at(glossary_index)
       end
