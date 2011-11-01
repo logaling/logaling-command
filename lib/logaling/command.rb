@@ -115,13 +115,26 @@ class Logaling::Command < Thor
   end
 
   def load_config
-    if File.exists?(".logaling")
-      tmp_options = File.readlines(".logaling").map {|l| l.chomp.split " "}
+    if path = find_dotfile
+      puts path
+      tmp_options = File.readlines(path).map {|l| l.chomp.split " "}
       tmp_options.each do |option|
         key = option[0].sub(/^[\-]{2}/, "")
         value = option[1]
         @dot_options[key] = value
       end
+    end
+  end
+
+  def find_dotfile()
+    dir = Dir.pwd()
+    while(dir) do
+      path = File.join(dir, '.logaling')
+      if File.exist?(path)
+        return path
+        break
+      end
+      dir = (dir != "/") ? File.dirname(dir) : nil
     end
   end
 end
