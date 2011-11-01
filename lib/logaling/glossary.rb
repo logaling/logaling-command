@@ -43,6 +43,7 @@ module Logaling
       end
 
       glossary = YAML::load_file(@path)
+      glossary ||= []
       glossary << build_term(source_term, target_term, note)
 
       File.open(@path, "w") do |f|
