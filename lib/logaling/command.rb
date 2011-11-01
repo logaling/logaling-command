@@ -4,8 +4,6 @@ require 'thor'
 require "logaling/glossary"
 require "logaling/glossary_db"
 
-DOT_OPTIONS = Hash.new
-
 class Logaling::Command < Thor
   VERSION = "0.0.1"
 
@@ -18,6 +16,11 @@ class Logaling::Command < Thor
   class_option :glossary, type: :string, aliases: "-g"
   class_option :from, type: :string, aliases: "-F"
   class_option :to, type: :string, aliases: "-T"
+
+  def initialize(*args)
+    super
+    @dot_options = Hash.new
+  end
 
   desc 'create', 'Create glossary.'
   def create
@@ -81,13 +84,13 @@ class Logaling::Command < Thor
   private
   def glossary
     glossary = options[:glossary] ? options[:glossary] :
-                 DOT_OPTIONS["glossary"] ? DOT_OPTIONS["glossary"] :
+                 @dot_options["glossary"] ? @dot_options["glossary"] :
                    raise(Logaling::CommandFailed, "input glossary name '-g <glossary name>'")
     from     = options[:from] ? options[:from] :
-                 DOT_OPTIONS["from"] ? DOT_OPTIONS["from"] :
+                 @dot_options["from"] ? @dot_options["from"] :
                    raise(Logaling::CommandFailed, "input source-language code '-F <source-language code>'")
     to       = options[:to] ? options[:to] :
-                 DOT_OPTIONS["to"] ? DOT_OPTIONS["to"] :
+                 @dot_options["to"] ? @dot_options["to"] :
                    raise(Logaling::CommandFailed, "input translation-language code '-T <translation-language code>'")
 
     Logaling::Glossary.new(glossary, from, to)
@@ -100,11 +103,11 @@ class Logaling::Command < Thor
 
   def load_config
     if File.exists?(".logaling")
-      dot_options = File.readlines(".logaling").map {|l| l.chomp.split " "}
-      dot_options.each do |option|
+      tmp_options = File.readlines(".logaling").map {|l| l.chomp.split " "}
+      tmp_options.each do |option|
         key = option[0].sub(/^[\-]{2}/, "")
         value = option[1]
-        DOT_OPTIONS[key] = value
+        @dot_options[key] = value
       end
     end
   end
