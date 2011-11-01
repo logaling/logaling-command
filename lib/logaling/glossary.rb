@@ -40,9 +40,11 @@ module Logaling
         return
       end
 
-      File.open(@path, "a") do |f|
-        term = [ build_term(source_term, target_term, note) ]
-        f.puts(term.to_yaml.gsub("---\n", ""))
+      glossary = YAML::load_file(@path)
+      glossary << build_term(source_term, target_term, note)
+
+      File.open(@path, "w") do |f|
+        f.puts(glossary.to_yaml)
       end
     end
 
