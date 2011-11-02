@@ -42,8 +42,7 @@ module Logaling
         return
       end
 
-      glossary = YAML::load_file(@path)
-      glossary ||= []
+      glossary = load_glossary_yml
       glossary << build_term(source_term, target_term, note)
 
       File.open(@path, "w") do |f|
@@ -59,7 +58,7 @@ module Logaling
         return
       end
 
-      glossary = YAML::load_file(@path)
+      glossary = load_glossary_yml
       target_index = find_term_index(glossary, source_term, target_term)
       if target_index
         glossary[target_index] = rebuild_term(glossary[target_index], source_term, new_target_term, note)
@@ -74,7 +73,7 @@ module Logaling
     def delete(source_term, target_term)
       check_glossary_exists
 
-      glossary = YAML::load_file(@path)
+      glossary = load_glossary_yml
       target_index = find_term_index(glossary, source_term, target_term)
       if target_index
         glossary.delete_at(target_index)
@@ -116,6 +115,10 @@ module Logaling
     end
 
     private
+    def load_glossary_yml
+      YAML::load_file(@path) || []
+    end
+
     def build_term(source_term, target_term, note)
       {'source_term' => source_term, 'target_term' => target_term, 'note' => note}
     end
