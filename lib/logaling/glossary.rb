@@ -45,10 +45,9 @@ module Logaling
       glossary = load_glossary_yml
       glossary << build_term(source_term, target_term, note)
 
-      File.open(@path, "w") do |f|
-        f.puts(glossary.to_yaml)
-      end
+      dump_glossary(glossary)
     end
+
 
     def update(source_term, target_term, new_target_term, note)
       check_glossary_exists
@@ -62,9 +61,7 @@ module Logaling
       target_index = find_term_index(glossary, source_term, target_term)
       if target_index
         glossary[target_index] = rebuild_term(glossary[target_index], source_term, new_target_term, note)
-        File.open(@path, "w") do |f|
-          f.puts glossary.to_yaml
-        end
+        dump_glossary(glossary)
       else
         puts "source_term:#{source_term} target_term:#{target_term} not found in glossary #{@path}"
       end
@@ -77,9 +74,7 @@ module Logaling
       target_index = find_term_index(glossary, source_term, target_term)
       if target_index
         glossary.delete_at(target_index)
-        File.open(@path, "w") do |f|
-          f.puts glossary.to_yaml
-        end
+        dump_glossary(glossary)
       else
         puts "source_term:#{source_term} target_term:#{target_term} not found in glossary #{@path}"
       end
@@ -168,6 +163,12 @@ module Logaling
       end
       file_list.unshift(@path)
       return file_list
+    end
+
+    def dump_glossary(glossary)
+      File.open(@path, "w") do |f|
+        f.puts(glossary.to_yaml)
+      end
     end
   end
 end
