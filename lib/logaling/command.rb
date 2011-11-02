@@ -116,7 +116,6 @@ class Logaling::Command < Thor
 
   def load_config
     if path = find_dotfile
-      puts path
       tmp_options = File.readlines(path).map {|l| l.chomp.split " "}
       tmp_options.each do |option|
         key = option[0].sub(/^[\-]{2}/, "")
