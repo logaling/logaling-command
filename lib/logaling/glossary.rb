@@ -38,7 +38,7 @@ module Logaling
       check_glossary_exists
 
       if bilingual_pair_exists?(source_term, target_term)
-        puts "[#{source_term}] [#{target_term}] pair already exist}"
+        puts "[#{source_term}] [#{target_term}] pair already exists"
         return
       end
 
@@ -53,7 +53,7 @@ module Logaling
       check_glossary_exists
 
       if bilingual_pair_exists?(source_term, new_target_term)
-        puts "[#{source_term}] [#{new_target_term}] pair already exist}"
+        puts "[#{source_term}] [#{new_target_term}] pair already exists"
         return
       end
 
