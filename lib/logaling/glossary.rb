@@ -38,7 +38,7 @@ module Logaling
       check_glossary_exists
 
       if bilingual_pair_exists?(source_term, target_term)
-        puts "[#{source_term}] [#{target_term}] pair is already exist}"
+        puts "[#{source_term}] [#{target_term}] pair already exist}"
         return
       end
 
@@ -53,7 +53,7 @@ module Logaling
       check_glossary_exists
 
       if bilingual_pair_exists?(source_term, new_target_term)
-        puts "[#{source_term}] [#{new_target_term}] pair is already exist}"
+        puts "[#{source_term}] [#{new_target_term}] pair already exist}"
         return
       end
 
@@ -139,7 +139,7 @@ module Logaling
     end
 
     def check_glossary_unexists
-      raise CommandFailed, "glossary #{@path} is already exists" if exist?
+      raise CommandFailed, "glossary #{@path} already exists" if exist?
     end
 
     def check_glossary_exists
