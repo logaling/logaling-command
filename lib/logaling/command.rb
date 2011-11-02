@@ -125,8 +125,8 @@ class Logaling::Command < Thor
     end
   end
 
-  def find_dotfile()
-    dir = Dir.pwd()
+  def find_dotfile
+    dir = Dir.pwd
     while(dir) do
       path = File.join(dir, '.logaling')
       if File.exist?(path)
