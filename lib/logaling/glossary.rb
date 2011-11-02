@@ -47,7 +47,6 @@ module Logaling
       dump_glossary(glossary)
     end
 
-
     def update(source_term, target_term, new_target_term, note)
       check_glossary_exists
 
