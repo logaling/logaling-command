@@ -76,7 +76,7 @@ class Logaling::Command < Thor
   desc 'index', 'Index glossaries to groonga DB.'
   def index
     load_config
-    home = find_option(:logaling_home) : LOGALING_HOME
+    home = find_option("logaling_home") ? find_option("logaling_home") : LOGALING_HOME
     db_home = File.join(home, ".logadb")
     glossarydb = Logaling::GlossaryDB.new
     glossarydb.open(db_home, "utf8") do |db|
@@ -87,16 +87,16 @@ class Logaling::Command < Thor
 
   private
   def glossary
-    glossary = find_option(:glossary)
+    glossary = find_option("glossary")
     raise(Logaling::CommandFailed, "input glossary name '-g <glossary name>'") unless glossary
 
-    source_language = find_option(:source_language)
+    source_language = find_option("source_language")
     raise(Logaling::CommandFailed, "input source-language code '-S <source-language code>'") unless source_language
 
-    target_language = find_option(:target_language)
+    target_language = find_option("target_language")
     raise(Logaling::CommandFailed, "input target-language code '-T <target-language code>'") unless target_language
 
-    logaling_home = find_option(:logaling_home) || ""
+    logaling_home = find_option("logaling_home") || ""
 
     Logaling::Glossary.new(glossary, source_language, target_language, logaling_home)
   end
@@ -107,7 +107,7 @@ class Logaling::Command < Thor
   end
 
   def find_option(key)
-   options[key] || @dot_options[key]
+    options[key] || @dot_options[key]
   end
 
   def load_config
