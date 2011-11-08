@@ -17,7 +17,8 @@ module Logaling
       end
     end
 
-    def initialize(glossary, source_language, target_language, logaling_home=LOGALING_HOME)
+    def initialize(glossary, source_language, target_language, logaling_home)
+      logaling_home ||= LOGALING_HOME
       @path = Glossary.build_path(glossary, source_language, target_language, logaling_home)
       @glossary = glossary
       @source_language = source_language
