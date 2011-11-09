@@ -5,9 +5,9 @@ require "logaling-command/version"
 Gem::Specification.new do |s|
   s.name        = "logaling-command"
   s.version     = Logaling::Command::VERSION
-  s.authors     = ["SHIMADA Koji"]
-  s.email       = ["koji.shimada@enishi-tech.com"]
-  s.homepage    = ""
+  s.authors     = ["SHIMADA Koji", "SHIDARA Yoji", "Kouhei Sutou", "Daijiro MORI", "SUZUKI Miho"]
+  s.email       = ["koji.shimada@enishi-tech.com", "dara@shidara.net", "kou@clear-code.com", "daijiro.mori@gmail.com", "adzuki34@gmail.com"]
+  s.homepage    = "http://logaling.github.com/"
   s.summary     = %q{A command line interface for logaling.}
   s.description = %q{A command line interface for logaling.}
 
