@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 $:.push File.expand_path("../lib", __FILE__)
-require "logaling-command/version"
+require "logaling/command.rb"
 
 Gem::Specification.new do |s|
   s.name        = "logaling-command"
