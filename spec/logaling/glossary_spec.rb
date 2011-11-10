@@ -5,10 +5,10 @@ require "fileutils"
 module Logaling
   describe Glossary do
     before do
-      @path = File.join(Dir.pwd(), 'spec.en.ja.yml')
-      FileUtils.mkdir_p(Dir.pwd())
+      @path = File.join(Dir.pwd, 'spec.en.ja.yml')
+      FileUtils.mkdir_p(Dir.pwd)
       FileUtils.touch(@path)
-      @glossary = Glossary.new('spec', 'en', 'ja', Dir.pwd())
+      @glossary = Glossary.new('spec', 'en', 'ja', Dir.pwd)
     end
 
     after do
