@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 require File.join(File.dirname(__FILE__), "..", "spec_helper")
 
-
 describe Logaling::Command do
   describe '#create' do
     context 'when same glossary not exists' do
@@ -11,7 +10,6 @@ describe Logaling::Command do
       File.exists?(File.join(LOGALING_HOME, "/spec.en.ja.yml"))
       it { should be_true }
     end
-
   end
 
   after do
@@ -19,5 +17,4 @@ describe Logaling::Command do
     p path
     File.unlink(path) if File.exists?(path)
   end
-
 end
