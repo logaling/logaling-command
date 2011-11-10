@@ -1,11 +1,7 @@
-require "rubygems"
-require "bundler/setup"
-
-require 'rspec'
 require 'stringio'
 
 $LOAD_PATH.unshift(File.dirname(__FILE__) + '/../lib')
-require 'logaling/glossary'
+require 'logaling'
 
 RSpec.configure do |config|
   def capture(stream)
