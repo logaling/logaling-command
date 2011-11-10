@@ -18,11 +18,6 @@ class Logaling::Command < Thor
   class_option :target_language, type: :string, aliases: "-T"
   class_option :logaling_home, type: :string, required: false, aliases: "-h"
 
-  def initialize(*args)
-    super
-    @dot_options = Hash.new
-  end
-
   desc 'create', 'Create glossary.'
   def create
     load_config
@@ -111,6 +106,7 @@ class Logaling::Command < Thor
   end
 
   def load_config
+    @dot_options ||= {}
     if path = find_dotfile
       tmp_options = File.readlines(path).map {|l| l.chomp.split " "}
       tmp_options.each do |option|
