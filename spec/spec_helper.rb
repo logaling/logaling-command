@@ -1,7 +1,8 @@
-require 'stringio'
-
 $LOAD_PATH.unshift(File.dirname(__FILE__) + '/../lib')
 require 'logaling'
+
+require "fileutils"
+require 'stringio'
 
 LOGALING_HOME = File.expand_path("~/.logaling.d")
 
