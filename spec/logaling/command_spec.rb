@@ -11,7 +11,7 @@ describe Logaling::Command do
   end
 
   describe '#create' do
-    context 'with arguments show non-existent glossary' do
+    context 'with options show non-existent glossary' do
       before do
         command.options = base_options
         command.create
