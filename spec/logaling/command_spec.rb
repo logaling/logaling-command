@@ -24,6 +24,14 @@ describe Logaling::Command do
   end
 
   describe "#update" do
+    before do
+      command.options = base_options
+      command.create
+
+      command.options = base_options.merge("source-term"=>"spec", "target-term"=>"テスト", "note"=>"備考")
+      command.add
+    end
+
     context "not given source-term option" do
       # should show err
     end
@@ -38,20 +46,18 @@ describe Logaling::Command do
 
     context "not given note option" do
       before do
-        command.options = base_options
-        command.create
-
-        command.options = base_options.merge("source-term"=>"spec", "target-term"=>"テスト", "note"=>"備考")
-        command.add
-
         command.options = base_options.merge("source-term"=>"spec", "target-term"=>"テスト", "new-target-term"=>"スペック")
         command.update
       end
 
-      subject { YAML::load_file(glossary_path) }
+      subject { YAML::load_file(glossary_path).find{|h| h["source-term"] == "spec" }}
 
-      it "glossary yaml should be updated" do
-        should == [{"source-term"=>"spec", "target-term"=>"スペック", "note"=>"備考"}]
+      it "term's target-term should be updated" do
+        subject["target-term"].should == "スペック"
+      end
+
+      it "term's note should not be updated" do
+        subject["note"].should == "備考"
       end
     end
   end
