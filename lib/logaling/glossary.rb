@@ -117,6 +117,7 @@ module Logaling
     end
 
     def build_term(source_term, target_term, note)
+      note ||= ''
       {'source-term' => source_term, 'target-term' => target_term, 'note' => note}
     end
 

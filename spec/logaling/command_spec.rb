@@ -23,6 +23,47 @@ describe Logaling::Command do
     end
   end
 
+  describe '#add' do
+    before do
+      command.options = base_options
+      command.create
+    end
+
+    context 'with only bilingual pair option' do
+      before do
+        command.options = base_options.merge("source-term"=>"spec", "target-term"=>"テスト")
+        command.add
+      end
+
+      subject { YAML::load_file(glossary_path).find{|h| h["source-term"] == "spec" }}
+
+      it "glossary yaml should contain that term" do
+        subject["target-term"].should == "テスト"
+      end
+
+      it "term should note have note" do
+        subject["note"].should == ""
+      end
+   end
+
+    context 'with bilingual pair option and note' do
+      before do
+        command.options = base_options.merge("source-term"=>"spec", "target-term"=>"テスト", "note"=>"備考")
+        command.add
+      end
+
+      subject { YAML::load_file(glossary_path).find{|h| h["source-term"] == "spec" }}
+
+      it "glossary yaml should contain that term" do
+        subject["target-term"].should == "テスト"
+      end
+
+      it "term should have note" do
+        subject["note"].should == "備考"
+      end
+    end
+  end
+
   describe "#update" do
     before do
       command.options = base_options
