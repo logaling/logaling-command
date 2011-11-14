@@ -13,10 +13,10 @@ class Logaling::Command < Thor
       '-u' => :update,
       '-l' => :lookup
 
-  class_option :glossary, type: :string, aliases: "-g"
-  class_option :source_language, type: :string, aliases: "-S"
-  class_option :target_language, type: :string, aliases: "-T"
-  class_option :logaling_home, type: :string, required: false, aliases: "-h"
+  class_option "glossary", type: :string, aliases: "-g"
+  class_option "source-language", type: :string, aliases: "-S"
+  class_option "target-language", type: :string, aliases: "-T"
+  class_option "logaling-home", type: :string, required: false, aliases: "-h"
 
   desc 'create', 'Create glossary.'
   def create
@@ -27,43 +27,43 @@ class Logaling::Command < Thor
   end
 
   desc 'add', 'Add term to glossary.'
-  method_option :source_term, type: :string, required: true, aliases: "-s"
-  method_option :target_term, type: :string, required: true, aliases: "-t"
-  method_option :note, type: :string, aliases: "-n"
+  method_option "source-term", type: :string, required: true, aliases: "-s"
+  method_option "target-term", type: :string, required: true, aliases: "-t"
+  method_option "note", type: :string, aliases: "-n"
   def add
     load_config
-    glossary.add(options[:source_term], options[:target_term], options[:note])
+    glossary.add(options["source-term"], options["target-term"], options[:note])
   rescue Logaling::CommandFailed => e
     error(e.message)
   end
 
   desc 'delete', 'Delete term.'
-  method_option :source_term, type: :string, required: true, aliases: "-s"
-  method_option :target_term, type: :string, required: true, aliases: "-t"
+  method_option "source-term", type: :string, required: true, aliases: "-s"
+  method_option "target-term", type: :string, required: true, aliases: "-t"
   def delete
     load_config
-    glossary.delete(options[:source_term], options[:target_term])
+    glossary.delete(options["source-term"], options["target-term"])
   rescue Logaling::CommandFailed => e
     error(e.message)
   end
 
   desc 'update', 'Update term.'
-  method_option :source_term, type: :string, required: true, aliases: "-s"
-  method_option :target_term, type: :string, required: true, aliases: "-t"
-  method_option :new_target_term, type: :string, required: true, aliases: "-nt"
-  method_option :note, type: :string, required: false, aliases: "-n"
+  method_option "source-term", type: :string, required: true, aliases: "-s"
+  method_option "target-term", type: :string, required: true, aliases: "-t"
+  method_option "new-target-term", type: :string, required: true, aliases: "-nt"
+  method_option "note", type: :string, required: false, aliases: "-n"
   def update
     load_config
-    glossary.update(options[:source_term], options[:target_term], options[:new_target_term], options[:note])
+    glossary.update(options["source-term"], options["target-term"], options["new-target-term"], options[:note])
   rescue Logaling::CommandFailed => e
     error(e.message)
   end
 
   desc 'lookup', 'Lookup terms.'
-  method_option :source_term, type: :string, required: true, aliases: "-s"
+  method_option "source-term", type: :string, required: true, aliases: "-s"
   def lookup
     load_config
-    glossary.lookup(options[:source_term])
+    glossary.lookup(options["source-term"])
   rescue Logaling::CommandFailed => e
     error(e.message)
   end
@@ -71,7 +71,7 @@ class Logaling::Command < Thor
   desc 'index', 'Index glossaries to groonga DB.'
   def index
     load_config
-    home = find_option("logaling_home") || LOGALING_HOME
+    home = find_option("logaling-home") || LOGALING_HOME
     db_home = File.join(home, ".logadb")
     glossarydb = Logaling::GlossaryDB.new
     glossarydb.open(db_home, "utf8") do |db|
@@ -85,13 +85,13 @@ class Logaling::Command < Thor
     glossary = find_option("glossary")
     raise(Logaling::CommandFailed, "input glossary name '-g <glossary name>'") unless glossary
 
-    source_language = find_option("source_language")
+    source_language = find_option("source-language")
     raise(Logaling::CommandFailed, "input source-language code '-S <source-language code>'") unless source_language
 
-    target_language = find_option("target_language")
+    target_language = find_option("target-language")
     raise(Logaling::CommandFailed, "input target-language code '-T <target-language code>'") unless target_language
 
-    logaling_home = find_option("logaling_home")
+    logaling_home = find_option("logaling-home")
 
     Logaling::Glossary.new(glossary, source_language, target_language, logaling_home)
   end

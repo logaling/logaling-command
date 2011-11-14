@@ -4,11 +4,11 @@ require File.join(File.dirname(__FILE__), "..", "spec_helper")
 describe Logaling::Command do
   let(:command) { Logaling::Command.new([], {
     "glossary"=>"spec",
-    "source_language"=>"en",
-    "target_language"=>"ja",
-    "source_term"=>"spec",
-    "target_term"=>"テスト",
-    "new_target_term"=>"スペック",
+    "source-language"=>"en",
+    "target-language"=>"ja",
+    "source-term"=>"spec",
+    "target-term"=>"テスト",
+    "new-target-term"=>"スペック",
     "note"=>"備考"})}
   let(:glossary_path) { File.join(LOGALING_HOME, "/spec.en.ja.yml") }
 
@@ -30,15 +30,15 @@ describe Logaling::Command do
   end
 
   describe "#update" do
-    context "not given source_term option" do
+    context "not given source-term option" do
       # should show err
     end
 
-    context "not given target_term option" do
+    context "not given target-term option" do
       #should show err
     end
 
-    context "not given new_target_term option" do
+    context "not given new-target-term option" do
       #should show err
     end
 
@@ -53,7 +53,7 @@ describe Logaling::Command do
       subject { YAML::load_file(glossary_path) }
 
       it "glossary yaml should be updated" do
-        should == [{"source_term"=>"spec", "target_term"=>"スペック", "note"=>"備考"}]
+        should == [{"source-term"=>"spec", "target-term"=>"スペック", "note"=>"備考"}]
       end
     end
   end
