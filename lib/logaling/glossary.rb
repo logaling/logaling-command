@@ -121,7 +121,7 @@ module Logaling
     end
 
     def rebuild_term(current, source_term, target_term, note)
-      note = current['note'] if note == ""
+      note = current['note'] if note.nil? || note == ""
       target_term = current['target-term'] if target_term == ""
       build_term(source_term, target_term, note)
     end

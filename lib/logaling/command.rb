@@ -32,7 +32,7 @@ class Logaling::Command < Thor
   method_option "note", type: :string, aliases: "-n"
   def add
     load_config
-    glossary.add(options["source-term"], options["target-term"], options[:note])
+    glossary.add(options["source-term"], options["target-term"], options["note"])
   rescue Logaling::CommandFailed => e
     error(e.message)
   end
@@ -54,7 +54,7 @@ class Logaling::Command < Thor
   method_option "note", type: :string, required: false, aliases: "-n"
   def update
     load_config
-    glossary.update(options["source-term"], options["target-term"], options["new-target-term"], options[:note])
+    glossary.update(options["source-term"], options["target-term"], options["new-target-term"], options["note"])
   rescue Logaling::CommandFailed => e
     error(e.message)
   end
