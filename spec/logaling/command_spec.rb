@@ -2,14 +2,8 @@
 require File.join(File.dirname(__FILE__), "..", "spec_helper")
 
 describe Logaling::Command do
-  let(:command) { Logaling::Command.new([], {
-    "glossary"=>"spec",
-    "source-language"=>"en",
-    "target-language"=>"ja",
-    "source-term"=>"spec",
-    "target-term"=>"テスト",
-    "new-target-term"=>"スペック",
-    "note"=>"備考"})}
+  let(:command) { Logaling::Command.new }
+  let(:base_options) { {"glossary"=>"spec", "source-language"=>"en", "target-language"=>"ja"} }
   let(:glossary_path) { File.join(LOGALING_HOME, "/spec.en.ja.yml") }
 
   before do
@@ -18,8 +12,8 @@ describe Logaling::Command do
 
   describe '#create' do
     context 'with arguments show non-existent glossary' do
-
       before do
+        command.options = base_options
         command.create
       end
 
@@ -44,9 +38,13 @@ describe Logaling::Command do
 
     context "not given note option" do
       before do
-        FileUtils.remove_file(glossary_path, true)
+        command.options = base_options
         command.create
+
+        command.options = base_options.merge("source-term"=>"spec", "target-term"=>"テスト", "note"=>"備考")
         command.add
+
+        command.options = base_options.merge("source-term"=>"spec", "target-term"=>"テスト", "new-target-term"=>"スペック")
         command.update
       end
 
@@ -57,6 +55,7 @@ describe Logaling::Command do
       end
     end
   end
+
   after do
     FileUtils.remove_file(glossary_path, true)
   end
