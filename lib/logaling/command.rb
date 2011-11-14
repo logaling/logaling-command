@@ -51,7 +51,7 @@ class Logaling::Command < Thor
   method_option :source_term, type: :string, required: true, aliases: "-s"
   method_option :target_term, type: :string, required: true, aliases: "-t"
   method_option :new_target_term, type: :string, required: true, aliases: "-nt"
-  method_option :note, type: :string, required: true, aliases: "-n"
+  method_option :note, type: :string, required: false, aliases: "-n"
   def update
     load_config
     glossary.update(options[:source_term], options[:target_term], options[:new_target_term], options[:note])
