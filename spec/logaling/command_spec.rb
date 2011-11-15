@@ -2,8 +2,8 @@
 require File.join(File.dirname(__FILE__), "..", "spec_helper")
 
 describe Logaling::Command do
-  let(:command) { Logaling::Command.new }
   let(:base_options) { {"glossary"=>"spec", "source-language"=>"en", "target-language"=>"ja"} }
+  let(:command) { Logaling::Command.new([], base_options) }
   let(:glossary_path) { File.join(LOGALING_HOME, "/spec.en.ja.yml") }
 
   before do
@@ -11,9 +11,8 @@ describe Logaling::Command do
   end
 
   describe '#create' do
-    context 'with options show non-existent glossary' do
+    context 'with arguments show non-existent glossary' do
       before do
-        command.options = base_options
         command.create
       end
 
@@ -25,20 +24,18 @@ describe Logaling::Command do
 
   describe '#add' do
     before do
-      command.options = base_options
       command.create
     end
 
-    context 'with only bilingual pair option' do
+    context 'with arguments have only bilingual pair' do
       before do
-        command.options = base_options.merge("source-term"=>"spec", "target-term"=>"テスト")
-        command.add
+        command.add("spec", "テスト")
       end
 
-      subject { YAML::load_file(glossary_path).find{|h| h["source-term"] == "spec" }}
+      subject { YAML::load_file(glossary_path).find{|h| h["source_term"] == "spec" }}
 
       it "glossary yaml should contain that term" do
-        subject["target-term"].should == "テスト"
+        subject["target_term"].should == "テスト"
       end
 
       it "term should note have note" do
@@ -46,16 +43,15 @@ describe Logaling::Command do
       end
    end
 
-    context 'with bilingual pair option and note' do
+    context 'with arguments have bilingual pair and note' do
       before do
-        command.options = base_options.merge("source-term"=>"spec", "target-term"=>"テスト", "note"=>"備考")
-        command.add
+        command.add("spec", "テスト", "備考")
       end
 
-      subject { YAML::load_file(glossary_path).find{|h| h["source-term"] == "spec" }}
+      subject { YAML::load_file(glossary_path).find{|h| h["source_term"] == "spec" }}
 
       it "glossary yaml should contain that term" do
-        subject["target-term"].should == "テスト"
+        subject["target_term"].should == "テスト"
       end
 
       it "term should have note" do
@@ -66,11 +62,8 @@ describe Logaling::Command do
 
   describe "#update" do
     before do
-      command.options = base_options
       command.create
-
-      command.options = base_options.merge("source-term"=>"spec", "target-term"=>"テスト", "note"=>"備考")
-      command.add
+      command.add("spec", "テスト", "備考")
     end
 
     context "not given source-term option" do
@@ -85,16 +78,15 @@ describe Logaling::Command do
       #should show err
     end
 
-    context "not given note option" do
+    context "with arguments except note" do
       before do
-        command.options = base_options.merge("source-term"=>"spec", "target-term"=>"テスト", "new-target-term"=>"スペック")
-        command.update
+        command.update("spec", "テスト", "スペック")
       end
 
-      subject { YAML::load_file(glossary_path).find{|h| h["source-term"] == "spec" }}
+      subject { YAML::load_file(glossary_path).find{|h| h["source_term"] == "spec" }}
 
-      it "term's target-term should be updated" do
-        subject["target-term"].should == "スペック"
+      it "term's target_term should be updated" do
+        subject["target_term"].should == "スペック"
       end
 
       it "term's note should not be updated" do

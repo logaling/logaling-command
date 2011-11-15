@@ -118,23 +118,23 @@ module Logaling
 
     def build_term(source_term, target_term, note)
       note ||= ''
-      {'source-term' => source_term, 'target-term' => target_term, 'note' => note}
+      {'source_term' => source_term, 'target_term' => target_term, 'note' => note}
     end
 
     def rebuild_term(current, source_term, target_term, note)
       note = current['note'] if note.nil? || note == ""
-      target_term = current['target-term'] if target_term == ""
+      target_term = current['target_term'] if target_term == ""
       build_term(source_term, target_term, note)
     end
 
     def find_term_index(glossary_yml, source_term, target_term)
       glossary_yml.find_index do |term|
-        term['source-term'] == source_term && term['target-term'] == target_term
+        term['source_term'] == source_term && term['target_term'] == target_term
       end
     end
 
     def bilingual_pair_exists?(source_term, target_term)
-      target_terms(source_term).any?{|data| data['target-term'] == target_term }
+      target_terms(source_term).any?{|data| data['target_term'] == target_term }
     end
 
     def exist?
@@ -153,7 +153,7 @@ module Logaling
       target_terms = []
       glossaly = YAML::load_file(path) || []
       glossaly.each do |term|
-        target_terms << term if term['source-term'] == source_term
+        target_terms << term if term['source_term'] == source_term
       end
       target_terms
     end

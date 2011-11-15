@@ -20,7 +20,7 @@ module Logaling
 
         it 'glossary yaml should have that bilingual pair' do
           yaml = YAML::load_file(glossary_path)
-          term = yaml.index({"source-term"=>"spec", "target-term"=>"スペック", "note"=>"テストスペック"})
+          term = yaml.index({"source_term"=>"spec", "target_term"=>"スペック", "note"=>"テストスペック"})
           term.should_not be_nil
         end
       end
