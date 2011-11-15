@@ -13,10 +13,10 @@ class Logaling::Command < Thor
       '-u' => :update,
       '-l' => :lookup
 
-  class_option "glossary", type: :string, aliases: "-g"
+  class_option "glossary",        type: :string, aliases: "-g"
   class_option "source-language", type: :string, aliases: "-S"
   class_option "target-language", type: :string, aliases: "-T"
-  class_option "logaling-home", type: :string, required: false, aliases: "-h"
+  class_option "logaling-home",   type: :string, required: false, aliases: "-h"
 
   desc 'create', 'Create glossary.'
   def create
@@ -26,44 +26,34 @@ class Logaling::Command < Thor
     error(e.message)
   end
 
-  desc 'add', 'Add term to glossary.'
-  method_option "source-term", type: :string, required: true, aliases: "-s"
-  method_option "target-term", type: :string, required: true, aliases: "-t"
-  method_option "note", type: :string, aliases: "-n"
-  def add
+  desc 'add [source term] [target term] [note]', 'Add term to glossary.'
+  def add(source_term, target_term, note='')
     load_config
-    glossary.add(options["source-term"], options["target-term"], options["note"])
+    glossary.add(source_term, target_term, note)
   rescue Logaling::CommandFailed => e
     error(e.message)
   end
 
-  desc 'delete', 'Delete term.'
-  method_option "source-term", type: :string, required: true, aliases: "-s"
-  method_option "target-term", type: :string, required: true, aliases: "-t"
-  def delete
+  desc 'delete [source term] [target term]', 'Delete term.'
+  def delete(source_term, target_term)
     load_config
-    glossary.delete(options["source-term"], options["target-term"])
+    glossary.delete(source_term, target_term)
   rescue Logaling::CommandFailed => e
     error(e.message)
   end
 
-  desc 'update', 'Update term.'
-  method_option "source-term", type: :string, required: true, aliases: "-s"
-  method_option "target-term", type: :string, required: true, aliases: "-t"
-  method_option "new-target-term", type: :string, required: true, aliases: "-nt"
-  method_option "note", type: :string, required: false, aliases: "-n"
-  def update
+  desc 'update [source term] [target term] [new_target_term], [note]', 'Update term.'
+  def update(source_term, target_term, new_target_term, note='')
     load_config
-    glossary.update(options["source-term"], options["target-term"], options["new-target-term"], options["note"])
+    glossary.update(source_term, target_term, new_target_term, note)
   rescue Logaling::CommandFailed => e
     error(e.message)
   end
 
-  desc 'lookup', 'Lookup terms.'
-  method_option "source-term", type: :string, required: true, aliases: "-s"
-  def lookup
+  desc 'lookup [source term]', 'Lookup terms.'
+  def lookup(source_term)
     load_config
-    glossary.lookup(options["source-term"])
+    glossary.lookup(source_term)
   rescue Logaling::CommandFailed => e
     error(e.message)
   end
