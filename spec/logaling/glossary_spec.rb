@@ -30,11 +30,57 @@ module Logaling
           glossary.add("user", "ユーザ", "ユーザーではない")
         end
 
-        subject{ capture(:stdout){ glossary.add("user", "ユーザ", "ユーザーではない") }}
+        it {
+          -> { glossary.add("user", "ユーザ", "ユーザーではない") }.should raise_error(Logaling::TermError)
+        }
+      end
 
-        it 'stdout should receive error message' do
-          should eq "[user] [ユーザ] pair already exists\n"
-        end
+      after do
+        FileUtils.remove_file(glossary_path, true)
+      end
+    end
+
+    describe '#update' do
+      before do
+        FileUtils.remove_file(glossary_path, true)
+        glossary.create
+        glossary.add("user", "ユーザ", "ユーザーではない")
+      end
+
+      context 'with new-terget-term show existing bilingual pair' do
+        it {
+          -> { glossary.update("user", "ユーザー", "ユーザ", "やっぱりユーザー") }.should raise_error(Logaling::TermError)
+        }
+      end
+
+      context 'with source-term arguments show not existing bilingual pair' do
+        it {
+          -> { glossary.update("use", "ユーザ", "ユーザー", "やっぱりユーザー") }.should raise_error(Logaling::TermError)
+        }
+      end
+
+      context 'with target-term arguments show not existing bilingual pair' do
+        it {
+          -> { glossary.update("user", "ユー", "ユーザー", "やっぱりユーザー") }.should raise_error(Logaling::TermError)
+        }
+      end
+
+      after do
+        FileUtils.remove_file(glossary_path, true)
+      end
+    end
+
+    describe '#delete' do
+      before do
+        FileUtils.remove_file(glossary_path, true)
+        glossary.create
+        glossary.add("user", "ユーザ", "ユーザーではない")
+      end
+
+      context 'with arguments show not existing bilingual pair' do
+        it {
+          -> { glossary.delete("user", "ユーザー") }.should raise_error(Logaling::TermError)
+        }
       end
 
       after do

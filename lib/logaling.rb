@@ -3,5 +3,7 @@
 require "logaling/command"
 
 module Logaling
-  class CommandFailed < RuntimeError; end
+  class LogalingError < RuntimeError; end
+  class TermError < LogalingError; end
+  class CommandFailed < LogalingError; end
 end

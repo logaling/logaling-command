@@ -30,7 +30,7 @@ class Logaling::Command < Thor
   def add(source_term, target_term, note='')
     load_config
     glossary.add(source_term, target_term, note)
-  rescue Logaling::CommandFailed => e
+  rescue Logaling::CommandFailed, Logaling::TermError => e
     error(e.message)
   end
 
@@ -38,7 +38,7 @@ class Logaling::Command < Thor
   def delete(source_term, target_term)
     load_config
     glossary.delete(source_term, target_term)
-  rescue Logaling::CommandFailed => e
+  rescue Logaling::CommandFailed, Logaling::TermError => e
     error(e.message)
   end
 
@@ -46,7 +46,7 @@ class Logaling::Command < Thor
   def update(source_term, target_term, new_target_term, note='')
     load_config
     glossary.update(source_term, target_term, new_target_term, note)
-  rescue Logaling::CommandFailed => e
+  rescue Logaling::CommandFailed, Logaling::TermError => e
     error(e.message)
   end
 
@@ -54,7 +54,7 @@ class Logaling::Command < Thor
   def lookup(source_term)
     load_config
     glossary.lookup(source_term)
-  rescue Logaling::CommandFailed => e
+  rescue Logaling::CommandFailed, Logaling::TermError => e
     error(e.message)
   end
 

@@ -38,8 +38,7 @@ module Logaling
       check_glossary_exists
 
       if bilingual_pair_exists?(source_term, target_term)
-        puts "[#{source_term}] [#{target_term}] pair already exists"
-        return
+        raise TermError, "[#{source_term}] [#{target_term}] pair already exists"
       end
 
       glossary = load_glossary_yml
@@ -52,8 +51,7 @@ module Logaling
       check_glossary_exists
 
       if bilingual_pair_exists?(source_term, new_target_term)
-        puts "[#{source_term}] [#{new_target_term}] pair already exists"
-        return
+        raise TermError, "[#{source_term}] [#{new_target_term}] pair already exists"
       end
 
       glossary = load_glossary_yml
@@ -62,7 +60,7 @@ module Logaling
         glossary[target_index] = rebuild_term(glossary[target_index], source_term, new_target_term, note)
         dump_glossary(glossary)
       else
-        puts "source_term:#{source_term} target_term:#{target_term} not found in glossary #{@path}"
+        raise TermError, "source_term:#{source_term} target_term:#{target_term} not found in glossary #{@path}"
       end
     end
 
@@ -75,7 +73,7 @@ module Logaling
         glossary.delete_at(target_index)
         dump_glossary(glossary)
       else
-        puts "source_term:#{source_term} target_term:#{target_term} not found in glossary #{@path}"
+        raise TermError, "source_term:#{source_term} target_term:#{target_term} not found in glossary #{@path}"
       end
     end
 
@@ -89,8 +87,7 @@ module Logaling
           term[:source_language] != @source_language || term[:target_language] != @target_language
         end
         if glossaries.empty?
-          puts "source-term <#{source_term}> not found"
-          return
+          raise TermError, "source-term <#{source_term}> not found"
         end
         # order by glossary
         specified = glossaries.select{|term| term[:name] == @glossary}
