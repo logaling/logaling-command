@@ -23,6 +23,22 @@ module Logaling
           FileUtils.remove_file(glossary_path, true)
         end
       end
+
+      context '' do
+        # <glossary name>.source-language.target_language.yml というファイル名で用語集が作成されること
+        before do
+          FileUtils.remove_file(glossary_path, true)
+        end
+
+        it 'specified glossary should has created' do
+          glossary.create
+          File.exists?(glossary_path).should be_true
+        end
+
+        after do
+          FileUtils.remove_file(glossary_path, true)
+        end
+      end
     end
 
     describe '#add' do
