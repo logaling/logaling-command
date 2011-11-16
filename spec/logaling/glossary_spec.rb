@@ -4,8 +4,9 @@ require "fileutils"
 
 module Logaling
   describe Glossary do
-    let(:glossary) { Glossary.new('spec', 'en', 'ja', Dir.pwd) }
-    let(:glossary_path) { File.join(Dir.pwd, 'spec.en.ja.yml') }
+    let(:project) { "spec" }
+    let(:glossary) { Glossary.new(project, 'en', 'ja') }
+    let(:glossary_path) { Glossary.build_path(project, 'en', 'ja') }
 
     describe '#create' do
       context 'when glossary already exists' do
@@ -128,11 +129,11 @@ module Logaling
         glossary.create
         glossary.add("user", "ユーザ", "ユーザーではない")
 
-        db_home = File.join(LOGALING_HOME, ".logadb")
+        db_home = File.join(LOGALING_HOME, "db")
         glossarydb = Logaling::GlossaryDB.new
         glossarydb.open(db_home, "utf8") do |db|
           db.recreate_table(db_home)
-          db.load_glossaries(LOGALING_HOME)
+          db.load_glossaries(File.join(LOGALING_HOME, "projects", project, "glossary"))
         end
       end
 
