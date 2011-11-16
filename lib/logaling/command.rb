@@ -6,53 +6,96 @@ require "logaling/glossary_db"
 
 class Logaling::Command < Thor
   VERSION = "0.0.2"
+  LOGALING_CONFIG = '.logaling'
 
   map '-c' => :create,
       '-a' => :add,
       '-d' => :delete,
       '-u' => :update,
-      '-l' => :lookup
+      '-l' => :lookup,
+      '-i' => :init,
+      '-n' => :new,
+      '-L' => :link
 
   class_option "glossary",        type: :string, aliases: "-g"
   class_option "source-language", type: :string, aliases: "-S"
   class_option "target-language", type: :string, aliases: "-T"
   class_option "logaling-home",   type: :string, required: false, aliases: "-h"
 
+  desc 'init', 'Initialize logaling CLI'
+  def init
+    unless File.exist?(LOGALING_HOME)
+      FileUtils.mkdir_p(LOGALING_HOME)
+      FileUtils.mkdir_p(File.join(LOGALING_HOME, "projects"))
+      say "Successfully created #{LOGALING_HOME}"
+    else
+      say "#{LOGALING_HOME} is already exists."
+    end
+  end
+
+  desc 'new [PROJECT NAME] [SOURCE LANGUAGE] [TARGET LANGUAGE(optional)]', 'Create .logaling'
+  def new(project_name, source_language, target_language=nil)
+    unless File.exist?(LOGALING_CONFIG)
+      FileUtils.mkdir_p(LOGALING_CONFIG)
+      FileUtils.mkdir_p(File.join(LOGALING_CONFIG, "glossary"))
+      File.open(File.join(LOGALING_CONFIG, "config"), 'w') do |config|
+        config.puts "--glossary #{project_name}"
+        config.puts "--source-language #{source_language}"
+        config.puts "--target-language #{target_language}" if target_language
+      end
+      say "Successfully created #{LOGALING_CONFIG}"
+    else
+      say "#{LOGALING_CONFIG} is already exists."
+    end
+  end
+
+  desc 'link', 'Link .logaling'
+  def link
+    logaling_path = find_dotfile
+    if logaling_path
+      options = load_config
+      symlink_path = File.join(LOGALING_HOME, "projects", options["glossary"])
+      unless File.exists?(symlink_path)
+        FileUtils.ln_s(logaling_path, symlink_path)
+        say "Your project is now linked to #{symlink_path}."
+      else
+        say "#{options["glossary"]} is already linked."
+      end
+    else
+      say "Try 'loga new' first."
+    end
+  end
+
   desc 'create', 'Create glossary.'
   def create
-    load_config
     glossary.create
   rescue Logaling::CommandFailed => e
     error(e.message)
   end
 
-  desc 'add [source term] [target term] [note]', 'Add term to glossary.'
+  desc 'add [SOURCE TERM] [TARGET TERM] [NOTE(optional)]', 'Add term to glossary.'
   def add(source_term, target_term, note='')
-    load_config
     glossary.add(source_term, target_term, note)
   rescue Logaling::CommandFailed, Logaling::TermError => e
     error(e.message)
   end
 
-  desc 'delete [source term] [target term]', 'Delete term.'
+  desc 'delete [SOURCE TERM] [TARGET TERM]', 'Delete term.'
   def delete(source_term, target_term)
-    load_config
     glossary.delete(source_term, target_term)
   rescue Logaling::CommandFailed, Logaling::TermError => e
     error(e.message)
   end
 
-  desc 'update [source term] [target term] [new_target_term], [note]', 'Update term.'
+  desc 'update [SOURCE TERM] [TARGET TERM] [NEW TARGET TERM], [NOTE(optional)]', 'Update term.'
   def update(source_term, target_term, new_target_term, note='')
-    load_config
     glossary.update(source_term, target_term, new_target_term, note)
   rescue Logaling::CommandFailed, Logaling::TermError => e
     error(e.message)
   end
 
-  desc 'lookup [source term]', 'Lookup terms.'
+  desc 'lookup [TERM]', 'Lookup terms.'
   def lookup(source_term)
-    load_config
     glossary.lookup(source_term)
   rescue Logaling::CommandFailed, Logaling::TermError => e
     error(e.message)
@@ -60,30 +103,31 @@ class Logaling::Command < Thor
 
   desc 'index', 'Index glossaries to groonga DB.'
   def index
-    load_config
-    home = find_option("logaling-home") || LOGALING_HOME
-    db_home = File.join(home, ".logadb")
+    projects = Dir.glob(File.join(LOGALING_HOME, "projects", "*"))
+    db_home = File.join(LOGALING_HOME, "db")
     glossarydb = Logaling::GlossaryDB.new
     glossarydb.open(db_home, "utf8") do |db|
       db.recreate_table(db_home)
-      db.load_glossaries(home)
+      projects.each do |project|
+        db.load_glossaries(File.join(project, "glossary"))
+      end
     end
   end
 
   private
   def glossary
-    glossary = find_option("glossary")
+    config = load_config
+
+    glossary = options["glossary"] || config["glossary"]
     raise(Logaling::CommandFailed, "input glossary name '-g <glossary name>'") unless glossary
 
-    source_language = find_option("source-language")
+    source_language = options["source-language"] || config["source-language"]
     raise(Logaling::CommandFailed, "input source-language code '-S <source-language code>'") unless source_language
 
-    target_language = find_option("target-language")
+    target_language = options["target-language"] || config["target-language"]
     raise(Logaling::CommandFailed, "input target-language code '-T <target-language code>'") unless target_language
 
-    logaling_home = find_option("logaling-home")
-
-    Logaling::Glossary.new(glossary, source_language, target_language, logaling_home)
+    Logaling::Glossary.new(glossary, source_language, target_language)
   end
 
   def error(msg)
@@ -91,20 +135,16 @@ class Logaling::Command < Thor
     exit 1
   end
 
-  def find_option(key)
-    options[key] || @dot_options[key]
-  end
-
   def load_config
-    @dot_options ||= {}
+    config ||= {}
     if path = find_dotfile
-      tmp_options = File.readlines(path).map {|l| l.chomp.split " "}
-      tmp_options.each do |option|
+      File.readlines(File.join(path, 'config')).map{|l| l.chomp.split " "}.each do |option|
         key = option[0].sub(/^[\-]{2}/, "")
         value = option[1]
-        @dot_options[key] = value
+        config[key] = value
       end
     end
+    config
   end
 
   def find_dotfile
