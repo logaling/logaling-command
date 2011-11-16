@@ -87,5 +87,30 @@ module Logaling
         FileUtils.remove_file(glossary_path, true)
       end
     end
+
+    describe '#lookup' do
+      before do
+        FileUtils.remove_file(glossary_path, true)
+        glossary.create
+        glossary.add("user", "ユーザ", "ユーザーではない")
+
+        db_home = File.join(LOGALING_HOME, ".logadb")
+        glossarydb = Logaling::GlossaryDB.new
+        glossarydb.open(db_home, "utf8") do |db|
+          db.recreate_table(db_home)
+          db.load_glossaries(LOGALING_HOME)
+        end
+      end
+
+      context 'with arguments show not existing bilingual pair' do
+        it {
+          -> { glossary.delete("user", "ユーザー") }.should raise_error(Logaling::TermError)
+        }
+      end
+
+      after do
+        FileUtils.remove_file(glossary_path, true)
+      end
+    end
   end
 end
