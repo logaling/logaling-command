@@ -47,7 +47,7 @@ module Logaling
     end
 
     def load_glossaries(path)
-      file_list = Dir.glob("#{path}/*.yml")
+      file_list = Dir.glob(File.join(path, "*.yml"))
       file_list.each do |file|
         name, source_language, target_language = File::basename(file, "yml").split(".")
         glossary = YAML::load_file(file)
