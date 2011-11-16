@@ -7,7 +7,7 @@ require 'groonga'
 
 module Logaling
   class GlossaryDB
-    def initialize()
+    def initialize
       @database = nil
     end
 
