@@ -7,6 +7,24 @@ module Logaling
     let(:glossary) { Glossary.new('spec', 'en', 'ja', Dir.pwd) }
     let(:glossary_path) { File.join(Dir.pwd, 'spec.en.ja.yml') }
 
+    describe '#create' do
+      context 'when glossary already exists' do
+        before do
+          FileUtils.remove_file(glossary_path, true)
+          FileUtils.mkdir_p(File.dirname(glossary_path))
+          FileUtils.touch(glossary_path)
+        end
+
+        it {
+          -> { glossary.create }.should raise_error(Logaling::CommandFailed)
+        }
+
+        after do
+          FileUtils.remove_file(glossary_path, true)
+        end
+      end
+    end
+
     describe '#add' do
       before do
         FileUtils.remove_file(glossary_path, true)
