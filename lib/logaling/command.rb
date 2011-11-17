@@ -24,7 +24,6 @@ class Logaling::Command < Thor
   desc 'new [PROJECT NAME] [SOURCE LANGUAGE] [TARGET LANGUAGE(optional)]', 'Create .logaling'
   def new(project_name, source_language, target_language=nil)
     unless File.exist?(LOGALING_CONFIG)
-      FileUtils.mkdir_p(LOGALING_CONFIG)
       FileUtils.mkdir_p(File.join(LOGALING_CONFIG, "glossary"))
       File.open(File.join(LOGALING_CONFIG, "config"), 'w') do |config|
         config.puts "--glossary #{project_name}"
