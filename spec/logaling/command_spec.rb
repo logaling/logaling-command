@@ -8,7 +8,7 @@ describe Logaling::Command do
   let(:glossary_path) { Logaling::Glossary.build_path(project, 'en', 'ja') }
 
   before do
-    FileUtils.remove_file(glossary_path, true)
+    FileUtils.remove_entry_secure(glossary_path, true)
   end
 
   describe '#create' do
@@ -96,7 +96,41 @@ describe Logaling::Command do
     end
   end
 
+  describe '#index' do
+    before do
+      command.create
+      command.add("spec", "スペック", "備考")
+      command2 = Logaling::Command.new([], {"glossary"=>"spec2", "source-language"=>"en", "target-language"=>"ja"})
+      command.index
+    end
+
+    context 'glossary files exist in some project' do
+      db_home = File.join(LOGALING_HOME, "db")
+      db = Logaling::GlossaryDB.new
+
+      subject { db.open(db_home, "utf8"){|db| records = db.lookup("spec")} }
+
+      it 'glossaries should be indexed' do
+        subject.should == [{:name=>"spec", :source_language=>"en", :target_language=>"ja", :source_term=>"spec", :target_term=>"スペック", :note=>"備考"}]
+      end
+    end
+  end
+
+  describe '#lookup' do
+    context 'with arguments exist term' do
+      before do
+        command.create
+        command.add("spec", "スペック", "備考")
+      end
+
+      it 'succeed at find by term without command.index' do
+        stdout = capture(:stdout) {command.lookup("spec")}
+        stdout.should == "\nlookup word : spec\n\n  spec\n  スペック\n    note:備考\n    glossary:spec\n"
+      end
+    end
+  end
+
   after do
-    FileUtils.remove_file(glossary_path, true)
+    FileUtils.remove_entry_secure(glossary_path, true)
   end
 end

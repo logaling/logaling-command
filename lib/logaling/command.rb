@@ -86,6 +86,7 @@ class Logaling::Command < Thor
 
   desc 'lookup [TERM]', 'Lookup terms.'
   def lookup(source_term)
+    index
     glossary.lookup(source_term)
   rescue Logaling::CommandFailed, Logaling::TermError => e
     error(e.message)
