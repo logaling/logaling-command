@@ -7,23 +7,16 @@ require "fileutils"
 
 module Logaling
   class Glossary
-    def self.build_path(glossary, source_language, target_language, logaling_home)
-      dir, file = File::split(glossary)
-      if dir == "."
-        fname = [glossary, source_language, target_language].join(".")
-        return File.join(logaling_home, "#{fname}.yml")
-      else
-        return glossary
-      end
+    def self.build_path(glossary, source_language, target_language)
+      fname = [glossary, source_language, target_language].join(".")
+      File.join(LOGALING_HOME, "projects", glossary, "glossary", "#{fname}.yml")
     end
 
-    def initialize(glossary, source_language, target_language, logaling_home)
-      logaling_home ||= LOGALING_HOME
-      @path = Glossary.build_path(glossary, source_language, target_language, logaling_home)
+    def initialize(glossary, source_language, target_language)
+      @path = Glossary.build_path(glossary, source_language, target_language)
       @glossary = glossary
       @source_language = source_language
       @target_language = target_language
-      @logaling_home = logaling_home
     end
 
     def create
@@ -81,7 +74,7 @@ module Logaling
       check_glossary_exists
 
       glossarydb = Logaling::GlossaryDB.new
-      glossarydb.open(logaling_db_home, "utf8") do |db|
+      glossarydb.open(File.join(LOGALING_HOME, "db"), "utf8") do |db|
         glossaries = db.lookup(source_term)
         glossaries.reject! do |term|
           term[:source_language] != @source_language || term[:target_language] != @target_language
@@ -110,7 +103,7 @@ module Logaling
     end
 
     def logaling_db_home
-      File.join(@logaling_home, ".logadb")
+      File.join(LOGALING_HOME, "db")
     end
 
     def build_term(source_term, target_term, note)
@@ -134,16 +127,18 @@ module Logaling
       target_terms(source_term).any?{|data| data['target_term'] == target_term }
     end
 
-    def exist?
-      File.exists?(@path)
-    end
-
     def check_glossary_unexists
-      raise CommandFailed, "glossary #{@path} already exists" if exist?
+      unless File.exists?(File.dirname(@path))
+        raise CommandFailed, "glossary path #{File.dirname(@path)} not found"
+      end
+      raise CommandFailed, "glossary #{@path} already exists" if File.exists?(@path)
     end
 
     def check_glossary_exists
-      raise CommandFailed, "glossary #{@path} not found" unless exist?
+      unless File.exists?(File.dirname(@path))
+        raise CommandFailed, "glossary path #{File.dirname(@path)} not found"
+      end
+      FileUtils.touch(@path) unless File.exists?(@path)
     end
 
     def target_terms(source_term, path=@path)
@@ -153,15 +148,6 @@ module Logaling
         target_terms << term if term['source_term'] == source_term
       end
       target_terms
-    end
-
-    def lookup_files
-      file_list = Dir.glob("#{@logaling_home}/*.#{@source_language}.#{@target_language}.yml")
-      if glossary_index = file_list.index(@path)
-        file_list.delete_at(glossary_index)
-      end
-      file_list.unshift(@path)
-      return file_list
     end
 
     def dump_glossary(glossary)

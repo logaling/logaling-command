@@ -4,7 +4,8 @@ require File.join(File.dirname(__FILE__), "..", "spec_helper")
 describe Logaling::Command do
   let(:base_options) { {"glossary"=>"spec", "source-language"=>"en", "target-language"=>"ja"} }
   let(:command) { Logaling::Command.new([], base_options) }
-  let(:glossary_path) { File.join(LOGALING_HOME, "/spec.en.ja.yml") }
+  let(:project) { "spec" }
+  let(:glossary_path) { Logaling::Glossary.build_path(project, 'en', 'ja') }
 
   before do
     FileUtils.remove_file(glossary_path, true)

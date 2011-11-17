@@ -4,13 +4,17 @@ require "fileutils"
 
 module Logaling
   describe Glossary do
-    let(:glossary) { Glossary.new('spec', 'en', 'ja', Dir.pwd) }
-    let(:glossary_path) { File.join(Dir.pwd, 'spec.en.ja.yml') }
+    let(:project) { "spec" }
+    let(:glossary) { Glossary.new(project, 'en', 'ja') }
+    let(:glossary_path) { Glossary.build_path(project, 'en', 'ja') }
+
+    before do
+      FileUtils.remove_file(glossary_path, true)
+    end
 
     describe '#create' do
       context 'when glossary already exists' do
         before do
-          FileUtils.remove_file(glossary_path, true)
           FileUtils.mkdir_p(File.dirname(glossary_path))
           FileUtils.touch(glossary_path)
         end
@@ -18,32 +22,19 @@ module Logaling
         it {
           -> { glossary.create }.should raise_error(Logaling::CommandFailed)
         }
-
-        after do
-          FileUtils.remove_file(glossary_path, true)
-        end
       end
 
       context '' do
         # <glossary name>.source-language.target_language.yml というファイル名で用語集が作成されること
-        before do
-          FileUtils.remove_file(glossary_path, true)
-        end
-
         it 'specified glossary should has created' do
           glossary.create
           File.exists?(glossary_path).should be_true
-        end
-
-        after do
-          FileUtils.remove_file(glossary_path, true)
         end
       end
     end
 
     describe '#add' do
       before do
-        FileUtils.remove_file(glossary_path, true)
         glossary.create
       end
 
@@ -68,15 +59,10 @@ module Logaling
           -> { glossary.add("user", "ユーザ", "ユーザーではない") }.should raise_error(Logaling::TermError)
         }
       end
-
-      after do
-        FileUtils.remove_file(glossary_path, true)
-      end
     end
 
     describe '#update' do
       before do
-        FileUtils.remove_file(glossary_path, true)
         glossary.create
         glossary.add("user", "ユーザ", "ユーザーではない")
       end
@@ -98,15 +84,10 @@ module Logaling
           -> { glossary.update("user", "ユー", "ユーザー", "やっぱりユーザー") }.should raise_error(Logaling::TermError)
         }
       end
-
-      after do
-        FileUtils.remove_file(glossary_path, true)
-      end
     end
 
     describe '#delete' do
       before do
-        FileUtils.remove_file(glossary_path, true)
         glossary.create
         glossary.add("user", "ユーザ", "ユーザーではない")
       end
@@ -116,23 +97,18 @@ module Logaling
           -> { glossary.delete("user", "ユーザー") }.should raise_error(Logaling::TermError)
         }
       end
-
-      after do
-        FileUtils.remove_file(glossary_path, true)
-      end
     end
 
     describe '#lookup' do
       before do
-        FileUtils.remove_file(glossary_path, true)
         glossary.create
         glossary.add("user", "ユーザ", "ユーザーではない")
 
-        db_home = File.join(LOGALING_HOME, ".logadb")
+        db_home = File.join(LOGALING_HOME, "db")
         glossarydb = Logaling::GlossaryDB.new
         glossarydb.open(db_home, "utf8") do |db|
           db.recreate_table(db_home)
-          db.load_glossaries(LOGALING_HOME)
+          db.load_glossaries(File.join(LOGALING_HOME, "projects", project, "glossary"))
         end
       end
 
@@ -140,10 +116,6 @@ module Logaling
         it {
           -> { glossary.delete("user", "ユーザー") }.should raise_error(Logaling::TermError)
         }
-      end
-
-      after do
-        FileUtils.remove_file(glossary_path, true)
       end
     end
   end
