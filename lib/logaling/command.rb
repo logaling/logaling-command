@@ -13,7 +13,6 @@ class Logaling::Command < Thor
       '-d' => :delete,
       '-u' => :update,
       '-l' => :lookup,
-      '-i' => :init,
       '-n' => :new,
       '-L' => :link
 
@@ -21,17 +20,6 @@ class Logaling::Command < Thor
   class_option "source-language", type: :string, aliases: "-S"
   class_option "target-language", type: :string, aliases: "-T"
   class_option "logaling-home",   type: :string, required: false, aliases: "-h"
-
-  desc 'init', 'Initialize logaling CLI'
-  def init
-    unless File.exist?(LOGALING_HOME)
-      FileUtils.mkdir_p(LOGALING_HOME)
-      FileUtils.mkdir_p(File.join(LOGALING_HOME, "projects"))
-      say "Successfully created #{LOGALING_HOME}"
-    else
-      say "#{LOGALING_HOME} is already exists."
-    end
-  end
 
   desc 'new [PROJECT NAME] [SOURCE LANGUAGE] [TARGET LANGUAGE(optional)]', 'Create .logaling'
   def new(project_name, source_language, target_language=nil)
@@ -53,8 +41,11 @@ class Logaling::Command < Thor
   def link
     logaling_path = find_dotfile
     if logaling_path
-      options = load_config
-      symlink_path = File.join(LOGALING_HOME, "projects", options["glossary"])
+      logaling_projects_path = File.join(LOGALING_HOME, "projects")
+      FileUtils.mkdir_p(logaling_projects_path) unless File.exist?(logaling_projects_path)
+
+      config = load_config
+      symlink_path = File.join(logaling_projects_path, config["glossary"])
       unless File.exists?(symlink_path)
         FileUtils.ln_s(logaling_path, symlink_path)
         say "Your project is now linked to #{symlink_path}."
