@@ -75,7 +75,7 @@ module Logaling
         before do
           FileUtils.remove_entry_secure(File.join(LOGALING_HOME, 'projects', 'spec'), true)
         end
-        
+
         it {
           -> { glossary.add("test", "テスト", "テスト") }.should raise_error(Logaling::CommandFailed)
         }
