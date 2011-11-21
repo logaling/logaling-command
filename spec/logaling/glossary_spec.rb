@@ -10,12 +10,12 @@ module Logaling
 
     before do
       FileUtils.remove_entry_secure(File.join(LOGALING_HOME, 'projects', 'spec'), true)
+      FileUtils.mkdir_p(File.dirname(glossary_path))
     end
 
     describe '#create' do
       context 'when glossary already exists' do
         before do
-          FileUtils.mkdir_p(File.dirname(glossary_path))
           FileUtils.touch(glossary_path)
         end
 
@@ -25,10 +25,12 @@ module Logaling
       end
 
       context 'newly create' do
+        before do
+          glossary.create
+        end
+
         # <glossary name>.source-language.target_language.yml というファイル名で用語集が作成されること
         it 'specified glossary should has created' do
-          FileUtils.mkdir_p(File.dirname(glossary_path))
-          glossary.create
           File.exists?(glossary_path).should be_true
         end
       end
@@ -37,8 +39,6 @@ module Logaling
     describe '#add' do
       context 'with arguments show new bilingual pair' do
         before do
-          FileUtils.mkdir_p(File.dirname(glossary_path))
-          glossary.create
           glossary.add("spec", "スペック", "テストスペック")
         end
 
@@ -51,8 +51,6 @@ module Logaling
 
       context 'with arguments show existing bilingual pair' do
         before do
-          FileUtils.mkdir_p(File.dirname(glossary_path))
-          glossary.create
           glossary.add("user", "ユーザ", "ユーザーではない")
         end
 
@@ -63,7 +61,6 @@ module Logaling
 
       context "when the glossary not found" do
         before do
-          FileUtils.mkdir_p(File.dirname(glossary_path))
           glossary.add("test", "テスト", "テスト")
         end
 
@@ -75,6 +72,10 @@ module Logaling
       end
 
       context "when the glossary dir not found" do
+        before do
+          FileUtils.remove_entry_secure(File.join(LOGALING_HOME, 'projects', 'spec'), true)
+        end
+        
         it {
           -> { glossary.add("test", "テスト", "テスト") }.should raise_error(Logaling::CommandFailed)
         }
@@ -83,7 +84,6 @@ module Logaling
 
     describe '#update' do
       before do
-        FileUtils.mkdir_p(File.dirname(glossary_path))
         glossary.add("user", "ユーザ", "ユーザーではない")
       end
 
@@ -108,7 +108,6 @@ module Logaling
 
     describe '#delete' do
       before do
-        FileUtils.mkdir_p(File.dirname(glossary_path))
         glossary.add("user", "ユーザ", "ユーザーではない")
       end
 
@@ -121,7 +120,6 @@ module Logaling
 
     describe '#lookup' do
       before do
-        FileUtils.mkdir_p(File.dirname(glossary_path))
         glossary.add("user", "ユーザ", "ユーザーではない")
 
         db_home = File.join(LOGALING_HOME, "db")

@@ -9,11 +9,11 @@ describe Logaling::Command do
 
   before do
     FileUtils.remove_entry_secure(File.join(LOGALING_HOME, 'projects', 'spec'), true)
+    FileUtils.mkdir_p(File.dirname(glossary_path))
   end
 
   describe '#create' do
     before do
-      FileUtils.mkdir_p(File.dirname(glossary_path))
       FileUtils.touch(glossary_path)
     end
 
@@ -27,7 +27,6 @@ describe Logaling::Command do
   describe '#add' do
     context 'with arguments have only bilingual pair' do
       before do
-        FileUtils.mkdir_p(File.dirname(glossary_path))
         command.add("spec", "テスト")
       end
 
@@ -44,7 +43,6 @@ describe Logaling::Command do
 
     context 'with arguments have bilingual pair and note' do
       before do
-        FileUtils.mkdir_p(File.dirname(glossary_path))
         command.add("spec", "テスト", "備考")
       end
 
@@ -62,7 +60,6 @@ describe Logaling::Command do
 
   describe "#update" do
     before do
-      FileUtils.mkdir_p(File.dirname(glossary_path))
       command.add("spec", "テスト", "備考")
     end
 
@@ -97,7 +94,6 @@ describe Logaling::Command do
 
   describe '#index' do
     before do
-      FileUtils.mkdir_p(File.dirname(glossary_path))
       command.add("spec", "スペック", "備考")
       command.index
     end
@@ -122,7 +118,6 @@ describe Logaling::Command do
 
     context 'with arguments exist term' do
       before do
-        FileUtils.mkdir_p(File.dirname(glossary_path))
         command.add("spec", "スペック", "備考")
         FileUtils.mkdir_p(File.dirname(glossary_path2))
         command2.add("spec", "スペック")
