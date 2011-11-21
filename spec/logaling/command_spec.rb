@@ -121,16 +121,41 @@ describe Logaling::Command do
   end
 
   describe '#lookup' do
+    let(:base_options2) { {"glossary"=>"spec2", "source-language"=>"en", "target-language"=>"ja"} }
+    let(:command2) { Logaling::Command.new([], base_options2) }
+    let(:project2) { "spec2" }
+    let(:glossary_path2) { Logaling::Glossary.build_path(project2, 'en', 'ja') }
     context 'with arguments exist term' do
       before do
         FileUtils.mkdir_p(File.dirname(glossary_path))
         FileUtils.touch(glossary_path)
         command.add("spec", "スペック", "備考")
+
+        FileUtils.mkdir_p(File.dirname(glossary_path2))
+        FileUtils.touch(glossary_path2)
+        command2.add("spec", "スペック")
       end
 
       it 'succeed at find by term without command.index' do
         stdout = capture(:stdout) {command.lookup("spec")}
-        stdout.should == "\nlookup word : spec\n\n  spec\n  スペック\n    note:備考\n    glossary:spec\n"
+        stdout.should == <<-EOM
+
+lookup word : spec
+
+  spec
+  スペック
+    note:備考
+    glossary:spec
+
+  spec
+  スペック
+    note:
+    glossary:spec2
+        EOM
+      end
+
+      after do
+        FileUtils.remove_entry_secure(File.join(LOGALING_HOME, 'projects', 'spec2'), true)
       end
     end
   end
