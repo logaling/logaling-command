@@ -24,7 +24,7 @@ module Logaling
         }
       end
 
-      context '' do
+      context 'newly create' do
         # <glossary name>.source-language.target_language.yml というファイル名で用語集が作成されること
         it 'specified glossary should has created' do
           FileUtils.mkdir_p(File.dirname(glossary_path))
