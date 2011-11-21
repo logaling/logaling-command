@@ -37,6 +37,8 @@ module Logaling
     describe '#add' do
       context 'with arguments show new bilingual pair' do
         before do
+          FileUtils.mkdir_p(File.dirname(glossary_path))
+          glossary.create
           glossary.add("spec", "スペック", "テストスペック")
         end
 
@@ -49,12 +51,28 @@ module Logaling
 
       context 'with arguments show existing bilingual pair' do
         before do
+          FileUtils.mkdir_p(File.dirname(glossary_path))
+          glossary.create
           glossary.add("user", "ユーザ", "ユーザーではない")
         end
 
         it {
           -> { glossary.add("user", "ユーザ", "ユーザーではない") }.should raise_error(Logaling::TermError)
         }
+      end
+
+      context "when the glossary not found" do
+        before do
+          FileUtils.mkdir_p(File.dirname(glossary_path))
+          glossary.create
+          glossary.add("test", "テスト", "テスト")
+        end
+
+        it "should create the glossary and add term" do
+          yaml = YAML::load_file(glossary_path)
+          term = yaml.index({"source_term"=>"test", "target_term"=>"テスト", "note"=>"テスト"})
+          term.should_not be_nil
+        end
       end
     end
 
