@@ -8,13 +8,14 @@ describe Logaling::Command do
   let(:glossary_path) { Logaling::Glossary.build_path(project, 'en', 'ja') }
 
   before do
-    FileUtils.remove_entry_secure(glossary_path, true)
+    FileUtils.remove_entry_secure(File.join(LOGALING_HOME, 'projects', 'spec'), true)
   end
 
   describe '#create' do
     context 'with arguments show non-existent glossary' do
       before do
-        command.create
+        FileUtils.mkdir_p(File.dirname(glossary_path))
+        FileUtils.touch(glossary_path)
       end
 
       it "glossary yaml should be newly created" do
@@ -25,7 +26,8 @@ describe Logaling::Command do
 
   describe '#add' do
     before do
-      command.create
+      FileUtils.mkdir_p(File.dirname(glossary_path))
+      FileUtils.touch(glossary_path)
     end
 
     context 'with arguments have only bilingual pair' do
@@ -42,7 +44,7 @@ describe Logaling::Command do
       it "term should note have note" do
         subject["note"].should == ""
       end
-   end
+    end
 
     context 'with arguments have bilingual pair and note' do
       before do
@@ -63,7 +65,8 @@ describe Logaling::Command do
 
   describe "#update" do
     before do
-      command.create
+      FileUtils.mkdir_p(File.dirname(glossary_path))
+      FileUtils.touch(glossary_path)
       command.add("spec", "テスト", "備考")
     end
 
@@ -98,7 +101,8 @@ describe Logaling::Command do
 
   describe '#index' do
     before do
-      command.create
+      FileUtils.mkdir_p(File.dirname(glossary_path))
+      FileUtils.touch(glossary_path)
       command.add("spec", "スペック", "備考")
       command2 = Logaling::Command.new([], {"glossary"=>"spec2", "source-language"=>"en", "target-language"=>"ja"})
       command.index
@@ -119,7 +123,8 @@ describe Logaling::Command do
   describe '#lookup' do
     context 'with arguments exist term' do
       before do
-        command.create
+        FileUtils.mkdir_p(File.dirname(glossary_path))
+        FileUtils.touch(glossary_path)
         command.add("spec", "スペック", "備考")
       end
 
@@ -131,6 +136,6 @@ describe Logaling::Command do
   end
 
   after do
-    FileUtils.remove_entry_secure(glossary_path, true)
+    FileUtils.remove_entry_secure(File.join(LOGALING_HOME, 'projects', 'spec'), true)
   end
 end
