@@ -35,11 +35,6 @@ module Logaling
     end
 
     describe '#add' do
-      before do
-        FileUtils.mkdir_p(File.dirname(glossary_path))
-        glossary.create
-      end
-
       context 'with arguments show new bilingual pair' do
         before do
           glossary.add("spec", "スペック", "テストスペック")
@@ -65,8 +60,6 @@ module Logaling
 
     describe '#update' do
       before do
-        FileUtils.mkdir_p(File.dirname(glossary_path))
-        glossary.create
         glossary.add("user", "ユーザ", "ユーザーではない")
       end
 
@@ -91,8 +84,6 @@ module Logaling
 
     describe '#delete' do
       before do
-        FileUtils.mkdir_p(File.dirname(glossary_path))
-        glossary.create
         glossary.add("user", "ユーザ", "ユーザーではない")
       end
 
@@ -105,8 +96,6 @@ module Logaling
 
     describe '#lookup' do
       before do
-        FileUtils.mkdir_p(File.dirname(glossary_path))
-        glossary.create
         glossary.add("user", "ユーザ", "ユーザーではない")
 
         db_home = File.join(LOGALING_HOME, "db")

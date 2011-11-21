@@ -12,12 +12,12 @@ describe Logaling::Command do
   end
 
   describe '#create' do
-    context 'with arguments show non-existent glossary' do
-      before do
+    before do
         FileUtils.mkdir_p(File.dirname(glossary_path))
         FileUtils.touch(glossary_path)
-      end
+    end
 
+    context 'with arguments show non-existent glossary' do
       it "glossary yaml should be newly created" do
         File.exists?(glossary_path).should be_true
       end
@@ -25,11 +25,6 @@ describe Logaling::Command do
   end
 
   describe '#add' do
-    before do
-      FileUtils.mkdir_p(File.dirname(glossary_path))
-      FileUtils.touch(glossary_path)
-    end
-
     context 'with arguments have only bilingual pair' do
       before do
         command.add("spec", "テスト")
@@ -65,8 +60,6 @@ describe Logaling::Command do
 
   describe "#update" do
     before do
-      FileUtils.mkdir_p(File.dirname(glossary_path))
-      FileUtils.touch(glossary_path)
       command.add("spec", "テスト", "備考")
     end
 
@@ -101,8 +94,6 @@ describe Logaling::Command do
 
   describe '#index' do
     before do
-      FileUtils.mkdir_p(File.dirname(glossary_path))
-      FileUtils.touch(glossary_path)
       command.add("spec", "スペック", "備考")
       command2 = Logaling::Command.new([], {"glossary"=>"spec2", "source-language"=>"en", "target-language"=>"ja"})
       command.index
@@ -127,12 +118,7 @@ describe Logaling::Command do
     let(:glossary_path2) { Logaling::Glossary.build_path(project2, 'en', 'ja') }
     context 'with arguments exist term' do
       before do
-        FileUtils.mkdir_p(File.dirname(glossary_path))
-        FileUtils.touch(glossary_path)
         command.add("spec", "スペック", "備考")
-
-        FileUtils.mkdir_p(File.dirname(glossary_path2))
-        FileUtils.touch(glossary_path2)
         command2.add("spec", "スペック")
       end
 

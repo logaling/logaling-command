@@ -28,7 +28,10 @@ module Logaling
     end
 
     def add(source_term, target_term, note)
-      check_glossary_exists
+      unless File.exists?(@path)
+        FileUtils.mkdir_p(File.dirname(@path))
+        FileUtils.touch(@path)
+      end
 
       if bilingual_pair_exists?(source_term, target_term)
         raise TermError, "[#{source_term}] [#{target_term}] pair already exists"
