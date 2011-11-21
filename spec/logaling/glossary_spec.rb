@@ -9,7 +9,7 @@ module Logaling
     let(:glossary_path) { Glossary.build_path(project, 'en', 'ja') }
 
     before do
-      FileUtils.remove_file(glossary_path, true)
+      FileUtils.remove_entry_secure(File.join(LOGALING_HOME, 'projects', 'spec'), true)
     end
 
     describe '#create' do
@@ -27,6 +27,7 @@ module Logaling
       context '' do
         # <glossary name>.source-language.target_language.yml というファイル名で用語集が作成されること
         it 'specified glossary should has created' do
+          FileUtils.mkdir_p(File.dirname(glossary_path))
           glossary.create
           File.exists?(glossary_path).should be_true
         end
@@ -35,6 +36,7 @@ module Logaling
 
     describe '#add' do
       before do
+        FileUtils.mkdir_p(File.dirname(glossary_path))
         glossary.create
       end
 
@@ -63,6 +65,7 @@ module Logaling
 
     describe '#update' do
       before do
+        FileUtils.mkdir_p(File.dirname(glossary_path))
         glossary.create
         glossary.add("user", "ユーザ", "ユーザーではない")
       end
@@ -88,6 +91,7 @@ module Logaling
 
     describe '#delete' do
       before do
+        FileUtils.mkdir_p(File.dirname(glossary_path))
         glossary.create
         glossary.add("user", "ユーザ", "ユーザーではない")
       end
@@ -101,6 +105,7 @@ module Logaling
 
     describe '#lookup' do
       before do
+        FileUtils.mkdir_p(File.dirname(glossary_path))
         glossary.create
         glossary.add("user", "ユーザ", "ユーザーではない")
 
@@ -117,6 +122,10 @@ module Logaling
           -> { glossary.delete("user", "ユーザー") }.should raise_error(Logaling::TermError)
         }
       end
+    end
+
+    after do
+      FileUtils.remove_entry_secure(File.join(LOGALING_HOME, 'projects', 'spec'), true)
     end
   end
 end
