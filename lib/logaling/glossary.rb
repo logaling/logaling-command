@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-#require "logaling-command/version"
-
 require 'psych'
 require "yaml"
 require "fileutils"
