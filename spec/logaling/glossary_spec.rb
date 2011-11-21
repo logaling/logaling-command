@@ -64,7 +64,6 @@ module Logaling
       context "when the glossary not found" do
         before do
           FileUtils.mkdir_p(File.dirname(glossary_path))
-          glossary.create
           glossary.add("test", "テスト", "テスト")
         end
 
@@ -74,10 +73,17 @@ module Logaling
           term.should_not be_nil
         end
       end
+
+      context "when the glossary dir not found" do
+        it {
+          -> { glossary.add("test", "テスト", "テスト") }.should raise_error(Logaling::CommandFailed)
+        }
+      end
     end
 
     describe '#update' do
       before do
+        FileUtils.mkdir_p(File.dirname(glossary_path))
         glossary.add("user", "ユーザ", "ユーザーではない")
       end
 
@@ -102,6 +108,7 @@ module Logaling
 
     describe '#delete' do
       before do
+        FileUtils.mkdir_p(File.dirname(glossary_path))
         glossary.add("user", "ユーザ", "ユーザーではない")
       end
 
@@ -114,6 +121,7 @@ module Logaling
 
     describe '#lookup' do
       before do
+        FileUtils.mkdir_p(File.dirname(glossary_path))
         glossary.add("user", "ユーザ", "ユーザーではない")
 
         db_home = File.join(LOGALING_HOME, "db")

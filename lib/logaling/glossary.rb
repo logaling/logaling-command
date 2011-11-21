@@ -28,10 +28,7 @@ module Logaling
     end
 
     def add(source_term, target_term, note)
-      unless File.exists?(@path)
-        FileUtils.mkdir_p(File.dirname(@path))
-        FileUtils.touch(@path)
-      end
+      check_glossary_exists
 
       if bilingual_pair_exists?(source_term, target_term)
         raise TermError, "[#{source_term}] [#{target_term}] pair already exists"
@@ -130,17 +127,19 @@ module Logaling
       target_terms(source_term).any?{|data| data['target_term'] == target_term }
     end
 
-    def check_glossary_unexists
+    def check_glossarydir_unexists
       unless File.exists?(File.dirname(@path))
         raise CommandFailed, "glossary path #{File.dirname(@path)} not found"
       end
+    end
+
+    def check_glossary_unexists
+      check_glossarydir_unexists
       raise CommandFailed, "glossary #{@path} already exists" if File.exists?(@path)
     end
 
     def check_glossary_exists
-      unless File.exists?(File.dirname(@path))
-        raise CommandFailed, "glossary path #{File.dirname(@path)} not found"
-      end
+      check_glossarydir_unexists
       FileUtils.touch(@path) unless File.exists?(@path)
     end
 
