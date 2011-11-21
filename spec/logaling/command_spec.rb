@@ -13,8 +13,8 @@ describe Logaling::Command do
 
   describe '#create' do
     before do
-        FileUtils.mkdir_p(File.dirname(glossary_path))
-        FileUtils.touch(glossary_path)
+      FileUtils.mkdir_p(File.dirname(glossary_path))
+      FileUtils.touch(glossary_path)
     end
 
     context 'with arguments show non-existent glossary' do
