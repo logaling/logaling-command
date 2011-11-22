@@ -60,8 +60,10 @@ module Logaling
       when ".tsv", ".csv"
         sep = extname == ".tsv" ? "\t" : ","
         glossary = []
-        CSV.open(file, "r",  {:col_sep => sep}).each do |row|
-          glossary << {"source_term" => row[0], "target_term" => row[1], "note" => ""}
+        CSV.open(file, "r",  {:col_sep => sep}) do |csv|
+          csv.each do |row|
+            glossary << {"source_term" => row[0], "target_term" => row[1], "note" => ""}
+          end
         end
         glossary
       when ".yml"
