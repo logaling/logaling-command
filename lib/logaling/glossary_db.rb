@@ -62,7 +62,7 @@ module Logaling
         glossary = []
         CSV.open(file, "r",  {:col_sep => sep}) do |csv|
           csv.each do |row|
-            glossary << {"source_term" => row[0], "target_term" => row[1], "note" => ""}
+            glossary << {"source_term" => row[0], "target_term" => row[1], "note" => ""} if row.size >= 2
           end
         end
         glossary

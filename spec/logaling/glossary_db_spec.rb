@@ -80,7 +80,7 @@ describe Logaling::GlossaryDB do
     context 'with argument csv' do
       before do
         FileUtils.touch(csv_path)
-        term = "spec,スペック"
+        term = "spec,スペック,備考\ntest\n"
         File.open(csv_path, "w"){|f| f.puts(term)}
       end
 
