@@ -4,6 +4,7 @@ require 'psych'
 require "yaml"
 require "fileutils"
 require 'groonga'
+require 'csv'
 
 module Logaling
   class GlossaryDB
@@ -46,11 +47,33 @@ module Logaling
       @database.nil? or @database.closed?
     end
 
+    def get_file_list(path, types)
+      glob_list = []
+      types.each do |type|
+        glob_list << File.join(path, "*.#{type}")
+      end
+      Dir.glob(glob_list)
+    end
+
+    def load_glossary(file)
+      case extname = File.extname(file)
+      when ".tsv", ".csv"
+        sep = extname == ".tsv" ? "\t" : ","
+        glossary = []
+        CSV.open(file, "r",  {:col_sep => sep}).each do |row|
+          glossary << {"source_term" => row[0], "target_term" => row[1], "note" => ""}
+        end
+        glossary
+      when ".yml"
+        YAML::load_file(file)
+      end
+    end
+
     def load_glossaries(path)
-      file_list = Dir.glob(File.join(path, "*.yml"))
+      file_list = get_file_list(path, ["yml", "tsv", "csv"])
       file_list.each do |file|
-        name, source_language, target_language = File::basename(file, "yml").split(".")
-        glossary = YAML::load_file(file)
+        name, source_language, target_language = File::basename(file, ".*").split(".")
+        glossary = load_glossary(file)
         next if !glossary
         glossary.each do |term|
           source_term = term['source_term']
