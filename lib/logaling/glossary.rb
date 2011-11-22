@@ -2,6 +2,7 @@
 require 'psych'
 require "yaml"
 require "fileutils"
+require "logaling/glossary_db"
 
 module Logaling
   class Glossary
@@ -91,6 +92,18 @@ module Logaling
           puts "  #{term[:target_term]}\n"
           puts "    note:#{term[:note]}"
           puts "    glossary:#{term[:name]}"
+        end
+      end
+    end
+
+    def index
+      projects = Dir.glob(File.join(LOGALING_HOME, "projects", "*"))
+      db_home = File.join(LOGALING_HOME, "db")
+      glossarydb = Logaling::GlossaryDB.new
+      glossarydb.open(db_home, "utf8") do |db|
+        db.recreate_table(db_home)
+        projects.each do |project|
+          db.load_glossaries(File.join(project, "glossary"))
         end
       end
     end

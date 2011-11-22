@@ -2,7 +2,6 @@
 
 require 'thor'
 require "logaling/glossary"
-require "logaling/glossary_db"
 
 class Logaling::Command < Thor
   VERSION = "0.0.2"
@@ -94,15 +93,9 @@ class Logaling::Command < Thor
 
   desc 'index', 'Index glossaries to groonga DB.'
   def index
-    projects = Dir.glob(File.join(LOGALING_HOME, "projects", "*"))
-    db_home = File.join(LOGALING_HOME, "db")
-    glossarydb = Logaling::GlossaryDB.new
-    glossarydb.open(db_home, "utf8") do |db|
-      db.recreate_table(db_home)
-      projects.each do |project|
-        db.load_glossaries(File.join(project, "glossary"))
-      end
-    end
+    glossary.index
+  rescue Logaling::CommandFailed, Logaling::TermError => e
+    error(e.message)
   end
 
   private
