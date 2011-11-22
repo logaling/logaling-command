@@ -130,10 +130,19 @@ module Logaling
         end
       end
 
-      context 'with arguments show not existing bilingual pair' do
-        it {
-          -> { glossary.delete("user", "ユーザー") }.should raise_error(Logaling::TermError)
-        }
+      context 'with arguments show existing bilingual pair' do
+        it 'succeed at find by term' do
+          stdout = capture(:stdout) {glossary.lookup("user")}
+          stdout.should == <<-EOM
+
+lookup word : user
+
+  user
+  ユーザ
+    note:ユーザーではない
+    glossary:spec
+          EOM
+        end
       end
     end
 
