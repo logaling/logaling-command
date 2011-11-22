@@ -121,17 +121,11 @@ module Logaling
     describe '#lookup' do
       before do
         glossary.add("user", "ユーザ", "ユーザーではない")
-
-        db_home = File.join(LOGALING_HOME, "db")
-        glossarydb = Logaling::GlossaryDB.new
-        glossarydb.open(db_home, "utf8") do |db|
-          db.recreate_table(db_home)
-          db.load_glossaries(File.join(LOGALING_HOME, "projects", project, "glossary"))
-        end
       end
 
       context 'with arguments show existing bilingual pair' do
         it 'succeed at find by term' do
+          glossary.index
           stdout = capture(:stdout) {glossary.lookup("user")}
           stdout.should == <<-EOM
 
@@ -142,6 +136,104 @@ lookup word : user
     note:ユーザーではない
     glossary:spec
           EOM
+        end
+      end
+
+      context 'when tsv file as glossary exists' do
+        let(:tsv_path) { File.join(File.dirname(glossary_path), "spec.en.ja.tsv") }
+
+        before do
+          FileUtils.mkdir_p(File.dirname(glossary_path))
+          FileUtils.touch(tsv_path)
+          File.open(tsv_path, "w"){|f| f.puts "user\tユーザー"}
+          glossary.index
+        end
+
+        it 'succeed at find by term' do
+          glossary.index
+          stdout = capture(:stdout) {glossary.lookup("user")}
+          stdout.should == <<-EOM
+
+lookup word : user
+
+  user
+  ユーザ
+    note:ユーザーではない
+    glossary:spec
+
+  user
+  ユーザー
+    note:
+    glossary:spec
+          EOM
+        end
+
+        after do
+          FileUtils.remove_entry_secure(tsv_path, true)
+        end
+      end
+    end
+
+    describe '#index' do
+      let(:db_home) { File.join(LOGALING_HOME, "db") }
+      let(:logaling_db) { Logaling::GlossaryDB.new }
+      let(:tsv_path) { File.join(File.dirname(glossary_path), "spec.en.ja.tsv") }
+      let(:csv_path) { File.join(File.dirname(glossary_path), "spec.en.ja.csv") }
+
+      context 'when yml file as glossary exists' do
+        before do
+          FileUtils.mkdir_p(File.dirname(glossary_path))
+          FileUtils.touch(glossary_path)
+          glossary.add("spec", "スペック", "備考")
+          glossary.index
+        end
+
+        subject { logaling_db.open(db_home, "utf8"){|db| logaling_db.lookup("spec")} }
+
+        it 'glossaries should be indexed' do
+          subject.should == [{:name=>"spec", :source_language=>"en", :target_language=>"ja", :source_term=>"spec", :target_term=>"スペック", :note=>"備考"}]
+        end
+
+        after do
+          FileUtils.remove_entry_secure(glossary_path, true)
+        end
+      end
+
+      context 'when tsv file as glossary exists' do
+        before do
+          FileUtils.mkdir_p(File.dirname(glossary_path))
+          FileUtils.touch(tsv_path)
+          File.open(tsv_path, "w"){|f| f.puts "user\tユーザ"}
+          glossary.index
+        end
+
+        subject { logaling_db.open(db_home, "utf8"){|db| logaling_db.lookup("user")} }
+
+        it 'glossaries should be indexed' do
+          subject.should == [{:name=>"spec", :source_language=>"en", :target_language=>"ja", :source_term=>"user", :target_term=>"ユーザ", :note=>nil}]
+        end
+
+        after do
+          FileUtils.remove_entry_secure(tsv_path, true)
+        end
+      end
+
+      context 'when csv file as glosary exists' do
+        before do
+          FileUtils.mkdir_p(File.dirname(glossary_path))
+          FileUtils.touch(csv_path)
+          File.open(csv_path, "w"){|f| f.puts "test,テスト"}
+          glossary.index
+        end
+
+        subject { logaling_db.open(db_home, "utf8"){|db| logaling_db.lookup("test")} }
+
+        it 'glossaries should be indexed' do
+          subject.should == [{:name=>"spec", :source_language=>"en", :target_language=>"ja", :source_term=>"test", :target_term=>"テスト", :note=>nil}]
+        end
+
+        after do
+          FileUtils.remove_entry_secure(csv_path, true)
         end
       end
     end
