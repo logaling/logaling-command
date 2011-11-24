@@ -191,7 +191,7 @@ lookup word : user
         subject { logaling_db.open(db_home, "utf8"){|db| logaling_db.lookup("spec")} }
 
         it 'glossaries should be indexed' do
-          subject.should == [{:name=>"spec", :source_language=>"en", :target_language=>"ja", :source_term=>"spec", :target_term=>"スペック", :note=>"備考"}]
+          should == [{:name=>"spec", :source_language=>"en", :target_language=>"ja", :source_term=>"spec", :target_term=>"スペック", :note=>"備考"}]
         end
 
         after do
@@ -210,7 +210,7 @@ lookup word : user
         subject { logaling_db.open(db_home, "utf8"){|db| logaling_db.lookup("user")} }
 
         it 'glossaries should be indexed' do
-          subject.should == [{:name=>"spec", :source_language=>"en", :target_language=>"ja", :source_term=>"user", :target_term=>"ユーザ", :note=>nil}]
+          should == [{:name=>"spec", :source_language=>"en", :target_language=>"ja", :source_term=>"user", :target_term=>"ユーザ", :note=>nil}]
         end
 
         after do
@@ -229,7 +229,7 @@ lookup word : user
         subject { logaling_db.open(db_home, "utf8"){|db| logaling_db.lookup("test")} }
 
         it 'glossaries should be indexed' do
-          subject.should == [{:name=>"spec", :source_language=>"en", :target_language=>"ja", :source_term=>"test", :target_term=>"テスト", :note=>nil}]
+          should == [{:name=>"spec", :source_language=>"en", :target_language=>"ja", :source_term=>"test", :target_term=>"テスト", :note=>nil}]
         end
 
         after do
