@@ -47,11 +47,6 @@ module Logaling
       @database.nil? or @database.closed?
     end
 
-    def get_file_list(path, types)
-      glob_list = types.map{|type| File.join(path, "*.#{type}") }
-      Dir.glob(glob_list)
-    end
-
     def load_glossary(file)
       case extname = File.extname(file)
       when ".tsv", ".csv"
@@ -150,5 +145,11 @@ module Logaling
         schema.remove_table("terms")
       end
     end
+
+    def get_file_list(path, types)
+      glob_list = types.map{|type| File.join(path, "*.#{type}") }
+      Dir.glob(glob_list)
+    end
+
   end
 end
