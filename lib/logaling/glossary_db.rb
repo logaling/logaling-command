@@ -48,10 +48,7 @@ module Logaling
     end
 
     def get_file_list(path, types)
-      glob_list = []
-      types.each do |type|
-        glob_list << File.join(path, "*.#{type}")
-      end
+      glob_list = types.map{|type| File.join(path, "*.#{type}") }
       Dir.glob(glob_list)
     end
 
