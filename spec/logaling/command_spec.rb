@@ -4,8 +4,7 @@ require File.join(File.dirname(__FILE__), "..", "spec_helper")
 describe Logaling::Command do
   let(:base_options) { {"glossary"=>"spec", "source-language"=>"en", "target-language"=>"ja"} }
   let(:command) { Logaling::Command.new([], base_options) }
-  let(:project) { "spec" }
-  let(:glossary_path) { Logaling::Glossary.build_path(project, 'en', 'ja') }
+  let(:glossary_path) { Logaling::Glossary.build_path('spec', 'en', 'ja') }
   let(:target_project_path) { File.join(LOGALING_HOME, "projects", "spec") }
 
   describe '#new' do
@@ -267,8 +266,7 @@ describe Logaling::Command do
   describe '#lookup' do
     let(:base_options2) { {"glossary"=>"spec2", "source-language"=>"en", "target-language"=>"ja"} }
     let(:command2) { Logaling::Command.new([], base_options2) }
-    let(:project2) { "spec2" }
-    let(:glossary_path2) { Logaling::Glossary.build_path(project2, 'en', 'ja') }
+    let(:glossary_path2) { Logaling::Glossary.build_path('spec2', 'en', 'ja') }
 
     before do
       FileUtils.remove_entry_secure(File.join(LOGALING_HOME, 'projects', 'spec'), true)
