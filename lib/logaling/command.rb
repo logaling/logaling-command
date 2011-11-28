@@ -13,7 +13,7 @@ class Logaling::Command < Thor
       '-u' => :update,
       '-l' => :lookup,
       '-n' => :new,
-      '-L' => :link
+      '-r' => :register
 
   class_option "glossary",        type: :string, aliases: "-g"
   class_option "source-language", type: :string, aliases: "-S"
@@ -35,8 +35,8 @@ class Logaling::Command < Thor
     end
   end
 
-  desc 'link', 'Link .logaling'
-  def link
+  desc 'register', 'Register .logaling'
+  def register
     logaling_path = find_dotfile
     if logaling_path
       logaling_projects_path = File.join(LOGALING_HOME, "projects")
@@ -46,9 +46,9 @@ class Logaling::Command < Thor
       symlink_path = File.join(logaling_projects_path, config["glossary"])
       unless File.exists?(symlink_path)
         FileUtils.ln_s(logaling_path, symlink_path)
-        say "Your project is now linked to #{symlink_path}."
+        say "Your project is now registered to #{symlink_path}."
       else
-        say "#{options["glossary"]} is already linked."
+        say "#{options["glossary"]} is already registered."
       end
     else
       say "Try 'loga new' first."

@@ -7,9 +7,44 @@ describe Logaling::Command do
   let(:project) { "spec" }
   let(:glossary_path) { Logaling::Glossary.build_path(project, 'en', 'ja') }
 
-  before do
-    FileUtils.remove_entry_secure(File.join(LOGALING_HOME, 'projects', 'spec'), true)
-    FileUtils.mkdir_p(File.dirname(glossary_path))
+  describe '#register' do
+    let(:target_project_path) { File.join(LOGALING_HOME, "projects", "spec") }
+
+    before do
+      FileUtils.remove_file(target_project_path) if File.exist?(target_project_path)
+      @project_counts = Dir[File.join(LOGALING_HOME, "projects", "*")].size
+    end
+
+    context "when can not find .logaling" do
+      before(:all) do
+        FileUtils.remove_entry_secure(Logaling::Command::LOGALING_CONFIG, true)
+        @stdout = capture(:stdout) {command.register}
+      end
+
+      it 'register nothing' do
+        Dir[File.join(LOGALING_HOME, "projects", "*")].size.should == @project_counts
+      end
+
+      it "print message \"Try 'loga new' first.\"" do
+        @stdout.should == "Try 'loga new' first.\n"
+      end
+    end
+
+    context 'when find .logaling' do
+      before do
+        command.new('spec', 'en', 'ja')
+        command.register
+      end
+
+      it 'register .logaling as project' do
+        File.exist?(target_project_path).should be_true
+        Dir[File.join(LOGALING_HOME, "projects", "*")].size.should == @project_counts + 1
+      end
+
+      after do
+        FileUtils.remove_entry_secure(Logaling::Command::LOGALING_CONFIG, true)
+      end
+    end
   end
 
   describe '#create' do
@@ -25,6 +60,11 @@ describe Logaling::Command do
   end
 
   describe '#add' do
+    before do
+      FileUtils.remove_entry_secure(File.join(LOGALING_HOME, 'projects', 'spec'), true)
+      FileUtils.mkdir_p(File.dirname(glossary_path))
+    end
+
     context 'with arguments have only bilingual pair' do
       before do
         command.add("spec", "テスト")
@@ -60,6 +100,8 @@ describe Logaling::Command do
 
   describe "#update" do
     before do
+      FileUtils.remove_entry_secure(File.join(LOGALING_HOME, 'projects', 'spec'), true)
+      FileUtils.mkdir_p(File.dirname(glossary_path))
       command.add("spec", "テスト", "備考")
     end
 
@@ -94,6 +136,8 @@ describe Logaling::Command do
 
   describe '#index' do
     before do
+      FileUtils.remove_entry_secure(File.join(LOGALING_HOME, 'projects', 'spec'), true)
+      FileUtils.mkdir_p(File.dirname(glossary_path))
       command.add("spec", "スペック", "備考")
       command.index
     end
@@ -115,6 +159,11 @@ describe Logaling::Command do
     let(:command2) { Logaling::Command.new([], base_options2) }
     let(:project2) { "spec2" }
     let(:glossary_path2) { Logaling::Glossary.build_path(project2, 'en', 'ja') }
+
+    before do
+      FileUtils.remove_entry_secure(File.join(LOGALING_HOME, 'projects', 'spec'), true)
+      FileUtils.mkdir_p(File.dirname(glossary_path))
+    end
 
     context 'with arguments exist term' do
       before do
