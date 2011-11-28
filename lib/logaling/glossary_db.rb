@@ -66,15 +66,20 @@ module Logaling
     def load_glossaries(path)
       file_list = get_file_list(path, ["yml", "tsv", "csv"])
       file_list.each do |file|
-        name, source_language, target_language = File::basename(file, ".*").split(".")
-        glossary = load_glossary(file)
-        next if !glossary
-        glossary.each do |term|
-          source_term = term['source_term']
-          target_term = term['target_term']
-          note = term['note']
-          add_glossary(name, source_language, target_language, source_term, target_term, note)
-        end
+        index_glossary(file)
+      end
+    end
+
+    def index_glossary(glossary_path)
+      glossary = load_glossary(glossary_path)
+      return if !glossary
+
+      name, source_language, target_language = File::basename(glossary_path, ".*").split(".")
+      glossary.each do |term|
+        source_term = term['source_term']
+        target_term = term['target_term']
+        note = term['note']
+        add_glossary(name, source_language, target_language, source_term, target_term, note)
       end
     end
 
