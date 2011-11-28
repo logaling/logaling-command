@@ -42,7 +42,6 @@ class Logaling::Command < Thor
   def register
     logaling_path = find_dotfile
     if logaling_path
-      logaling_projects_path = File.join(LOGALING_HOME, "projects")
       FileUtils.mkdir_p(logaling_projects_path) unless File.exist?(logaling_projects_path)
 
       config = load_config
@@ -62,7 +61,6 @@ class Logaling::Command < Thor
   def unregister
     logaling_path = find_dotfile
     if logaling_path
-      logaling_projects_path = File.join(LOGALING_HOME, "projects")
       config = load_config
       symlink_path = File.join(logaling_projects_path, config["glossary"])
       if File.exists?(symlink_path)
@@ -133,6 +131,10 @@ class Logaling::Command < Thor
     raise(Logaling::CommandFailed, "input target-language code '-T <target-language code>'") unless target_language
 
     Logaling::Glossary.new(glossary, source_language, target_language)
+  end
+
+  def logaling_projects_path
+    File.join(LOGALING_HOME, "projects")
   end
 
   def error(msg)
