@@ -43,10 +43,6 @@ module Logaling
       @database = nil
     end
 
-    def closed?
-      @database.nil? or @database.closed?
-    end
-
     def load_glossary(file)
       case extname = File.extname(file)
       when ".tsv", ".csv"
@@ -146,10 +142,13 @@ module Logaling
       end
     end
 
+    def closed?
+      @database.nil? or @database.closed?
+    end
+
     def get_file_list(path, types)
       glob_list = types.map{|type| File.join(path, "*.#{type}") }
       Dir.glob(glob_list)
     end
-
   end
 end
