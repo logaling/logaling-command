@@ -13,7 +13,8 @@ class Logaling::Command < Thor
       '-u' => :update,
       '-l' => :lookup,
       '-n' => :new,
-      '-r' => :register
+      '-r' => :register,
+      '-U' => :unregister
 
   class_option "glossary",        type: :string, aliases: "-g"
   class_option "source-language", type: :string, aliases: "-S"
@@ -52,6 +53,24 @@ class Logaling::Command < Thor
       end
     else
       say "Try 'loga new' first."
+    end
+  end
+
+  desc 'unregister', 'Unregister .logaling'
+  def unregister
+    logaling_path = find_dotfile
+    if logaling_path
+      logaling_projects_path = File.join(LOGALING_HOME, "projects")
+      config = load_config
+      symlink_path = File.join(logaling_projects_path, config["glossary"])
+      if File.exists?(symlink_path)
+        FileUtils.remove_entry_secure(symlink_path, true)
+        say "Your project is now unregistered."
+      else
+        say ".logaling is not yet registered."
+      end
+    else
+      say ".logaling can't be found."
     end
   end
 

@@ -6,10 +6,9 @@ describe Logaling::Command do
   let(:command) { Logaling::Command.new([], base_options) }
   let(:project) { "spec" }
   let(:glossary_path) { Logaling::Glossary.build_path(project, 'en', 'ja') }
+  let(:target_project_path) { File.join(LOGALING_HOME, "projects", "spec") }
 
   describe '#register' do
-    let(:target_project_path) { File.join(LOGALING_HOME, "projects", "spec") }
-
     before do
       FileUtils.remove_file(target_project_path) if File.exist?(target_project_path)
       @project_counts = Dir[File.join(LOGALING_HOME, "projects", "*")].size
@@ -43,6 +42,55 @@ describe Logaling::Command do
 
       after do
         FileUtils.remove_entry_secure(Logaling::Command::LOGALING_CONFIG, true)
+      end
+    end
+  end
+
+  describe '#unregister' do
+    before do
+      @project_counts = Dir[File.join(LOGALING_HOME, "projects", "*")].size
+    end
+
+    context "when can not find .logaling" do
+      before(:all) do
+        FileUtils.remove_entry_secure(Logaling::Command::LOGALING_CONFIG, true)
+        @stdout = capture(:stdout) {command.unregister}
+      end
+
+      it 'unregister nothing' do
+        Dir[File.join(LOGALING_HOME, "projects", "*")].size.should == @project_counts
+      end
+
+      it "print message \".logaling can't be found.\"" do
+        @stdout.should == ".logaling can't be found.\n"
+      end
+    end
+
+    context 'when find .logaling' do
+      before do
+        command.new('spec', 'en', 'ja')
+      end
+
+      context 'and .logaling registered' do
+        before do
+          command.register
+          command.unregister
+        end
+
+        it 'unregister .logaling' do
+          File.exist?(target_project_path).should be_false
+          Dir[File.join(LOGALING_HOME, "projects", "*")].size.should == @project_counts
+        end
+      end
+
+      context "and .logaling is not registered" do
+        before do
+          @stdout = capture(:stdout) {command.unregister}
+        end
+
+        it "print message \".logaling is not yet registered.\"" do
+          @stdout.should == ".logaling is not yet registered.\n"
+        end
       end
     end
   end
