@@ -21,8 +21,8 @@ describe Logaling::Command do
         @stdout = capture(:stdout) { command.new('spec', 'en', 'ja') }
       end
 
-      it 'print message \"<.logaling path> is already exists.\"' do
-        @stdout.should == "#{Logaling::Command::LOGALING_CONFIG} is already exists.\n"
+      it 'print message \"<.logaling path> already exists.\"' do
+        @stdout.should == "#{Logaling::Command::LOGALING_CONFIG} already exists.\n"
       end
     end
 

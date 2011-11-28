@@ -34,7 +34,7 @@ class Logaling::Command < Thor
       register unless options["no-register"]
       say "Successfully created #{LOGALING_CONFIG}"
     else
-      say "#{LOGALING_CONFIG} is already exists."
+      say "#{LOGALING_CONFIG} already exists."
     end
   end
 
