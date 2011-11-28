@@ -63,7 +63,7 @@ module Logaling
       end
     end
 
-    def load_glossaries(path)
+    def index_glossaries(path)
       file_list = get_file_list(path, ["yml", "tsv", "csv"])
       file_list.each do |file|
         index_glossary(file)

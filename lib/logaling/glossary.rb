@@ -101,7 +101,7 @@ module Logaling
       Logaling::GlossaryDB.open(logaling_db_home, "utf8") do |db|
         db.recreate_table(logaling_db_home)
         projects.each do |project|
-          db.load_glossaries(File.join(project, "glossary"))
+          db.index_glossaries(File.join(project, "glossary"))
         end
       end
     end
