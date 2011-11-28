@@ -49,13 +49,24 @@ describe Logaling::Command do
 
   describe '#create' do
     before do
-      FileUtils.touch(glossary_path)
+      FileUtils.remove_entry_secure(File.join(LOGALING_HOME, 'projects', 'spec'), true)
+      FileUtils.mkdir_p(File.dirname(glossary_path))
     end
 
     context 'with arguments show non-existent glossary' do
+      before do
+        command.new('spec', 'en', 'ja')
+        command.register
+        command.create
+      end
+
       it "glossary yaml should be newly created" do
         File.exists?(glossary_path).should be_true
       end
+    end
+
+    after do
+      FileUtils.remove_entry_secure(Logaling::Command::LOGALING_CONFIG, true)
     end
   end
 
