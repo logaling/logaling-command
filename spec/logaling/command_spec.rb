@@ -11,6 +11,8 @@ describe Logaling::Command do
   describe '#new' do
     before do
       FileUtils.remove_entry_secure(Logaling::Command::LOGALING_CONFIG, true)
+      FileUtils.remove_file(target_project_path) if File.exist?(target_project_path)
+      @project_counts = Dir[File.join(LOGALING_HOME, "projects", "*")].size
     end
 
     context 'when .logaling already exists' do
@@ -25,12 +27,35 @@ describe Logaling::Command do
     end
 
     context 'when .logaling does not exist' do
-      before do
-        command.new('spec', 'en', 'ja')
+      context 'and called with no special option' do
+        before do
+          command.new('spec', 'en', 'ja')
+        end
+
+        it 'should create .logaling' do
+          File.exist?(Logaling::Command::LOGALING_CONFIG).should be_true
+        end
+
+        it 'should register .logaling as project' do
+          File.exist?(target_project_path).should be_true
+          Dir[File.join(LOGALING_HOME, "projects", "*")].size.should == @project_counts + 1
+        end
       end
 
-      it 'should create .logaling' do
-        File.exist?(Logaling::Command::LOGALING_CONFIG).should be_true
+      context "and called with '--no-register=true'" do
+        before do
+          command.options = base_options.merge("no-register" => true)
+          command.new('spec', 'en', 'ja')
+        end
+
+        it 'should create .logaling' do
+          File.exist?(Logaling::Command::LOGALING_CONFIG).should be_true
+        end
+
+        it 'should not register .logaling as project' do
+          File.exist?(target_project_path).should be_false
+          Dir[File.join(LOGALING_HOME, "projects", "*")].size.should == @project_counts
+        end
       end
     end
   end

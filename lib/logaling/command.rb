@@ -22,6 +22,7 @@ class Logaling::Command < Thor
   class_option "logaling-home",   type: :string, required: false, aliases: "-h"
 
   desc 'new [PROJECT NAME] [SOURCE LANGUAGE] [TARGET LANGUAGE(optional)]', 'Create .logaling'
+  method_option "no-register", type: :boolean, default: false
   def new(project_name, source_language, target_language=nil)
     unless File.exist?(LOGALING_CONFIG)
       FileUtils.mkdir_p(File.join(LOGALING_CONFIG, "glossary"))
@@ -30,6 +31,7 @@ class Logaling::Command < Thor
         config.puts "--source-language #{source_language}"
         config.puts "--target-language #{target_language}" if target_language
       end
+      register unless options["no-register"]
       say "Successfully created #{LOGALING_CONFIG}"
     else
       say "#{LOGALING_CONFIG} is already exists."
