@@ -8,6 +8,33 @@ describe Logaling::Command do
   let(:glossary_path) { Logaling::Glossary.build_path(project, 'en', 'ja') }
   let(:target_project_path) { File.join(LOGALING_HOME, "projects", "spec") }
 
+  describe '#new' do
+    before do
+      FileUtils.remove_entry_secure(Logaling::Command::LOGALING_CONFIG, true)
+    end
+
+    context 'when .logaling already exists' do
+      before do
+        FileUtils.mkdir_p(Logaling::Command::LOGALING_CONFIG)
+        @stdout = capture(:stdout) { command.new('spec', 'en', 'ja') }
+      end
+
+      it 'print message \"<.logaling path> is already exists.\"' do
+        @stdout.should == "#{Logaling::Command::LOGALING_CONFIG} is already exists.\n"
+      end
+    end
+
+    context 'when .logaling does not exist' do
+      before do
+        command.new('spec', 'en', 'ja')
+      end
+
+      it 'should create .logaling' do
+        File.exist?(Logaling::Command::LOGALING_CONFIG).should be_true
+      end
+    end
+  end
+
   describe '#register' do
     before do
       FileUtils.remove_file(target_project_path) if File.exist?(target_project_path)
@@ -98,7 +125,6 @@ describe Logaling::Command do
   describe '#create' do
     before do
       FileUtils.remove_entry_secure(File.join(LOGALING_HOME, 'projects', 'spec'), true)
-      FileUtils.mkdir_p(File.dirname(glossary_path))
     end
 
     context 'with arguments show non-existent glossary' do
