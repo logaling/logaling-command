@@ -12,34 +12,6 @@ describe Logaling::GlossaryDB do
     FileUtils.mkdir_p(File.dirname(glossary_path))
   end
 
-  describe '#get_file_list' do
-    context 'when specified file not exist' do
-      subject { glossary_db.get_file_list(File.dirname(glossary_path), ['yml', 'csv', 'tsv']) }
-      it 'should return empty array' do
-        should == []
-      end
-    end
-
-    context 'when specified file exists' do
-      before do
-        FileUtils.touch(glossary_path)
-        FileUtils.touch(tsv_path)
-        FileUtils.touch(csv_path)
-      end
-
-      subject { glossary_db.get_file_list(File.dirname(glossary_path), ['yml', 'csv', 'tsv']) }
-      it 'should return file list' do
-        should == [glossary_path, csv_path, tsv_path]
-      end
-
-      after do
-        FileUtils.remove_entry_secure(glossary_path, true)
-        FileUtils.remove_entry_secure(tsv_path, true)
-        FileUtils.remove_entry_secure(csv_path, true)
-      end
-    end
-  end
-
   describe '#load_glossary' do
     context 'with argument yml' do
       before do
