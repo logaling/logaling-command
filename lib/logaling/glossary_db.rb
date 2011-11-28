@@ -8,6 +8,10 @@ require 'csv'
 
 module Logaling
   class GlossaryDB
+    def self.open(base_path, encoding, &blk)
+      blk ? GlossaryDB.new.open(base_path, encoding, &blk) : GlossaryDB.new.open(base_path, encoding)
+    end
+
     def initialize
       @database = nil
     end

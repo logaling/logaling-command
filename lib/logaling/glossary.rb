@@ -72,8 +72,7 @@ module Logaling
     def lookup(source_term)
       check_glossary_exists
 
-      glossarydb = Logaling::GlossaryDB.new
-      glossarydb.open(logaling_db_home, "utf8") do |db|
+      Logaling::GlossaryDB.open(logaling_db_home, "utf8") do |db|
         glossaries = db.lookup(source_term)
         glossaries.reject! do |term|
           term[:source_language] != @source_language || term[:target_language] != @target_language
@@ -98,8 +97,8 @@ module Logaling
 
     def index
       projects = Dir.glob(File.join(LOGALING_HOME, "projects", "*"))
-      glossarydb = Logaling::GlossaryDB.new
-      glossarydb.open(logaling_db_home, "utf8") do |db|
+
+      Logaling::GlossaryDB.open(logaling_db_home, "utf8") do |db|
         db.recreate_table(logaling_db_home)
         projects.each do |project|
           db.load_glossaries(File.join(project, "glossary"))
