@@ -105,7 +105,19 @@ class Logaling::Command < Thor
   desc 'lookup [TERM]', 'Lookup terms.'
   def lookup(source_term)
     index
-    glossary.lookup(source_term)
+    terms = glossary.lookup(source_term)
+
+    puts "\nlookup word : #{source_term}"
+    unless terms.empty?
+      terms.each do |term|
+        puts "\n  #{term[:source_term]}\n"
+        puts "  #{term[:target_term]}\n"
+        puts "    note:#{term[:note]}"
+        puts "    glossary:#{term[:name]}"
+      end
+    else
+      "source-term <#{source_term}> not found"
+    end
   rescue Logaling::CommandFailed, Logaling::TermError => e
     error(e.message)
   end

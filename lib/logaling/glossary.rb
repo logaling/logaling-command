@@ -72,27 +72,20 @@ module Logaling
     def lookup(source_term)
       check_glossary_exists
 
+      terms = []
       Logaling::GlossaryDB.open(logaling_db_home, "utf8") do |db|
-        glossaries = db.lookup(source_term)
-        glossaries.reject! do |term|
+        terms = db.lookup(source_term)
+        terms.reject! do |term|
           term[:source_language] != @source_language || term[:target_language] != @target_language
         end
-        if glossaries.empty?
-          raise TermError, "source-term <#{source_term}> not found"
-        end
-        # order by glossary
-        specified = glossaries.select{|term| term[:name] == @glossary}
-        other = glossaries.select{|term| term[:name] != @glossary}
-        glossaries = specified.concat(other)
-
-        puts "\nlookup word : #{source_term}"
-        glossaries.each do |term|
-          puts "\n  #{term[:source_term]}\n"
-          puts "  #{term[:target_term]}\n"
-          puts "    note:#{term[:note]}"
-          puts "    glossary:#{term[:name]}"
+        unless terms.empty?
+          # order by glossary
+          specified = terms.select{|term| term[:name] == @glossary}
+          other = terms.select{|term| term[:name] != @glossary}
+          terms = specified.concat(other)
         end
       end
+      terms
     end
 
     def index

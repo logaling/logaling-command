@@ -258,7 +258,7 @@ describe Logaling::Command do
       subject { db.open(db_home, "utf8"){|db| records = db.lookup("spec")} }
 
       it 'glossaries should be indexed' do
-        subject.should == [{:name=>"spec", :source_language=>"en", :target_language=>"ja", :source_term=>"spec", :target_term=>"スペック", :note=>"備考"}]
+        should be_include({:name=>"spec", :source_language=>"en", :target_language=>"ja", :source_term=>"spec", :target_term=>"スペック", :note=>"備考"})
       end
     end
   end
@@ -276,30 +276,11 @@ describe Logaling::Command do
     context 'with arguments exist term' do
       before do
         command.add("spec", "スペック", "備考")
-        FileUtils.mkdir_p(File.dirname(glossary_path2))
-        command2.add("spec", "スペック")
       end
 
       it 'succeed at find by term without command.index' do
         stdout = capture(:stdout) {command.lookup("spec")}
-        stdout.should == <<-EOM
-
-lookup word : spec
-
-  spec
-  スペック
-    note:備考
-    glossary:spec
-
-  spec
-  スペック
-    note:
-    glossary:spec2
-        EOM
-      end
-
-      after do
-        FileUtils.remove_entry_secure(File.join(LOGALING_HOME, 'projects', 'spec2'), true)
+        stdout.should be_include "glossary:spec"
       end
     end
   end

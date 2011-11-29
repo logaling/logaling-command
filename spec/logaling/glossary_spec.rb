@@ -121,21 +121,14 @@ module Logaling
     describe '#lookup' do
       before do
         glossary.add("user", "ユーザ", "ユーザーではない")
+        glossary.index
       end
 
       context 'with arguments show existing bilingual pair' do
+        subject {glossary.lookup("user")}
+
         it 'succeed at find by term' do
-          glossary.index
-          stdout = capture(:stdout) {glossary.lookup("user")}
-          stdout.should == <<-EOM
-
-lookup word : user
-
-  user
-  ユーザ
-    note:ユーザーではない
-    glossary:spec
-          EOM
+          should be_include({:name=>"spec", :source_language=>"en", :target_language=>"ja", :source_term=>"user", :target_term=>"ユーザ", :note=>"ユーザーではない"})
         end
       end
 
@@ -149,23 +142,10 @@ lookup word : user
           glossary.index
         end
 
+        subject {glossary.lookup("user")}
+
         it 'succeed at find by term' do
-          glossary.index
-          stdout = capture(:stdout) {glossary.lookup("user")}
-          stdout.should == <<-EOM
-
-lookup word : user
-
-  user
-  ユーザ
-    note:ユーザーではない
-    glossary:spec
-
-  user
-  ユーザー
-    note:
-    glossary:spec
-          EOM
+          should be_include({:name=>"spec", :source_language=>"en", :target_language=>"ja", :source_term=>"user", :target_term=>"ユーザー", :note=>nil})
         end
 
         after do
@@ -191,7 +171,7 @@ lookup word : user
         subject { logaling_db.open(db_home, "utf8"){|db| logaling_db.lookup("spec")} }
 
         it 'glossaries should be indexed' do
-          should == [{:name=>"spec", :source_language=>"en", :target_language=>"ja", :source_term=>"spec", :target_term=>"スペック", :note=>"備考"}]
+          should be_include({:name=>"spec", :source_language=>"en", :target_language=>"ja", :source_term=>"spec", :target_term=>"スペック", :note=>"備考"})
         end
 
         after do
