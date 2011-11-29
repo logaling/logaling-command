@@ -25,7 +25,7 @@ module Logaling
         raise TermError, "term '#{source_term}: #{target_term}' already exists in '#{@glossary}'"
       end
 
-      glossary = load_glossary_yml
+      glossary = load_glossary_yml(@path)
       glossary << build_term(source_term, target_term, note)
 
       dump_glossary(glossary)
@@ -38,7 +38,7 @@ module Logaling
         raise TermError, "term '#{source_term}: #{target_term}' already exists in '#{@glossary}'"
       end
 
-      glossary = load_glossary_yml
+      glossary = load_glossary_yml(@path)
       target_index = find_term_index(glossary, source_term, target_term)
       if target_index
         glossary[target_index] = rebuild_term(glossary[target_index], source_term, new_target_term, note)
@@ -51,7 +51,7 @@ module Logaling
     def delete(source_term, target_term)
       raise GlossaryNotFound unless File.exists?(@path)
 
-      glossary = load_glossary_yml
+      glossary = load_glossary_yml(@path)
       target_index = find_term_index(glossary, source_term, target_term)
       if target_index
         glossary.delete_at(target_index)
@@ -86,14 +86,49 @@ module Logaling
       Logaling::GlossaryDB.open(logaling_db_home, "utf8") do |db|
         db.recreate_table
         projects.each do |project|
-          db.index_glossaries(File.join(project, "glossary"))
+          get_glossaries(project).each do |glossary, name, source_language, target_language|
+            db.index_glossary(glossary, name, source_language, target_language)
+          end
         end
       end
     end
 
     private
-    def load_glossary_yml
-      YAML::load_file(@path) || []
+    def load_glossary(file)
+      case File.extname(file)
+      when ".csv"
+        load_glossary_csv(file)
+      when ".tsv"
+        load_glossary_tsv(file)
+      when ".yml"
+        load_glossary_yml(file)
+      end
+    end
+
+    def get_glossaries(path)
+      glob_list = %w(yml tsv csv).map{|type| File.join(path, "glossary", "*.#{type}") }
+      Dir.glob(glob_list).map do |file|
+        name, source_language, target_language = File::basename(file, ".*").split(".")
+        [load_glossary(file), name, source_language, target_language]
+      end
+    end
+
+    def load_glossary_yml(path)
+      YAML::load_file(path) || []
+    end
+
+    def load_glossary_tsv(path)
+      load_glossary_csv(path, "\t")
+    end
+
+    def load_glossary_csv(path, sep=",")
+      glossary = []
+      CSV.open(path, "r",  {:col_sep => sep}) do |csv|
+        csv.each do |row|
+          glossary << {"source_term" => row[0], "target_term" => row[1], "note" => ""} if row.size >= 2
+        end
+      end
+      glossary
     end
 
     def logaling_db_home

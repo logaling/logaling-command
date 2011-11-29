@@ -44,29 +44,7 @@ module Logaling
       @database = nil
     end
 
-    def load_glossary(file)
-      case File.extname(file)
-      when ".csv"
-        load_glossary_csv(file)
-      when ".tsv"
-        load_glossary_tsv(file)
-      when ".yml"
-        load_glossary_yml(file)
-      end
-    end
-
-    def index_glossaries(path)
-      file_list = get_file_list(path, ["yml", "tsv", "csv"])
-      file_list.each do |file|
-        index_glossary(file)
-      end
-    end
-
-    def index_glossary(glossary_path)
-      glossary = load_glossary(glossary_path)
-      return if !glossary
-
-      name, source_language, target_language = File::basename(glossary_path, ".*").split(".")
+    def index_glossary(glossary, name, source_language, target_language)
       glossary.each do |term|
         source_term = term['source_term']
         target_term = term['target_term']
@@ -96,24 +74,6 @@ module Logaling
     end
 
     private
-    def load_glossary_yml(path)
-      YAML::load_file(path) || []
-    end
-
-    def load_glossary_tsv(path)
-      load_glossary_csv(path, "\t")
-    end
-
-    def load_glossary_csv(path, sep=",")
-      glossary = []
-      CSV.open(path, "r",  {:col_sep => sep}) do |csv|
-        csv.each do |row|
-          glossary << {"source_term" => row[0], "target_term" => row[1], "note" => ""} if row.size >= 2
-        end
-      end
-      glossary
-    end
-
     def add_glossary(name, source_language, target_language, source_term, target_term, note)
       Groonga["glossaries"].add(:name => name,
                                 :source_language => source_language,
@@ -163,11 +123,6 @@ module Logaling
 
     def closed?
       @database.nil? or @database.closed?
-    end
-
-    def get_file_list(path, types)
-      glob_list = types.map{|type| File.join(path, "*.#{type}") }
-      Dir.glob(glob_list)
     end
   end
 end
