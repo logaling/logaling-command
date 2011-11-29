@@ -143,8 +143,8 @@ module Logaling
 
     def remove_schema
       Groonga::Schema.define do |schema|
-        schema.remove_table("glossaries")
-        schema.remove_table("terms")
+        schema.remove_table("glossaries") if Groonga["glossaries"]
+        schema.remove_table("terms") if Groonga["terms"]
       end
     end
 
