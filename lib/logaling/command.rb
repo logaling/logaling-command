@@ -82,6 +82,8 @@ class Logaling::Command < Thor
     glossary.delete(source_term, target_term)
   rescue Logaling::CommandFailed, Logaling::TermError => e
     say e.message
+  rescue Logaling::GlossaryNotFound => e
+    say "Try 'loga new or register' first."
   end
 
   desc 'update [SOURCE TERM] [TARGET TERM] [NEW TARGET TERM], [NOTE(optional)]', 'Update term.'
@@ -89,11 +91,13 @@ class Logaling::Command < Thor
     glossary.update(source_term, target_term, new_target_term, note)
   rescue Logaling::CommandFailed, Logaling::TermError => e
     say e.message
+  rescue Logaling::GlossaryNotFound => e
+    say "Try 'loga new or register' first."
   end
 
   desc 'lookup [TERM]', 'Lookup terms.'
   def lookup(source_term)
-    index
+    glossary.index
     terms = glossary.lookup(source_term)
 
     puts "\nlookup word : #{source_term}"
@@ -107,13 +111,6 @@ class Logaling::Command < Thor
     else
       "source-term <#{source_term}> not found"
     end
-  rescue Logaling::CommandFailed, Logaling::TermError => e
-    say e.message
-  end
-
-  desc 'index', 'Index glossaries to groonga DB.'
-  def index
-    glossary.index
   rescue Logaling::CommandFailed, Logaling::TermError => e
     say e.message
   end

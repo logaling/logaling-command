@@ -6,4 +6,6 @@ module Logaling
   class LogalingError < RuntimeError; end
   class TermError < LogalingError; end
   class CommandFailed < LogalingError; end
+  class GlossaryNotFound < LogalingError; end
+  class GlossaryDBNotFound < LogalingError; end
 end

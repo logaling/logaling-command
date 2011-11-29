@@ -220,25 +220,6 @@ describe Logaling::Command do
     end
   end
 
-  describe '#index' do
-    before do
-      command.new('spec', 'en', 'ja')
-      command.add("spec", "スペック", "備考")
-      command.index
-    end
-
-    context 'glossary files exist in some project' do
-      subject do
-        db_home = File.join(LOGALING_HOME, "db")
-        Logaling::GlossaryDB.open(db_home, "utf8"){|db| records = db.lookup("spec")}
-      end
-
-      it 'glossaries should be indexed' do
-        should be_include({:name=>"spec", :source_language=>"en", :target_language=>"ja", :source_term=>"spec", :target_term=>"スペック", :note=>"備考"})
-      end
-    end
-  end
-
   describe '#lookup' do
     before do
       command.new('spec', 'en', 'ja')

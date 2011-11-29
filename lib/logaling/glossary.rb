@@ -19,10 +19,10 @@ module Logaling
     end
 
     def add(source_term, target_term, note)
-      check_glossary_exists
+      FileUtils.touch(@path) unless File.exists?(@path)
 
       if bilingual_pair_exists?(source_term, target_term)
-        raise TermError, "[#{source_term}] [#{target_term}] pair already exists"
+        raise TermError, "term '#{source_term}: #{target_term}' already exists in '#{@glossary}'"
       end
 
       glossary = load_glossary_yml
@@ -32,10 +32,10 @@ module Logaling
     end
 
     def update(source_term, target_term, new_target_term, note)
-      check_glossary_exists
+      raise GlossaryNotFound unless File.exists?(@path)
 
       if bilingual_pair_exists?(source_term, new_target_term)
-        raise TermError, "[#{source_term}] [#{new_target_term}] pair already exists"
+        raise TermError, "term '#{source_term}: #{target_term}' already exists in '#{@glossary}'"
       end
 
       glossary = load_glossary_yml
@@ -44,12 +44,12 @@ module Logaling
         glossary[target_index] = rebuild_term(glossary[target_index], source_term, new_target_term, note)
         dump_glossary(glossary)
       else
-        raise TermError, "source_term:#{source_term} target_term:#{target_term} not found in glossary #{@path}"
+        raise TermError, "Can't found term '#{source_term}: #{target_term}' in '#{@glossary}'"
       end
     end
 
     def delete(source_term, target_term)
-      check_glossary_exists
+      raise GlossaryNotFound unless File.exists?(@path)
 
       glossary = load_glossary_yml
       target_index = find_term_index(glossary, source_term, target_term)
@@ -57,12 +57,12 @@ module Logaling
         glossary.delete_at(target_index)
         dump_glossary(glossary)
       else
-        raise TermError, "source_term:#{source_term} target_term:#{target_term} not found in glossary #{@path}"
+        raise TermError, "Can't found term '#{source_term}: #{target_term}' in '#{@glossary}'"
       end
     end
 
     def lookup(source_term)
-      check_glossary_exists
+      raise GlossaryDBNotFound unless File.exists?(logaling_db_home)
 
       terms = []
       Logaling::GlossaryDB.open(logaling_db_home, "utf8") do |db|
@@ -119,22 +119,6 @@ module Logaling
 
     def bilingual_pair_exists?(source_term, target_term)
       target_terms(source_term).any?{|data| data['target_term'] == target_term }
-    end
-
-    def check_glossarydir_unexists
-      unless File.exists?(File.dirname(@path))
-        raise CommandFailed, "glossary path #{File.dirname(@path)} not found"
-      end
-    end
-
-    def check_glossary_unexists
-      check_glossarydir_unexists
-      raise CommandFailed, "glossary #{@path} already exists" if File.exists?(@path)
-    end
-
-    def check_glossary_exists
-      check_glossarydir_unexists
-      FileUtils.touch(@path) unless File.exists?(@path)
     end
 
     def target_terms(source_term, path=@path)
