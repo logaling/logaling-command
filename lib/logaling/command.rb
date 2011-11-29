@@ -52,7 +52,7 @@ class Logaling::Command < Thor
       say "#{config['glossary']} is already registered."
     end
   rescue Logaling::CommandFailed => e
-    say e
+    say e.message
     say "Try 'loga new' first."
   end
 
@@ -68,7 +68,7 @@ class Logaling::Command < Thor
       say "#{config['glossary']} is not yet registered."
     end
   rescue Logaling::CommandFailed => e
-    say e
+    error(e.message)
   end
 
   desc 'create', 'Create glossary.'
