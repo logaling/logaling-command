@@ -45,18 +45,13 @@ module Logaling
     end
 
     def load_glossary(file)
-      case extname = File.extname(file)
-      when ".tsv", ".csv"
-        sep = extname == ".tsv" ? "\t" : ","
-        glossary = []
-        CSV.open(file, "r",  {:col_sep => sep}) do |csv|
-          csv.each do |row|
-            glossary << {"source_term" => row[0], "target_term" => row[1], "note" => ""} if row.size >= 2
-          end
-        end
-        glossary
+      case File.extname(file)
+      when ".csv"
+        load_glossary_csv(file)
+      when ".tsv"
+        load_glossary_tsv(file)
       when ".yml"
-        YAML::load_file(file)
+        load_glossary_yml(file)
       end
     end
 
@@ -101,6 +96,24 @@ module Logaling
     end
 
     private
+    def load_glossary_yml(path)
+      YAML::load_file(path) || []
+    end
+
+    def load_glossary_tsv(path)
+      load_glossary_csv(path, "\t")
+    end
+
+    def load_glossary_csv(path, sep=",")
+      glossary = []
+      CSV.open(path, "r",  {:col_sep => sep}) do |csv|
+        csv.each do |row|
+          glossary << {"source_term" => row[0], "target_term" => row[1], "note" => ""} if row.size >= 2
+        end
+      end
+      glossary
+    end
+
     def add_glossary(name, source_language, target_language, source_term, target_term, note)
       Groonga["glossaries"].add(:name => name,
                                 :source_language => source_language,
