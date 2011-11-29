@@ -7,8 +7,7 @@ class Logaling::Command < Thor
   VERSION = "0.0.4"
   LOGALING_CONFIG = '.logaling'
 
-  map '-c' => :create,
-      '-a' => :add,
+  map '-a' => :add,
       '-d' => :delete,
       '-u' => :update,
       '-l' => :lookup,
@@ -67,13 +66,6 @@ class Logaling::Command < Thor
     else
       say "#{config['glossary']} is not yet registered."
     end
-  rescue Logaling::CommandFailed => e
-    say e.message
-  end
-
-  desc 'create', 'Create glossary.'
-  def create
-    glossary.create
   rescue Logaling::CommandFailed => e
     say e.message
   end

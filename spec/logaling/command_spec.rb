@@ -147,20 +147,6 @@ describe Logaling::Command do
     end
   end
 
-  describe '#create' do
-    context 'with arguments show non-existent glossary' do
-      before do
-        command.new('spec', 'en', 'ja')
-        command.register
-        command.create
-      end
-
-      it "glossary yaml should be newly created" do
-        File.exists?(glossary_path).should be_true
-      end
-    end
-  end
-
   describe '#add' do
     before do
       command.new('spec', 'en', 'ja')

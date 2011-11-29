@@ -13,29 +13,6 @@ module Logaling
       FileUtils.mkdir_p(File.dirname(glossary_path))
     end
 
-    describe '#create' do
-      context 'when glossary already exists' do
-        before do
-          FileUtils.touch(glossary_path)
-        end
-
-        it {
-          -> { glossary.create }.should raise_error(Logaling::CommandFailed)
-        }
-      end
-
-      context 'newly create' do
-        before do
-          glossary.create
-        end
-
-        # <glossary name>.source-language.target_language.yml というファイル名で用語集が作成されること
-        it 'specified glossary should has created' do
-          File.exists?(glossary_path).should be_true
-        end
-      end
-    end
-
     describe '#add' do
       context 'with arguments show new bilingual pair' do
         before do

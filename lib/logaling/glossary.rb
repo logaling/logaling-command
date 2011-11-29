@@ -18,14 +18,6 @@ module Logaling
       @target_language = target_language
     end
 
-    def create
-      check_glossary_unexists
-
-      dirname = File::dirname(@path)
-      FileUtils.mkdir_p(dirname)
-      FileUtils.touch(@path)
-    end
-
     def add(source_term, target_term, note)
       check_glossary_exists
 
