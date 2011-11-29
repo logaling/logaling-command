@@ -99,7 +99,7 @@ module Logaling
       projects = Dir.glob(File.join(LOGALING_HOME, "projects", "*"))
 
       Logaling::GlossaryDB.open(logaling_db_home, "utf8") do |db|
-        db.recreate_table(logaling_db_home)
+        db.recreate_table
         projects.each do |project|
           db.index_glossaries(File.join(project, "glossary"))
         end
