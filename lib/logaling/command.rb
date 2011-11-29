@@ -48,9 +48,9 @@ class Logaling::Command < Thor
       symlink_path = File.join(logaling_projects_path, config["glossary"])
       unless File.exists?(symlink_path)
         FileUtils.ln_s(logaling_path, symlink_path)
-        say "Your project is now registered to #{symlink_path}."
+        say "#{config['glossary']} is now registered to logaling."
       else
-        say "#{options["glossary"]} is already registered."
+        say "#{config['glossary']} is already registered."
       end
     else
       say "Try 'loga new' first."
@@ -65,9 +65,9 @@ class Logaling::Command < Thor
       symlink_path = File.join(logaling_projects_path, config["glossary"])
       if File.exists?(symlink_path)
         FileUtils.remove_entry_secure(symlink_path, true)
-        say "Your project is now unregistered."
+        say "#{config['glossary']} is now unregistered."
       else
-        say ".logaling is not yet registered."
+        say "#{config['glossary']} is not yet registered."
       end
     else
       say ".logaling can't be found."

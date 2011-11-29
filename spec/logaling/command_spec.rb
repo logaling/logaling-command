@@ -139,8 +139,8 @@ describe Logaling::Command do
           @stdout = capture(:stdout) {command.unregister}
         end
 
-        it "print message \".logaling is not yet registered.\"" do
-          @stdout.should == ".logaling is not yet registered.\n"
+        it "print message \"<glossary name> is not yet registered.\"" do
+          @stdout.should == "spec is not yet registered.\n"
         end
       end
     end
