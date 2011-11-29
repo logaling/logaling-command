@@ -110,11 +110,11 @@ describe Logaling::Command do
         @stdout = capture(:stdout) {command.unregister}
       end
 
-      it 'unregister nothing' do
+      it 'should not register nothing' do
         Dir[File.join(LOGALING_HOME, "projects", "*")].size.should == @project_counts
       end
 
-      it "print message \"Can't found .logaling in [...]\"" do
+      it "should print message \"Can't found .logaling in [...]\"" do
         @stdout.should be_include "Can't found .logaling in"
       end
     end
