@@ -78,7 +78,7 @@ describe Logaling::Command do
       end
 
       it "print message \"Try 'loga new' first.\"" do
-        @stdout.should == "Try 'loga new' first.\n"
+        @stdout.should be_include "Try 'loga new' first.\n"
       end
     end
 
@@ -114,8 +114,8 @@ describe Logaling::Command do
         Dir[File.join(LOGALING_HOME, "projects", "*")].size.should == @project_counts
       end
 
-      it "print message \".logaling can't be found.\"" do
-        @stdout.should == ".logaling can't be found.\n"
+      it "print message \"Can't found .logaling in [...]\"" do
+        @stdout.should be_include "Can't found .logaling in"
       end
     end
 

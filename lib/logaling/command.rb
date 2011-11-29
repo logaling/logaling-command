@@ -41,37 +41,34 @@ class Logaling::Command < Thor
   desc 'register', 'Register .logaling'
   def register
     logaling_path = find_dotfile
-    if logaling_path
-      FileUtils.mkdir_p(logaling_projects_path) unless File.exist?(logaling_projects_path)
+    FileUtils.mkdir_p(logaling_projects_path) unless File.exist?(logaling_projects_path)
 
-      config = load_config
-      symlink_path = File.join(logaling_projects_path, config["glossary"])
-      unless File.exists?(symlink_path)
-        FileUtils.ln_s(logaling_path, symlink_path)
-        say "#{config['glossary']} is now registered to logaling."
-      else
-        say "#{config['glossary']} is already registered."
-      end
+    config = load_config
+    symlink_path = File.join(logaling_projects_path, config["glossary"])
+    unless File.exists?(symlink_path)
+      FileUtils.ln_s(logaling_path, symlink_path)
+      say "#{config['glossary']} is now registered to logaling."
     else
-      say "Try 'loga new' first."
+      say "#{config['glossary']} is already registered."
     end
+  rescue Logaling::CommandFailed => e
+    say e
+    say "Try 'loga new' first."
   end
 
   desc 'unregister', 'Unregister .logaling'
   def unregister
     logaling_path = find_dotfile
-    if logaling_path
-      config = load_config
-      symlink_path = File.join(logaling_projects_path, config["glossary"])
-      if File.exists?(symlink_path)
-        FileUtils.remove_entry_secure(symlink_path, true)
-        say "#{config['glossary']} is now unregistered."
-      else
-        say "#{config['glossary']} is not yet registered."
-      end
+    config = load_config
+    symlink_path = File.join(logaling_projects_path, config["glossary"])
+    if File.exists?(symlink_path)
+      FileUtils.remove_entry_secure(symlink_path, true)
+      say "#{config['glossary']} is now unregistered."
     else
-      say ".logaling can't be found."
+      say "#{config['glossary']} is not yet registered."
     end
+  rescue Logaling::CommandFailed => e
+    say e
   end
 
   desc 'create', 'Create glossary.'
@@ -168,13 +165,19 @@ class Logaling::Command < Thor
 
   def find_dotfile
     dir = Dir.pwd
+    searched_path = []
     while(dir) do
       path = File.join(dir, '.logaling')
       if File.exist?(path)
         return path
-        break
+      else
+        if dir != "/"
+          searched_path << dir
+          dir = File.dirname(dir)
+        else
+          raise(Logaling::CommandFailed, "Can't found .logaling in #{searched_path}")
+        end
       end
-      dir = (dir != "/") ? File.dirname(dir) : nil
     end
   end
 end
