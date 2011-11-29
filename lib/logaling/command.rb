@@ -68,35 +68,35 @@ class Logaling::Command < Thor
       say "#{config['glossary']} is not yet registered."
     end
   rescue Logaling::CommandFailed => e
-    error(e.message)
+    say e.message
   end
 
   desc 'create', 'Create glossary.'
   def create
     glossary.create
   rescue Logaling::CommandFailed => e
-    error(e.message)
+    say e.message
   end
 
   desc 'add [SOURCE TERM] [TARGET TERM] [NOTE(optional)]', 'Add term to glossary.'
   def add(source_term, target_term, note='')
     glossary.add(source_term, target_term, note)
   rescue Logaling::CommandFailed, Logaling::TermError => e
-    error(e.message)
+    say e.message
   end
 
   desc 'delete [SOURCE TERM] [TARGET TERM]', 'Delete term.'
   def delete(source_term, target_term)
     glossary.delete(source_term, target_term)
   rescue Logaling::CommandFailed, Logaling::TermError => e
-    error(e.message)
+    say e.message
   end
 
   desc 'update [SOURCE TERM] [TARGET TERM] [NEW TARGET TERM], [NOTE(optional)]', 'Update term.'
   def update(source_term, target_term, new_target_term, note='')
     glossary.update(source_term, target_term, new_target_term, note)
   rescue Logaling::CommandFailed, Logaling::TermError => e
-    error(e.message)
+    say e.message
   end
 
   desc 'lookup [TERM]', 'Lookup terms.'
@@ -116,14 +116,14 @@ class Logaling::Command < Thor
       "source-term <#{source_term}> not found"
     end
   rescue Logaling::CommandFailed, Logaling::TermError => e
-    error(e.message)
+    say e.message
   end
 
   desc 'index', 'Index glossaries to groonga DB.'
   def index
     glossary.index
   rescue Logaling::CommandFailed, Logaling::TermError => e
-    error(e.message)
+    say e.message
   end
 
   private
