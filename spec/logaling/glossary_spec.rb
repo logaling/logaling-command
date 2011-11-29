@@ -47,16 +47,6 @@ module Logaling
           term.should_not be_nil
         end
       end
-
-      context "when the glossary dir not found" do
-        before do
-          FileUtils.remove_entry_secure(File.join(LOGALING_HOME, 'projects', 'spec'), true)
-        end
-
-        it {
-          -> { glossary.add("test", "テスト", "テスト") }.should raise_error(Logaling::CommandFailed)
-        }
-      end
     end
 
     describe '#update' do
