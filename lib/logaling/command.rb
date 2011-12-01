@@ -105,7 +105,7 @@ class Logaling::Command < Thor
       terms.each do |term|
         puts "\n  #{term[:source_term]}\n"
         puts "  #{term[:target_term]}\n"
-        puts "    note:#{term[:note]}"
+        puts "    note:#{term[:note]}" unless term[:note].empty?
         puts "    glossary:#{term[:name]}"
       end
     else

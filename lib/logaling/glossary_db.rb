@@ -69,7 +69,7 @@ module Logaling
          :target_language => term.target_language,
          :source_term => term.source_term,
          :target_term => term.target_term,
-         :note => term.note,}
+         :note => term.note || ''}
       end
     end
 
