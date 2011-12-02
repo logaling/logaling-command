@@ -112,7 +112,7 @@ module Logaling
         subject {glossary.lookup("user")}
 
         it 'succeed at find by term' do
-          should be_include({:name=>"spec", :source_language=>"en", :target_language=>"ja", :source_term=>"user", :target_term=>"ユーザー", :note=>nil})
+          should be_include({:name=>"spec", :source_language=>"en", :target_language=>"ja", :source_term=>"user", :target_term=>"ユーザー", :note=>''})
         end
 
         after do
@@ -157,7 +157,7 @@ module Logaling
         subject { logaling_db.open(db_home, "utf8"){|db| logaling_db.lookup("user")} }
 
         it 'glossaries should be indexed' do
-          should == [{:name=>"spec", :source_language=>"en", :target_language=>"ja", :source_term=>"user", :target_term=>"ユーザ", :note=>nil}]
+          should == [{:name=>"spec", :source_language=>"en", :target_language=>"ja", :source_term=>"user", :target_term=>"ユーザ", :note=>''}]
         end
 
         after do
@@ -176,7 +176,7 @@ module Logaling
         subject { logaling_db.open(db_home, "utf8"){|db| logaling_db.lookup("test")} }
 
         it 'glossaries should be indexed' do
-          should == [{:name=>"spec", :source_language=>"en", :target_language=>"ja", :source_term=>"test", :target_term=>"テスト", :note=>nil}]
+          should == [{:name=>"spec", :source_language=>"en", :target_language=>"ja", :source_term=>"test", :target_term=>"テスト", :note=>''}]
         end
 
         after do
