@@ -18,7 +18,7 @@ class Logaling::Command < Thor
   class_option "glossary",        type: :string, aliases: "-g"
   class_option "source-language", type: :string, aliases: "-S"
   class_option "target-language", type: :string, aliases: "-T"
-  class_option "logaling-home",   type: :string, required: false, aliases: "-h"
+  class_option "logaling-home",   type: :string, aliases: "-h"
 
   desc 'new [PROJECT NAME] [SOURCE LANGUAGE] [TARGET LANGUAGE(optional)]', 'Create .logaling'
   method_option "no-register", type: :boolean, default: false
