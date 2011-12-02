@@ -158,8 +158,8 @@ module Logaling
 
     def target_terms(source_term, path=@path)
       target_terms = []
-      glossaly = YAML::load_file(path) || []
-      glossaly.each do |term|
+      glossaly_yml = load_glossary_yml(path)
+      glossaly_yml.each do |term|
         target_terms << term if term['source_term'] == source_term
       end
       target_terms
