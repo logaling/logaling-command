@@ -21,24 +21,23 @@ module Logaling
     def add(source_term, target_term, note)
       FileUtils.touch(@path) unless File.exists?(@path)
 
-      if bilingual_pair_exists?(source_term, target_term)
+      glossary = load_glossary(@path)
+      if bilingual_pair_exists?(glossary, source_term, target_term)
         raise TermError, "term '#{source_term}: #{target_term}' already exists in '#{@glossary}'"
       end
 
-      glossary = load_glossary_yml(@path)
       glossary << build_term(source_term, target_term, note)
-
       dump_glossary(glossary)
     end
 
     def update(source_term, target_term, new_target_term, note)
       raise GlossaryNotFound unless File.exists?(@path)
 
-      if bilingual_pair_exists?(source_term, new_target_term)
+      glossary = load_glossary(@path)
+      if bilingual_pair_exists?(glossary, source_term, new_target_term)
         raise TermError, "term '#{source_term}: #{target_term}' already exists in '#{@glossary}'"
       end
 
-      glossary = load_glossary_yml(@path)
       target_index = find_term_index(glossary, source_term, target_term)
       if target_index
         glossary[target_index] = rebuild_term(glossary[target_index], source_term, new_target_term, note)
@@ -51,7 +50,7 @@ module Logaling
     def delete(source_term, target_term)
       raise GlossaryNotFound unless File.exists?(@path)
 
-      glossary = load_glossary_yml(@path)
+      glossary = load_glossary(@path)
       target_index = find_term_index(glossary, source_term, target_term)
       if target_index
         glossary.delete_at(target_index)
@@ -146,20 +145,19 @@ module Logaling
       build_term(source_term, target_term, note)
     end
 
-    def find_term_index(glossary_yml, source_term, target_term)
-      glossary_yml.find_index do |term|
+    def find_term_index(glossary, source_term, target_term)
+      glossary.find_index do |term|
         term['source_term'] == source_term && term['target_term'] == target_term
       end
     end
 
-    def bilingual_pair_exists?(source_term, target_term)
-      target_terms(source_term).any?{|data| data['target_term'] == target_term }
+    def bilingual_pair_exists?(glossary, source_term, target_term)
+      target_terms(glossary, source_term).any?{|data| data['target_term'] == target_term }
     end
 
-    def target_terms(source_term, path=@path)
+    def target_terms(glossary, source_term)
       target_terms = []
-      glossaly_yml = load_glossary_yml(path)
-      glossaly_yml.each do |term|
+      glossary.each do |term|
         target_terms << term if term['source_term'] == source_term
       end
       target_terms
