@@ -13,7 +13,8 @@ class Logaling::Command < Thor
       '-l' => :lookup,
       '-n' => :new,
       '-r' => :register,
-      '-U' => :unregister
+      '-U' => :unregister,
+      '-v' => :version
 
   class_option "glossary",        type: :string, aliases: "-g"
   class_option "source-language", type: :string, aliases: "-S"
@@ -113,6 +114,11 @@ class Logaling::Command < Thor
     end
   rescue Logaling::CommandFailed, Logaling::TermError => e
     say e.message
+  end
+
+  desc 'version', 'Show version.'
+  def version
+    say "logaling-command version #{Logaling::Command::VERSION}"
   end
 
   private
