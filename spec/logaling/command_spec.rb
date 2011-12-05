@@ -237,6 +237,26 @@ describe Logaling::Command do
     end
   end
 
+  describe "#delete" do
+    before do
+      command.new('spec', 'en', 'ja')
+      command.add('spec', 'スペック', '備考')
+      command.add('spec', 'テスト', '備考')
+    end
+
+    context 'with arguments exist term' do
+      before do
+        command.delete('spec', 'スペック')
+        @stdout = capture(:stdout) {command.lookup("spec")}
+      end
+
+      it 'should delete the term' do
+        p @stdout
+        @stdout.should_not include "スペック"
+      end
+    end
+  end
+
   after do
     FileUtils.remove_entry_secure(Logaling::Command::LOGALING_CONFIG, true)
     FileUtils.remove_entry_secure(File.join(LOGALING_HOME, 'projects', 'spec'), true)
