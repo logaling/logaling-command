@@ -61,9 +61,7 @@ module Logaling
         dump_glossary(glossary)
       else
         if force
-          while target_index = find_term_index(glossary, source_term) do
-            glossary.delete_at(target_index)
-          end
+          glossary.delete_if{|term| term['source_term'] == source_term }
           dump_glossary(glossary)
         else
           raise TermError, "There are duplicate terms in glossary.\n" +
