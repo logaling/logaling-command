@@ -2,7 +2,6 @@
 require 'psych'
 require "yaml"
 require "fileutils"
-require "logaling/glossary_db"
 
 module Logaling
   class Glossary
@@ -79,36 +78,8 @@ module Logaling
       end
     end
 
-    def lookup(source_term)
-      raise GlossaryDBNotFound unless File.exists?(logaling_db_home)
-
-      terms = []
-      Logaling::GlossaryDB.open(logaling_db_home, "utf8") do |db|
-        terms = db.lookup(source_term)
-        terms.reject! do |term|
-          term[:source_language] != @source_language || term[:target_language] != @target_language
-        end
-        unless terms.empty?
-          # order by glossary
-          specified = terms.select{|term| term[:name] == @glossary}
-          other = terms.select{|term| term[:name] != @glossary}
-          terms = specified.concat(other)
-        end
-      end
-      terms
-    end
-
-    def index
-      projects = Dir.glob(File.join(LOGALING_HOME, "projects", "*"))
-
-      Logaling::GlossaryDB.open(logaling_db_home, "utf8") do |db|
-        db.recreate_table
-        projects.each do |project|
-          get_glossaries(project).each do |glossary, name, source_language, target_language|
-            db.index_glossary(glossary, name, source_language, target_language)
-          end
-        end
-      end
+    def load
+      load_glossary(@path)
     end
 
     private
@@ -120,14 +91,6 @@ module Logaling
         load_glossary_tsv(file)
       when ".yml"
         load_glossary_yml(file)
-      end
-    end
-
-    def get_glossaries(path)
-      glob_list = %w(yml tsv csv).map{|type| File.join(path, "glossary", "*.#{type}") }
-      Dir.glob(glob_list).map do |file|
-        name, source_language, target_language = File::basename(file, ".*").split(".")
-        [load_glossary(file), name, source_language, target_language]
       end
     end
 
@@ -147,10 +110,6 @@ module Logaling
         end
       end
       glossary
-    end
-
-    def logaling_db_home
-      File.join(LOGALING_HOME, "db")
     end
 
     def build_term(source_term, target_term, note)

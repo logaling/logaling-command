@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 require 'thor'
+require "logaling/repository"
 require "logaling/glossary"
 
 class Logaling::Command < Thor
@@ -103,8 +104,11 @@ class Logaling::Command < Thor
 
   desc 'lookup [TERM]', 'Lookup terms.'
   def lookup(source_term)
-    glossary.index
-    terms = glossary.lookup(source_term)
+    config = load_config_and_merge_options
+
+    repository = Logaling::Repository.new(LOGALING_HOME)
+    repository.index
+    terms = repository.lookup(source_term, config["source_language"], config["target_language"], config["glossary"])
 
     unless terms.empty?
       terms.each do |term|
@@ -152,6 +156,14 @@ class Logaling::Command < Thor
   def error(msg)
     STDERR.puts(msg)
     exit 1
+  end
+
+  def load_config_and_merge_options
+    config = load_config
+    config[:glossary] ||= options["glossary"]
+    config["source-language"] ||= options["source-language"]
+    config["target-language"] ||= options["target-language"]
+    config
   end
 
   def load_config
