@@ -51,10 +51,10 @@ module Logaling
       raise GlossaryNotFound unless File.exists?(@path)
 
       glossary = load_glossary(@path)
-      target_num = find_term_num(glossary, source_term)
-      if target_num == 0
+      target_terms = target_terms(glossary, source_term)
+      if target_terms.size == 0
         raise TermError, "Can't found term '#{source_term} in '#{@glossary}'"
-      elsif !target_term.empty? || target_num == 1
+      elsif !target_term.empty? || target_terms.size == 1
         target_index = find_term_index(glossary, source_term, target_term)
         raise TermError, "Can't found term '#{source_term} #{target_term}' in '#{@glossary}'" unless target_index
         glossary.delete_at(target_index)
@@ -163,10 +163,6 @@ module Logaling
           term['source_term'] == source_term && term['target_term'] == target_term
         end
       end
-    end
-
-    def find_term_num(glossary, source_term)
-      glossary.select{|term| term["source_term"] == source_term}.size
     end
 
     def bilingual_pair_exists?(glossary, source_term, target_term)
