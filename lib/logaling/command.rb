@@ -107,7 +107,7 @@ class Logaling::Command < Thor
     terms = glossary.lookup(source_term)
 
     unless terms.empty?
-      is_glossary_name_print = terms.map{|t| t[:name]}.uniq.size > 1 ? true : false
+      is_glossary_name_print = Dir.entries(logaling_projects_path).reject{|dir| dir.sub(/[\.]+/, '').empty?}.size > 1 ? true : false
       terms.each do |term|
         str_term = "#{term[:source_term]} : #{term[:target_term]}"
         str_term << " # #{term[:note]}" unless term[:note].empty?

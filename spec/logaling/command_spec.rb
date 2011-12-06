@@ -233,7 +233,28 @@ describe Logaling::Command do
 
       it 'succeed at find by term without command.index' do
         @stdout.should include "spec : スペック # 備考"
+      end
+    end
+
+    context 'only one project exist in LOGALING_HOME/projects' do
+      before do
+        Dir.should_receive(:entries).with(File.join(LOGALING_HOME, "projects")).and_return([".", "..", "spec"])
+        @stdout = capture(:stdout) {command.lookup("spec")}
+      end
+
+      it 'should not show glossary name' do
         @stdout.should_not include "(spec)"
+      end
+    end
+
+    context 'some projects exist in LOGALING_HOME/projects' do
+      before do
+        Dir.should_receive(:entries).with(File.join(LOGALING_HOME, "projects")).and_return([".", "..", "spec", "spec2"])
+        @stdout = capture(:stdout) {command.lookup("spec")}
+      end
+
+      it 'should show glossary name' do
+        @stdout.should include "(spec)"
       end
     end
   end
