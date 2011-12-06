@@ -177,11 +177,7 @@ module Logaling
     end
 
     def target_terms(glossary, source_term)
-      target_terms = []
-      glossary.each do |term|
-        target_terms << term if term['source_term'] == source_term
-      end
-      target_terms
+      glossary.select {|term| term['source_term'] == source_term }
     end
 
     def dump_glossary(glossary)
