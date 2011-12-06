@@ -4,7 +4,7 @@ require 'thor'
 require "logaling/glossary"
 
 class Logaling::Command < Thor
-  VERSION = "0.0.5"
+  VERSION = "0.0.6"
   LOGALING_CONFIG = '.logaling'
 
   map '-a' => :add,
