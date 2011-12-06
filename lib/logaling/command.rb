@@ -78,9 +78,10 @@ class Logaling::Command < Thor
     say e.message
   end
 
-  desc 'delete [SOURCE TERM] [TARGET TERM]', 'Delete term.'
-  def delete(source_term, target_term)
-    glossary.delete(source_term, target_term)
+  desc 'delete [SOURCE TERM] [TARGET TERM(optional)] [--force(optional)]', 'Delete term.'
+  method_option "force", type: :boolean, default: false
+  def delete(source_term, target_term='')
+    glossary.delete(source_term, target_term, options["force"])
   rescue Logaling::CommandFailed, Logaling::TermError => e
     say e.message
   rescue Logaling::GlossaryNotFound => e

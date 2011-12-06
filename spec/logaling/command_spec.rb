@@ -241,7 +241,9 @@ describe Logaling::Command do
     before do
       command.new('spec', 'en', 'ja')
       command.add('spec', 'スペック', '備考')
-      command.add('spec', 'テスト', '備考')
+      command.add('user', 'ユーザ', '備考')
+      command.add('test', 'てすと1', '備考')
+      command.add('test', 'てすと2', '備考')
     end
 
     context 'with arguments exist term' do
@@ -251,8 +253,50 @@ describe Logaling::Command do
       end
 
       it 'should delete the term' do
-        p @stdout
         @stdout.should_not include "スペック"
+      end
+    end
+
+    context 'without target_term' do
+      context 'only 1 bilingual pair exist' do
+      before do
+        command.delete('user')
+        @stdout = capture(:stdout) {command.lookup("user")}
+      end
+
+      it 'should delete the term' do
+        @stdout.should_not include "ユーザ"
+      end
+      end
+
+      context 'some bilingual pair exist' do
+        context "called without '--force=true'" do
+          before do
+            @stdout = capture(:stdout) {command.delete('test')}
+          end
+
+          it "should print usage" do
+            @stdout.should == "There are duplicate terms in glossary.\n" +
+            "If you really want to delete, please put `loga delete [SOURCE_TERM] --force`\n" +
+            " or `loga delete [SOURCE_TERM] [TARGET_TERM]`\n"
+          end
+        end
+
+        context "and called with '--force=true'" do
+          before do
+            command.options = base_options.merge("force" => true)
+            command.new('spec', 'en', 'ja')
+            command.add('term', '用語1', '備考')
+            command.add('term', '用語2', '備考')
+            command.delete("term")
+            @stdout = capture(:stdout) {command.lookup("term")}
+          end
+
+          it 'should delete bilingual pairs' do
+            @stdout.should_not include '用語1'
+            @stdout.should_not include '用語2'
+          end
+        end
       end
     end
   end

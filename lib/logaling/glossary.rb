@@ -47,16 +47,29 @@ module Logaling
       end
     end
 
-    def delete(source_term, target_term)
+    def delete(source_term, target_term='', force=false)
       raise GlossaryNotFound unless File.exists?(@path)
 
       glossary = load_glossary(@path)
-      target_index = find_term_index(glossary, source_term, target_term)
-      if target_index
+      target_num = find_term_num(glossary, source_term)
+      if target_num == 0
+        raise TermError, "Can't found term '#{source_term} #{target_term}' in '#{@glossary}'"
+      elsif !target_term.empty? || target_num == 1
+        target_index = find_term_index(glossary, source_term, target_term)
+        raise TermError, "Can't found term '#{source_term} #{target_term}' in '#{@glossary}'" unless target_index
         glossary.delete_at(target_index)
         dump_glossary(glossary)
       else
-        raise TermError, "Can't found term '#{source_term}: #{target_term}' in '#{@glossary}'"
+        if force
+          while target_index = find_term_index(glossary, source_term) do
+            glossary.delete_at(target_index)
+            dump_glossary(glossary)
+          end
+        else
+          raise TermError, "There are duplicate terms in glossary.\n" +
+            "If you really want to delete, please put `loga delete [SOURCE_TERM] --force`\n" +
+            " or `loga delete [SOURCE_TERM] [TARGET_TERM]`"
+        end
       end
     end
 
@@ -145,10 +158,18 @@ module Logaling
       build_term(source_term, target_term, note)
     end
 
-    def find_term_index(glossary, source_term, target_term)
+    def find_term_index(glossary, source_term, target_term='')
       glossary.find_index do |term|
-        term['source_term'] == source_term && term['target_term'] == target_term
+        if target_term.empty?
+          term['source_term'] == source_term
+        else
+          term['source_term'] == source_term && term['target_term'] == target_term
+        end
       end
+    end
+
+    def find_term_num(glossary, source_term)
+      glossary.select{|term| term["source_term"] == source_term}.size
     end
 
     def bilingual_pair_exists?(glossary, source_term, target_term)
