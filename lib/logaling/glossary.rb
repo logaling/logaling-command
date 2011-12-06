@@ -53,7 +53,7 @@ module Logaling
       glossary = load_glossary(@path)
       target_num = find_term_num(glossary, source_term)
       if target_num == 0
-        raise TermError, "Can't found term '#{source_term} #{target_term}' in '#{@glossary}'"
+        raise TermError, "Can't found term '#{source_term} in '#{@glossary}'"
       elsif !target_term.empty? || target_num == 1
         target_index = find_term_index(glossary, source_term, target_term)
         raise TermError, "Can't found term '#{source_term} #{target_term}' in '#{@glossary}'" unless target_index
