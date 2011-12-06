@@ -232,7 +232,8 @@ describe Logaling::Command do
       end
 
       it 'succeed at find by term without command.index' do
-        @stdout.should be_include "glossary:spec"
+        @stdout.should include "spec : スペック # 備考"
+        @stdout.should_not include "(spec)"
       end
     end
   end
@@ -253,7 +254,7 @@ describe Logaling::Command do
       end
 
       it 'should delete the term' do
-        @stdout.should_not include "スペック"
+        @stdout.should_not include "spec : スペック # 備考"
       end
     end
 
@@ -265,7 +266,7 @@ describe Logaling::Command do
       end
 
       it 'should delete the term' do
-        @stdout.should_not include "ユーザ"
+        @stdout.should_not include "user : ユーザ # 備考"
       end
       end
 
@@ -293,8 +294,8 @@ describe Logaling::Command do
           end
 
           it 'should delete bilingual pairs' do
-            @stdout.should_not include '用語1'
-            @stdout.should_not include '用語2'
+            @stdout.should_not include "term : 用語1 # 備考"
+            @stdout.should_not include "term : 用語2 # 備考"
           end
         end
       end

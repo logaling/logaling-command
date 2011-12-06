@@ -102,13 +102,13 @@ class Logaling::Command < Thor
     glossary.index
     terms = glossary.lookup(source_term)
 
-    puts "\nlookup word : #{source_term}"
     unless terms.empty?
+      is_glossary_name_print = terms.map{|t| t[:name]}.uniq.size > 1 ? true : false
       terms.each do |term|
-        puts "\n  #{term[:source_term]}\n"
-        puts "  #{term[:target_term]}\n"
-        puts "    note:#{term[:note]}" unless term[:note].empty?
-        puts "    glossary:#{term[:name]}"
+        str_term = "#{term[:source_term]} : #{term[:target_term]}"
+        str_term << " # #{term[:note]}" unless term[:note].empty?
+        puts str_term
+        puts "(#{term[:name]})" if is_glossary_name_print
       end
     else
       "source-term <#{source_term}> not found"
