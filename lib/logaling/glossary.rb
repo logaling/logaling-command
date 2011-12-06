@@ -47,27 +47,36 @@ module Logaling
       end
     end
 
-    def delete(source_term, target_term='', force=false)
+    def delete(source_term, target_term)
       raise GlossaryNotFound unless File.exists?(@path)
 
       glossary = load_glossary(@path)
-      target_terms = target_terms(glossary, source_term)
-      if target_terms.size == 0
-        raise TermError, "Can't found term '#{source_term} in '#{@glossary}'"
-      elsif !target_term.empty? || target_terms.size == 1
-        target_index = find_term_index(glossary, source_term, target_term)
+      target_index = find_term_index(glossary, source_term, target_term)
+      unless target_index
         raise TermError, "Can't found term '#{source_term} #{target_term}' in '#{@glossary}'" unless target_index
-        glossary.delete_at(target_index)
-      else
-        if force
-          glossary.delete_if{|term| term['source_term'] == source_term }
-        else
-          raise TermError, "There are duplicate terms in glossary.\n" +
-            "If you really want to delete, please put `loga delete [SOURCE_TERM] --force`\n" +
-            " or `loga delete [SOURCE_TERM] [TARGET_TERM]`"
-        end
       end
+
+      glossary.delete_at(target_index)
       dump_glossary(glossary)
+    end
+
+    def delete_all(source_term, force=false)
+      raise GlossaryNotFound unless File.exists?(@path)
+
+      glossary = load_glossary(@path)
+      delete_candidates = target_terms(glossary, source_term)
+      if delete_candidates.empty?
+        raise TermError, "Can't found term '#{source_term} in '#{@glossary}'"
+      end
+
+      if delete_candidates.size == 1 || force
+        glossary.delete_if{|term| term['source_term'] == source_term }
+        dump_glossary(glossary)
+      else
+        raise TermError, "There are duplicate terms in glossary.\n" +
+          "If you really want to delete, please put `loga delete [SOURCE_TERM] --force`\n" +
+          " or `loga delete [SOURCE_TERM] [TARGET_TERM]`"
+      end
     end
 
     def lookup(source_term)
