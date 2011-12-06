@@ -63,8 +63,8 @@ module Logaling
         if force
           while target_index = find_term_index(glossary, source_term) do
             glossary.delete_at(target_index)
-            dump_glossary(glossary)
           end
+          dump_glossary(glossary)
         else
           raise TermError, "There are duplicate terms in glossary.\n" +
             "If you really want to delete, please put `loga delete [SOURCE_TERM] --force`\n" +
