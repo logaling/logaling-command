@@ -58,17 +58,16 @@ module Logaling
         target_index = find_term_index(glossary, source_term, target_term)
         raise TermError, "Can't found term '#{source_term} #{target_term}' in '#{@glossary}'" unless target_index
         glossary.delete_at(target_index)
-        dump_glossary(glossary)
       else
         if force
           glossary.delete_if{|term| term['source_term'] == source_term }
-          dump_glossary(glossary)
         else
           raise TermError, "There are duplicate terms in glossary.\n" +
             "If you really want to delete, please put `loga delete [SOURCE_TERM] --force`\n" +
             " or `loga delete [SOURCE_TERM] [TARGET_TERM]`"
         end
       end
+      dump_glossary(glossary)
     end
 
     def lookup(source_term)
