@@ -107,12 +107,11 @@ class Logaling::Command < Thor
     terms = glossary.lookup(source_term)
 
     unless terms.empty?
-      is_glossary_name_print = Dir.entries(logaling_projects_path).reject{|dir| dir.sub(/[\.]+/, '').empty?}.size > 1 ? true : false
       terms.each do |term|
         str_term = "#{term[:source_term]} : #{term[:target_term]}"
         str_term << " # #{term[:note]}" unless term[:note].empty?
         puts str_term
-        puts "(#{term[:name]})" if is_glossary_name_print
+        puts "(#{term[:name]})" if registered_project_counts > 1
       end
     else
       "source-term <#{source_term}> not found"
@@ -144,6 +143,10 @@ class Logaling::Command < Thor
 
   def logaling_projects_path
     File.join(LOGALING_HOME, "projects")
+  end
+
+  def registered_project_counts
+    Dir.entries(logaling_projects_path).reject{|dir| dir.sub(/[\.]+/, '').empty?}.size
   end
 
   def error(msg)
