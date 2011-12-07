@@ -43,8 +43,8 @@ class Logaling::Command < Thor
   def register
     logaling_path = find_dotfile
 
-    config = load_config_and_merge_options
-    raise(Logaling::CommandFailed, "input glossary name '-g <glossary name>'") unless config["glossary"]
+    required_options = {"glossary" => "input glossary name '-g <glossary name>'"}
+    config = load_config_and_merge_options(required_options)
 
     repository.register(logaling_path, config["glossary"])
     say "#{config['glossary']} is now registered to logaling."
@@ -57,8 +57,8 @@ class Logaling::Command < Thor
 
   desc 'unregister', 'Unregister .logaling'
   def unregister
-    config = load_config_and_merge_options
-    raise(Logaling::CommandFailed, "input glossary name '-g <glossary name>'") unless config["glossary"]
+    required_options = {"glossary" => "input glossary name '-g <glossary name>'"}
+    config = load_config_and_merge_options(required_options)
 
     repository.unregister(config["glossary"])
     say "#{config['glossary']} is now unregistered."
@@ -132,18 +132,13 @@ class Logaling::Command < Thor
     if @glossary
       @glossary
     else
-      config = load_config
-
-      glossary = options["glossary"] || config["glossary"]
-      raise(Logaling::CommandFailed, "input glossary name '-g <glossary name>'") unless glossary
-
-      source_language = options["source-language"] || config["source-language"]
-      raise(Logaling::CommandFailed, "input source-language code '-S <source-language code>'") unless source_language
-
-      target_language = options["target-language"] || config["target-language"]
-      raise(Logaling::CommandFailed, "input target-language code '-T <target-language code>'") unless target_language
-
-      @glossary = Logaling::Glossary.new(glossary, source_language, target_language)
+      required_options = {
+        "glossary" => "input glossary name '-g <glossary name>'",
+        "source-language" => "input source-language code '-S <source-language code>'",
+        "target-language" => "input target-language code '-T <target-language code>'"
+      }
+      config = load_config_and_merge_options(required_options)
+      @glossary = Logaling::Glossary.new(config["glossary"], config["source-language"], config["target-language"])
     end
   end
 
@@ -152,11 +147,16 @@ class Logaling::Command < Thor
     exit 1
   end
 
-  def load_config_and_merge_options
+  def load_config_and_merge_options(required={})
     config = load_config
     config["glossary"] = options["glossary"] ? options["glossary"] : config["glossary"]
     config["source-language"] = options["source-language"] ? options["source-language"] : config["source-language"]
     config["target-language"] = options["target-language"] ? options["target-language"] : config["target-language"]
+
+    required.each do |required_option, message|
+      raise(Logaling::CommandFailed, message) unless config[required_option]
+    end
+
     config
   end
 
