@@ -42,34 +42,32 @@ class Logaling::Command < Thor
   desc 'register', 'Register .logaling'
   def register
     logaling_path = find_dotfile
-    FileUtils.mkdir_p(logaling_projects_path) unless File.exist?(logaling_projects_path)
 
-    config = load_config
-    symlink_path = File.join(logaling_projects_path, config["glossary"])
-    unless File.exists?(symlink_path)
-      FileUtils.ln_s(logaling_path, symlink_path)
-      say "#{config['glossary']} is now registered to logaling."
-    else
-      say "#{config['glossary']} is already registered."
-    end
+    config = load_config_and_merge_options
+    raise(Logaling::CommandFailed, "input glossary name '-g <glossary name>'") unless config["glossary"]
+
+    repository = Logaling::Repository.new(LOGALING_HOME)
+    repository.register(logaling_path, config["glossary"])
+    say "#{config['glossary']} is now registered to logaling."
   rescue Logaling::CommandFailed => e
     say e.message
     say "Try 'loga new' first."
+  rescue Logaling::GlossaryAlreadyRegistered => e
+    say "#{config['glossary']} is already registered."
   end
 
   desc 'unregister', 'Unregister .logaling'
   def unregister
-    logaling_path = find_dotfile
-    config = load_config
-    symlink_path = File.join(logaling_projects_path, config["glossary"])
-    if File.exists?(symlink_path)
-      FileUtils.remove_entry_secure(symlink_path, true)
-      say "#{config['glossary']} is now unregistered."
-    else
-      say "#{config['glossary']} is not yet registered."
-    end
+    config = load_config_and_merge_options
+    raise(Logaling::CommandFailed, "input glossary name '-g <glossary name>'") unless config["glossary"]
+
+    repository = Logaling::Repository.new(LOGALING_HOME)
+    repository.unregister(config["glossary"])
+    say "#{config['glossary']} is now unregistered."
   rescue Logaling::CommandFailed => e
     say e.message
+  rescue Logaling::GlossaryNotFound => e
+    say "#{config['glossary']} is not yet registered."
   end
 
   desc 'add [SOURCE TERM] [TARGET TERM] [NOTE(optional)]', 'Add term to glossary.'
@@ -145,10 +143,6 @@ class Logaling::Command < Thor
     Logaling::Glossary.new(glossary, source_language, target_language)
   end
 
-  def logaling_projects_path
-    File.join(LOGALING_HOME, "projects")
-  end
-
   def error(msg)
     STDERR.puts(msg)
     exit 1
@@ -156,9 +150,9 @@ class Logaling::Command < Thor
 
   def load_config_and_merge_options
     config = load_config
-    config[:glossary] ||= options["glossary"]
-    config["source-language"] ||= options["source-language"]
-    config["target-language"] ||= options["target-language"]
+    config["glossary"] = options["glossary"] ? options["glossary"] : config["glossary"]
+    config["source-language"] = options["source-language"] ? options["source-language"] : config["source-language"]
+    config["target-language"] = options["target-language"] ? options["target-language"] : config["target-language"]
     config
   end
 
