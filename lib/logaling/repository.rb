@@ -62,6 +62,11 @@ module Logaling
       Dir.entries(logaling_projects_path).reject{|dir| dir.sub(/[\.]+/, '').empty?}.size
     end
 
+    def config_path
+      path = File.join(@path, "config")
+      File.exist?(path) ? path : nil
+    end
+
     private
     def get_glossaries(path)
       glob_list = %w(yml tsv csv).map{|type| File.join(path, "glossary", "*.#{type}") }

@@ -160,10 +160,16 @@ class Logaling::Command < Thor
     config
   end
 
+  def find_config
+    File.join(find_dotfile, 'config')
+  rescue Logaling::CommandFailed
+    repository.config_path
+  end
+
   def load_config
     config ||= {}
-    if path = find_dotfile
-      File.readlines(File.join(path, 'config')).map{|l| l.chomp.split " "}.each do |option|
+    if config_path = find_config
+      File.readlines(config_path).map{|l| l.chomp.split " "}.each do |option|
         key = option[0].sub(/^[\-]{2}/, "")
         value = option[1]
         config[key] = value
