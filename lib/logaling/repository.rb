@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+require "fileutils"
 require "logaling/glossary_db"
 
 module Logaling
@@ -38,17 +39,25 @@ module Logaling
       end
     end
 
+    def registered_project_counts
+      Dir.entries(logaling_projects_path).reject{|dir| dir.sub(/[\.]+/, '').empty?}.size
+    end
+
     private
     def get_glossaries(path)
       glob_list = %w(yml tsv csv).map{|type| File.join(path, "glossary", "*.#{type}") }
       Dir.glob(glob_list).map do |file|
         name, source_language, target_language = File::basename(file, ".*").split(".")
-        [Glossary.new(name, source_language, target_language).load, name, source_language, target_language] 
+        [Glossary.new(name, source_language, target_language).load, name, source_language, target_language]
       end
     end
 
     def logaling_db_home
       File.join(@path, "db")
+    end
+
+    def logaling_projects_path
+      File.join(@path, "projects")
     end
   end
 end

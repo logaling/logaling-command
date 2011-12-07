@@ -115,7 +115,7 @@ class Logaling::Command < Thor
         str_term = "#{term[:source_term]} : #{term[:target_term]}"
         str_term << " # #{term[:note]}" unless term[:note].empty?
         puts str_term
-        puts "(#{term[:name]})" if registered_project_counts > 1
+        puts "(#{term[:name]})" if repository.registered_project_counts > 1
       end
     else
       "source-term <#{source_term}> not found"
@@ -147,10 +147,6 @@ class Logaling::Command < Thor
 
   def logaling_projects_path
     File.join(LOGALING_HOME, "projects")
-  end
-
-  def registered_project_counts
-    Dir.entries(logaling_projects_path).reject{|dir| dir.sub(/[\.]+/, '').empty?}.size
   end
 
   def error(msg)
