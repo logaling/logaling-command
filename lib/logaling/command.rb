@@ -46,7 +46,6 @@ class Logaling::Command < Thor
     config = load_config_and_merge_options
     raise(Logaling::CommandFailed, "input glossary name '-g <glossary name>'") unless config["glossary"]
 
-    repository = Logaling::Repository.new(LOGALING_HOME)
     repository.register(logaling_path, config["glossary"])
     say "#{config['glossary']} is now registered to logaling."
   rescue Logaling::CommandFailed => e
@@ -61,7 +60,6 @@ class Logaling::Command < Thor
     config = load_config_and_merge_options
     raise(Logaling::CommandFailed, "input glossary name '-g <glossary name>'") unless config["glossary"]
 
-    repository = Logaling::Repository.new(LOGALING_HOME)
     repository.unregister(config["glossary"])
     say "#{config['glossary']} is now unregistered."
   rescue Logaling::CommandFailed => e
@@ -103,8 +101,6 @@ class Logaling::Command < Thor
   desc 'lookup [TERM]', 'Lookup terms.'
   def lookup(source_term)
     config = load_config_and_merge_options
-
-    repository = Logaling::Repository.new(LOGALING_HOME)
     repository.index
     terms = repository.lookup(source_term, config["source_language"], config["target_language"], config["glossary"])
 
@@ -128,19 +124,27 @@ class Logaling::Command < Thor
   end
 
   private
+  def repository
+    @repository ||= Logaling::Repository.new(LOGALING_HOME)
+  end
+
   def glossary
-    config = load_config
+    if @glossary
+      @glossary
+    else
+      config = load_config
 
-    glossary = options["glossary"] || config["glossary"]
-    raise(Logaling::CommandFailed, "input glossary name '-g <glossary name>'") unless glossary
+      glossary = options["glossary"] || config["glossary"]
+      raise(Logaling::CommandFailed, "input glossary name '-g <glossary name>'") unless glossary
 
-    source_language = options["source-language"] || config["source-language"]
-    raise(Logaling::CommandFailed, "input source-language code '-S <source-language code>'") unless source_language
+      source_language = options["source-language"] || config["source-language"]
+      raise(Logaling::CommandFailed, "input source-language code '-S <source-language code>'") unless source_language
 
-    target_language = options["target-language"] || config["target-language"]
-    raise(Logaling::CommandFailed, "input target-language code '-T <target-language code>'") unless target_language
+      target_language = options["target-language"] || config["target-language"]
+      raise(Logaling::CommandFailed, "input target-language code '-T <target-language code>'") unless target_language
 
-    Logaling::Glossary.new(glossary, source_language, target_language)
+      @glossary = Logaling::Glossary.new(glossary, source_language, target_language)
+    end
   end
 
   def error(msg)
