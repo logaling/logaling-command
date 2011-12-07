@@ -18,7 +18,7 @@ module Logaling
     end
 
     def add(source_term, target_term, note)
-      FileUtils.touch(@path) unless File.exists?(@path)
+      FileUtils.touch(@path) unless File.exist?(@path)
 
       glossary = load_glossary(@path)
       if bilingual_pair_exists?(glossary, source_term, target_term)
@@ -30,7 +30,7 @@ module Logaling
     end
 
     def update(source_term, target_term, new_target_term, note)
-      raise GlossaryNotFound unless File.exists?(@path)
+      raise GlossaryNotFound unless File.exist?(@path)
 
       glossary = load_glossary(@path)
       if bilingual_pair_exists?(glossary, source_term, new_target_term)
@@ -47,7 +47,7 @@ module Logaling
     end
 
     def delete(source_term, target_term)
-      raise GlossaryNotFound unless File.exists?(@path)
+      raise GlossaryNotFound unless File.exist?(@path)
 
       glossary = load_glossary(@path)
       target_index = find_term_index(glossary, source_term, target_term)
@@ -60,7 +60,7 @@ module Logaling
     end
 
     def delete_all(source_term, force=false)
-      raise GlossaryNotFound unless File.exists?(@path)
+      raise GlossaryNotFound unless File.exist?(@path)
 
       glossary = load_glossary(@path)
       delete_candidates = target_terms(glossary, source_term)

@@ -11,7 +11,7 @@ module Logaling
     def register(dot_logaling_path, register_name)
       FileUtils.mkdir_p(logaling_projects_path) unless File.exist?(logaling_projects_path)
       symlink_path = File.join(logaling_projects_path, register_name)
-      unless File.exists?(symlink_path)
+      unless File.exist?(symlink_path)
         FileUtils.ln_s(dot_logaling_path, symlink_path)
       else
         raise GlossaryAlreadyRegistered, register_name
@@ -20,7 +20,7 @@ module Logaling
 
     def unregister(register_name)
       symlink_path = File.join(logaling_projects_path, register_name)
-      if File.exists?(symlink_path)
+      if File.exist?(symlink_path)
         FileUtils.remove_entry_secure(symlink_path, true)
       else
         raise GlossaryNotFound, register_name
@@ -28,7 +28,7 @@ module Logaling
     end
 
     def lookup(source_term, source_language, target_language, glossary)
-      raise GlossaryDBNotFound unless File.exists?(logaling_db_home)
+      raise GlossaryDBNotFound unless File.exist?(logaling_db_home)
 
       terms = []
       Logaling::GlossaryDB.open(logaling_db_home, "utf8") do |db|
