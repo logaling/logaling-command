@@ -105,17 +105,29 @@ describe Logaling::Command do
     end
 
     context "when can not find .logaling" do
-      before(:all) do
+      before do
         FileUtils.remove_entry_secure(Logaling::Command::LOGALING_CONFIG, true)
-        @stdout = capture(:stdout) {command.unregister}
       end
 
-      it 'should not register nothing' do
-        Dir[File.join(LOGALING_HOME, "projects", "*")].size.should == @project_counts
+      context "and call without option" do
+        before do
+          command.options = base_options.merge("glossary" => nil)
+          @stdout = capture(:stdout) {command.unregister}
+        end
+
+        it "should print message 'input glossary name ...'" do
+          @stdout.should be_include "input glossary name"
+        end
       end
 
-      it "should print message \"Can't found .logaling in [...]\"" do
-        @stdout.should be_include "Can't found .logaling in"
+      context "and call with option" do
+        before do
+          command.new('spec', 'en', 'ja')
+          @stdout = capture(:stdout) {command.unregister}
+        end
+        it 'should unregister symlink' do
+          Dir[File.join(LOGALING_HOME, "projects", "*")].size.should == @project_counts
+        end
       end
     end
 
