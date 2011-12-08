@@ -5,9 +5,44 @@ require "fileutils"
 
 module Logaling
   class Glossary
-    def self.build_path(glossary, source_language, target_language)
-      fname = [glossary, source_language, target_language].join(".")
-      File.join(LOGALING_HOME, "projects", glossary, "glossary", "#{fname}.yml")
+    class << self
+      def load(file)
+        load_glossary(file)
+      end
+
+      def load_glossary(file)
+        case File.extname(file)
+        when ".csv"
+          load_glossary_csv(file)
+        when ".tsv"
+          load_glossary_tsv(file)
+        when ".yml"
+          load_glossary_yml(file)
+        end
+      end
+
+      def load_glossary_yml(path)
+        YAML::load_file(path) || []
+      end
+
+      def load_glossary_tsv(path)
+        load_glossary_csv(path, "\t")
+      end
+
+      def load_glossary_csv(path, sep=",")
+        glossary = []
+        CSV.open(path, "r",  {:col_sep => sep}) do |csv|
+          csv.each do |row|
+            glossary << {"source_term" => row[0], "target_term" => row[1], "note" => ""} if row.size >= 2
+          end
+        end
+        glossary
+      end
+
+      def build_path(glossary, source_language, target_language)
+        fname = [glossary, source_language, target_language].join(".")
+        File.join(LOGALING_HOME, "projects", glossary, "glossary", "#{fname}.yml")
+      end
     end
 
     def initialize(glossary, source_language, target_language)
@@ -20,7 +55,7 @@ module Logaling
     def add(source_term, target_term, note)
       FileUtils.touch(@path) unless File.exist?(@path)
 
-      glossary = load_glossary(@path)
+      glossary = Glossary.load_glossary(@path)
       if bilingual_pair_exists?(glossary, source_term, target_term)
         raise TermError, "term '#{source_term}: #{target_term}' already exists in '#{@glossary}'"
       end
@@ -32,7 +67,7 @@ module Logaling
     def update(source_term, target_term, new_target_term, note)
       raise GlossaryNotFound unless File.exist?(@path)
 
-      glossary = load_glossary(@path)
+      glossary = Glossary.load_glossary(@path)
       if bilingual_pair_exists?(glossary, source_term, new_target_term)
         raise TermError, "term '#{source_term}: #{target_term}' already exists in '#{@glossary}'"
       end
@@ -49,7 +84,7 @@ module Logaling
     def delete(source_term, target_term)
       raise GlossaryNotFound unless File.exist?(@path)
 
-      glossary = load_glossary(@path)
+      glossary = Glossary.load_glossary(@path)
       target_index = find_term_index(glossary, source_term, target_term)
       unless target_index
         raise TermError, "Can't found term '#{source_term} #{target_term}' in '#{@glossary}'" unless target_index
@@ -62,7 +97,7 @@ module Logaling
     def delete_all(source_term, force=false)
       raise GlossaryNotFound unless File.exist?(@path)
 
-      glossary = load_glossary(@path)
+      glossary = Glossary.load_glossary(@path)
       delete_candidates = target_terms(glossary, source_term)
       if delete_candidates.empty?
         raise TermError, "Can't found term '#{source_term} in '#{@glossary}'"
@@ -78,36 +113,7 @@ module Logaling
       end
     end
 
-    def load_glossary(file)
-      case File.extname(file)
-      when ".csv"
-        load_glossary_csv(file)
-      when ".tsv"
-        load_glossary_tsv(file)
-      when ".yml"
-        load_glossary_yml(file)
-      end
-    end
-
     private
-    def load_glossary_yml(path)
-      YAML::load_file(path) || []
-    end
-
-    def load_glossary_tsv(path)
-      load_glossary_csv(path, "\t")
-    end
-
-    def load_glossary_csv(path, sep=",")
-      glossary = []
-      CSV.open(path, "r",  {:col_sep => sep}) do |csv|
-        csv.each do |row|
-          glossary << {"source_term" => row[0], "target_term" => row[1], "note" => ""} if row.size >= 2
-        end
-      end
-      glossary
-    end
-
     def build_term(source_term, target_term, note)
       note ||= ''
       {'source_term' => source_term, 'target_term' => target_term, 'note' => note}
