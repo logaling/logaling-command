@@ -7,6 +7,7 @@ module Logaling
     let(:project) { "spec" }
     let(:glossary) { Glossary.new(project, 'en', 'ja') }
     let(:glossary_path) { Glossary.build_path(project, 'en', 'ja') }
+    let(:repository) { Logaling::Repository.new(LOGALING_HOME) }
 
     before do
       FileUtils.remove_entry_secure(File.join(LOGALING_HOME, 'projects', 'spec'), true)
@@ -79,8 +80,8 @@ module Logaling
           glossary.add("delete", "てすと1", "備考")
           glossary.add("delete", "てすと2", "備考")
           glossary.delete("delete", "てすと1")
-          glossary.index
-          @result = glossary.lookup("delete")
+          repository.index
+          @result = repository.lookup("delete", "en", "ja", project)
         end
 
         it 'should delete the bilingual pair' do
@@ -116,8 +117,8 @@ module Logaling
           before do
             glossary.add("user", "ユーザ", "備考")
             glossary.delete_all("user")
-            glossary.index
-            @result = glossary.lookup("user")
+            repository.index
+            @result = repository.lookup("user", "en", "ja", project)
           end
 
           it 'should delete the term' do
@@ -132,8 +133,8 @@ module Logaling
             glossary.add("delete", "てすと1", "備考")
             glossary.add("delete", "てすと2", "備考")
             glossary.delete_all("delete", true)
-            glossary.index
-            @result = glossary.lookup("delete")
+            repository.index
+            @result = repository.lookup("delete", "en", "ja", project)
           end
 
           it {
@@ -151,11 +152,11 @@ module Logaling
     describe '#lookup' do
       before do
         glossary.add("user", "ユーザ", "ユーザーではない")
-        glossary.index
+        repository.index
       end
 
       context 'with arguments show existing bilingual pair' do
-        subject {glossary.lookup("user")}
+        subject {repository.lookup("user", "en", "ja", project)}
 
         it 'succeed at find by term' do
           should be_include({:name=>"spec", :source_language=>"en", :target_language=>"ja", :source_term=>"user", :target_term=>"ユーザ", :note=>"ユーザーではない"})
@@ -163,16 +164,16 @@ module Logaling
       end
 
       context 'when tsv file as glossary exists' do
-        let(:tsv_path) { File.join(File.dirname(glossary_path), "spec.en.ja.tsv") }
+        let(:tsv_path) { glossary_path.sub(/yml$/, 'tsv') }
 
         before do
-          FileUtils.mkdir_p(File.dirname(glossary_path))
+          FileUtils.mkdir_p(File.dirname(tsv_path))
           FileUtils.touch(tsv_path)
           File.open(tsv_path, "w"){|f| f.puts "user\tユーザー"}
-          glossary.index
+          repository.index
         end
 
-        subject {glossary.lookup("user")}
+        subject {repository.lookup("user", "en", "ja", project)}
 
         it 'succeed at find by term' do
           should be_include({:name=>"spec", :source_language=>"en", :target_language=>"ja", :source_term=>"user", :target_term=>"ユーザー", :note=>''})
@@ -195,7 +196,7 @@ module Logaling
           FileUtils.mkdir_p(File.dirname(glossary_path))
           FileUtils.touch(glossary_path)
           glossary.add("spec", "スペック", "備考")
-          glossary.index
+          repository.index
         end
 
         subject { logaling_db.open(db_home, "utf8"){|db| logaling_db.lookup("spec")} }
@@ -214,7 +215,7 @@ module Logaling
           FileUtils.mkdir_p(File.dirname(glossary_path))
           FileUtils.touch(tsv_path)
           File.open(tsv_path, "w"){|f| f.puts "user\tユーザ"}
-          glossary.index
+          repository.index
         end
 
         subject { logaling_db.open(db_home, "utf8"){|db| logaling_db.lookup("user")} }
@@ -233,7 +234,7 @@ module Logaling
           FileUtils.mkdir_p(File.dirname(glossary_path))
           FileUtils.touch(csv_path)
           File.open(csv_path, "w"){|f| f.puts "test,テスト"}
-          glossary.index
+          repository.index
         end
 
         subject { logaling_db.open(db_home, "utf8"){|db| logaling_db.lookup("test")} }
