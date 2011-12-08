@@ -78,11 +78,6 @@ module Logaling
       end
     end
 
-    def load
-      load_glossary(@path)
-    end
-
-    private
     def load_glossary(file)
       case File.extname(file)
       when ".csv"
@@ -94,6 +89,7 @@ module Logaling
       end
     end
 
+    private
     def load_glossary_yml(path)
       YAML::load_file(path) || []
     end

@@ -72,7 +72,7 @@ module Logaling
       glob_list = %w(yml tsv csv).map{|type| File.join(path, "glossary", "*.#{type}") }
       Dir.glob(glob_list).map do |file|
         name, source_language, target_language = File::basename(file, ".*").split(".")
-        [Glossary.new(name, source_language, target_language).load, name, source_language, target_language]
+        [Glossary.new(name, source_language, target_language).load_glossary(file), name, source_language, target_language]
       end
     end
 
