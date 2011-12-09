@@ -4,6 +4,7 @@ require 'thor'
 require 'rainbow'
 require "logaling/repository"
 require "logaling/glossary"
+require "logaling/external_glossary"
 
 class Logaling::Command < Thor
   VERSION = "0.0.8"
@@ -13,6 +14,7 @@ class Logaling::Command < Thor
       '-d' => :delete,
       '-u' => :update,
       '-l' => :lookup,
+      '-i' => :import,
       '-n' => :new,
       '-r' => :register,
       '-U' => :unregister,
@@ -38,6 +40,12 @@ class Logaling::Command < Thor
     else
       say "#{LOGALING_CONFIG} already exists."
     end
+  end
+
+  desc 'import', 'Import external glossary'
+  def import(external_glossary)
+    Logaling::ExternalGlossary.load
+    repository.import(Logaling::ExternalGlossary.get(external_glossary))
   end
 
   desc 'register', 'Register .logaling'

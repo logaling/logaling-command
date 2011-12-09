@@ -27,6 +27,13 @@ module Logaling
       end
     end
 
+    def import(glossary)
+      FileUtils.mkdir_p(cache_path) unless File.exist?(cache_path)
+      Dir.chdir(cache_path) do
+        glossary.import
+      end
+    end
+
     def lookup(source_term, source_language, target_language, glossary)
       raise GlossaryDBNotFound unless File.exist?(logaling_db_home)
 
@@ -51,9 +58,12 @@ module Logaling
       Logaling::GlossaryDB.open(logaling_db_home, "utf8") do |db|
         db.recreate_table
         projects.each do |project|
-          get_glossaries(project).each do |glossary, name, source_language, target_language|
+          get_glossaries_from_project(project).each do |glossary, name, source_language, target_language|
             db.index_glossary(glossary, name, source_language, target_language)
           end
+        end
+        get_glossaries(cache_path).each do |glossary, name, source_language, target_language|
+          db.index_glossary(glossary, name, source_language, target_language)
         end
       end
     end
@@ -69,11 +79,15 @@ module Logaling
 
     private
     def get_glossaries(path)
-      glob_list = %w(yml tsv csv).map{|type| File.join(path, "glossary", "*.#{type}") }
+      glob_list = %w(yml tsv csv).map{|type| File.join(path, "*.#{type}") }
       Dir.glob(glob_list).map do |file|
         name, source_language, target_language = File::basename(file, ".*").split(".")
         [Glossary.load(file), name, source_language, target_language]
       end
+    end
+
+    def get_glossaries_from_project(path)
+      get_glossaries(File.join(path, "glossary"))
     end
 
     def logaling_db_home
@@ -82,6 +96,10 @@ module Logaling
 
     def logaling_projects_path
       File.join(@path, "projects")
+    end
+
+    def cache_path
+      File.join(@path, "cache")
     end
   end
 end
