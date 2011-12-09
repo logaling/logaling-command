@@ -59,7 +59,7 @@ module Logaling
     end
 
     def registered_project_counts
-      Dir[logaling_projects_path + "*"].size
+      Dir[File.join(logaling_projects_path, "*")].size
     end
 
     def config_path
