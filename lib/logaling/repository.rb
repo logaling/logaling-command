@@ -46,7 +46,7 @@ module Logaling
     end
 
     def index
-      projects = Dir.glob(File.join(@path, "projects", "*"))
+      projects = Dir[File.join(@path, "projects", "*")]
 
       Logaling::GlossaryDB.open(logaling_db_home, "utf8") do |db|
         db.recreate_table
@@ -59,7 +59,7 @@ module Logaling
     end
 
     def registered_project_counts
-      Dir.entries(logaling_projects_path).reject{|dir| dir.sub(/[\.]+/, '').empty?}.size
+      Dir[logaling_projects_path + "*"].size
     end
 
     def config_path
