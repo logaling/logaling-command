@@ -109,8 +109,8 @@ class Logaling::Command < Thor
       terms.each do |term|
         str_term = "#{term[:source_term].bright} : #{term[:target_term]}"
         str_term << " # #{term[:note]}" unless term[:note].empty?
-        puts str_term
-        puts "(#{term[:name]})" if repository.registered_project_counts > 1
+        str_term << "  (#{term[:name]})".color(:black) if repository.registered_project_counts > 1
+        puts "  #{str_term}"
       end
     else
       "source-term <#{source_term}> not found"
