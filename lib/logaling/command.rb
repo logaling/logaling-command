@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 require 'thor'
+require 'rainbow'
 require "logaling/repository"
 require "logaling/glossary"
 
@@ -106,7 +107,7 @@ class Logaling::Command < Thor
 
     unless terms.empty?
       terms.each do |term|
-        str_term = "#{term[:source_term]} : #{term[:target_term]}"
+        str_term = "#{term[:source_term].bright} : #{term[:target_term]}"
         str_term << " # #{term[:note]}" unless term[:note].empty?
         puts str_term
         puts "(#{term[:name]})" if repository.registered_project_counts > 1
