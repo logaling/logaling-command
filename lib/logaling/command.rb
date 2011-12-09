@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 require 'thor'
+require "logaling/repository"
 require "logaling/glossary"
 
 class Logaling::Command < Thor
@@ -41,34 +42,30 @@ class Logaling::Command < Thor
   desc 'register', 'Register .logaling'
   def register
     logaling_path = find_dotfile
-    FileUtils.mkdir_p(logaling_projects_path) unless File.exist?(logaling_projects_path)
 
-    config = load_config
-    symlink_path = File.join(logaling_projects_path, config["glossary"])
-    unless File.exists?(symlink_path)
-      FileUtils.ln_s(logaling_path, symlink_path)
-      say "#{config['glossary']} is now registered to logaling."
-    else
-      say "#{config['glossary']} is already registered."
-    end
+    required_options = {"glossary" => "input glossary name '-g <glossary name>'"}
+    config = load_config_and_merge_options(required_options)
+
+    repository.register(logaling_path, config["glossary"])
+    say "#{config['glossary']} is now registered to logaling."
   rescue Logaling::CommandFailed => e
     say e.message
     say "Try 'loga new' first."
+  rescue Logaling::GlossaryAlreadyRegistered => e
+    say "#{config['glossary']} is already registered."
   end
 
   desc 'unregister', 'Unregister .logaling'
   def unregister
-    logaling_path = find_dotfile
-    config = load_config
-    symlink_path = File.join(logaling_projects_path, config["glossary"])
-    if File.exists?(symlink_path)
-      FileUtils.remove_entry_secure(symlink_path, true)
-      say "#{config['glossary']} is now unregistered."
-    else
-      say "#{config['glossary']} is not yet registered."
-    end
+    required_options = {"glossary" => "input glossary name '-g <glossary name>'"}
+    config = load_config_and_merge_options(required_options)
+
+    repository.unregister(config["glossary"])
+    say "#{config['glossary']} is now unregistered."
   rescue Logaling::CommandFailed => e
     say e.message
+  rescue Logaling::GlossaryNotFound => e
+    say "#{config['glossary']} is not yet registered."
   end
 
   desc 'add [SOURCE TERM] [TARGET TERM] [NOTE(optional)]', 'Add term to glossary.'
@@ -103,15 +100,16 @@ class Logaling::Command < Thor
 
   desc 'lookup [TERM]', 'Lookup terms.'
   def lookup(source_term)
-    glossary.index
-    terms = glossary.lookup(source_term)
+    config = load_config_and_merge_options
+    repository.index
+    terms = repository.lookup(source_term, config["source_language"], config["target_language"], config["glossary"])
 
     unless terms.empty?
       terms.each do |term|
         str_term = "#{term[:source_term]} : #{term[:target_term]}"
         str_term << " # #{term[:note]}" unless term[:note].empty?
         puts str_term
-        puts "(#{term[:name]})" if registered_project_counts > 1
+        puts "(#{term[:name]})" if repository.registered_project_counts > 1
       end
     else
       "source-term <#{source_term}> not found"
@@ -126,27 +124,22 @@ class Logaling::Command < Thor
   end
 
   private
+  def repository
+    @repository ||= Logaling::Repository.new(LOGALING_HOME)
+  end
+
   def glossary
-    config = load_config
-
-    glossary = options["glossary"] || config["glossary"]
-    raise(Logaling::CommandFailed, "input glossary name '-g <glossary name>'") unless glossary
-
-    source_language = options["source-language"] || config["source-language"]
-    raise(Logaling::CommandFailed, "input source-language code '-S <source-language code>'") unless source_language
-
-    target_language = options["target-language"] || config["target-language"]
-    raise(Logaling::CommandFailed, "input target-language code '-T <target-language code>'") unless target_language
-
-    Logaling::Glossary.new(glossary, source_language, target_language)
-  end
-
-  def logaling_projects_path
-    File.join(LOGALING_HOME, "projects")
-  end
-
-  def registered_project_counts
-    Dir.entries(logaling_projects_path).reject{|dir| dir.sub(/[\.]+/, '').empty?}.size
+    if @glossary
+      @glossary
+    else
+      required_options = {
+        "glossary" => "input glossary name '-g <glossary name>'",
+        "source-language" => "input source-language code '-S <source-language code>'",
+        "target-language" => "input target-language code '-T <target-language code>'"
+      }
+      config = load_config_and_merge_options(required_options)
+      @glossary = Logaling::Glossary.new(config["glossary"], config["source-language"], config["target-language"])
+    end
   end
 
   def error(msg)
@@ -154,10 +147,29 @@ class Logaling::Command < Thor
     exit 1
   end
 
+  def load_config_and_merge_options(required={})
+    config = load_config
+    config["glossary"] = options["glossary"] ? options["glossary"] : config["glossary"]
+    config["source-language"] = options["source-language"] ? options["source-language"] : config["source-language"]
+    config["target-language"] = options["target-language"] ? options["target-language"] : config["target-language"]
+
+    required.each do |required_option, message|
+      raise(Logaling::CommandFailed, message) unless config[required_option]
+    end
+
+    config
+  end
+
+  def find_config
+    File.join(find_dotfile, 'config')
+  rescue Logaling::CommandFailed
+    repository.config_path
+  end
+
   def load_config
     config ||= {}
-    if path = find_dotfile
-      File.readlines(File.join(path, 'config')).map{|l| l.chomp.split " "}.each do |option|
+    if config_path = find_config
+      File.readlines(config_path).map{|l| l.chomp.split " "}.each do |option|
         key = option[0].sub(/^[\-]{2}/, "")
         value = option[1]
         config[key] = value
