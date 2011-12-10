@@ -109,7 +109,10 @@ class Logaling::Command < Thor
       terms.each do |term|
         str_term = "#{term[:source_term].bright} : #{term[:target_term]}"
         str_term << " # #{term[:note]}" unless term[:note].empty?
-        str_term << "  (#{term[:name]})".color(:black) if repository.registered_project_counts > 1
+        if repository.registered_project_counts > 1
+          color = (term[:name] == config["glossary"]) ? :green : :black
+          str_term << "  (#{term[:name]})".color(color)
+        end
         puts "  #{str_term}"
       end
     else
