@@ -22,7 +22,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'bundler', ['>= 1.0']
   s.add_runtime_dependency 'rroonga', ['>= 1.3.0']
   s.add_runtime_dependency 'rainbow'
-  s.add_runtime_dependency 'active_support/inflector'
+  s.add_runtime_dependency 'active_support'
 
   s.add_development_dependency 'rake'
   s.add_development_dependency 'rspec'
