@@ -18,6 +18,8 @@ class Logaling::ExternalGlossary
 
     def get(external_glossary)
       external_glossaries.detect{|c| c.inspect.include? external_glossary.camelize }.new
+    rescue NoMethodError
+      raise Logaling::ExternalGlossaryNotFound
     end
 
     def external_glossaries

@@ -51,6 +51,9 @@ class Logaling::Command < Thor
     else
       repository.import(Logaling::ExternalGlossary.get(external_glossary))
     end
+  rescue Logaling::ExternalGlossaryNotFound
+    say "'#{external_glossary}' can't find in import list."
+    say "Try 'loga import --list' and confirm import list."
   end
 
   desc 'register', 'Register .logaling'

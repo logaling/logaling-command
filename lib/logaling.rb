@@ -9,4 +9,5 @@ module Logaling
   class GlossaryAlreadyRegistered < LogalingError; end
   class GlossaryNotFound < LogalingError; end
   class GlossaryDBNotFound < LogalingError; end
+  class ExternalGlossaryNotFound < LogalingError; end
 end
