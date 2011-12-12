@@ -43,9 +43,14 @@ class Logaling::Command < Thor
   end
 
   desc 'import', 'Import external glossary'
-  def import(external_glossary)
+  method_option "list", type: :boolean, default: false
+  def import(external_glossary=nil)
     Logaling::ExternalGlossary.load
-    repository.import(Logaling::ExternalGlossary.get(external_glossary))
+    if options["list"]
+      Logaling::ExternalGlossary.list.each {|glossary| say "#{glossary.name.bright} : #{glossary.description}" }
+    else
+      repository.import(Logaling::ExternalGlossary.get(external_glossary))
+    end
   end
 
   desc 'register', 'Register .logaling'

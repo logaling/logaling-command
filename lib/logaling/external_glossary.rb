@@ -12,6 +12,10 @@ class Logaling::ExternalGlossary
       external_glossaries << subclass
     end
 
+    def list
+      external_glossaries
+    end
+
     def get(external_glossary)
       external_glossaries.detect{|c| c.inspect.include? external_glossary.camelize }.new
     end
@@ -21,7 +25,7 @@ class Logaling::ExternalGlossary
     end
 
     def name
-      self.to_s.underscore.gsub(/.*\//,'')
+      self.inspect.underscore.gsub(/.*\//,'')
     end
 
     def description val=nil
