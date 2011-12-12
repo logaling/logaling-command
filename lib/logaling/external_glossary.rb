@@ -3,7 +3,7 @@ require 'active_support/inflector'
 class Logaling::ExternalGlossary
   class << self
     def load
-      Dir[File.join(File.dirname(__FILE__), "external_glossary", "*.rb")].each do |file|
+      Dir[File.join(File.dirname(__FILE__), "external_glossaries", "*.rb")].each do |file|
         require file
       end
     end
