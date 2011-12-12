@@ -3,7 +3,11 @@ require 'nokogiri'
 
 module Logaling
   class PostgresqlManual < ExternalGlossary
-    def import
+    description     'PostgreSQL7.1 Manual(http://osb.sraoss.co.jp/PostgreSQL/Manual/)'
+    source_language 'en'
+    target_language 'ja'
+
+    def convert
       buffer = ""
       CSV.generate(buffer) do |csv|
         doc = ::Nokogiri::HTML(open("http://osb.sraoss.co.jp/PostgreSQL/Manual/word.html", "r:iso-2022-jp").read.encode("utf-8"))
@@ -13,7 +17,6 @@ module Logaling
           end
         end
       end
-      File.open("postgresql_manual.en.ja.csv", "w") {|f| f.write(buffer) }
     end
   end
 end

@@ -19,7 +19,30 @@ class Logaling::ExternalGlossary
     def external_glossaries
       @@external_glossaries ||= []
     end
+
+    def name
+      self.to_s.underscore.gsub(/.*\//,'')
+    end
+
+    def description val=nil
+      @description ||= val
+    end
+
+    def source_language val=nil
+      @source_language ||= val
+    end
+
+    def target_language val=nil
+      @target_language ||= val
+    end
   end
 
-  def import; end
+  def import
+    File.open(import_file_name, "w") {|f| f.write(self.convert) }
+  end
+
+  private
+  def import_file_name
+    [self.class.name, self.class.source_language, self.class.target_language, 'csv'].join('.')
+  end
 end

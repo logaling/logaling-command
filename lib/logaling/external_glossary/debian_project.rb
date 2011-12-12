@@ -3,7 +3,11 @@ require 'nokogiri'
 
 module Logaling
   class DebianProject < ExternalGlossary
-    def import
+    description     'Debian JP Project(http://www.debian.or.jp/community/translate/)'
+    source_language 'en'
+    target_language 'ja'
+
+    def convert
       buffer = ""
       CSV.generate(buffer) do |csv|
         doc = ::Nokogiri::HTML(open("http://www.debian.or.jp/community/translate/trans_table.html", "r"))
@@ -13,7 +17,6 @@ module Logaling
           end
         end
       end
-      File.open("debian_project.en.ja.csv", "w") {|f| f.write(buffer) }
     end
   end
 end
