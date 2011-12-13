@@ -122,14 +122,15 @@ class Logaling::Command < Thor
     terms = repository.lookup(source_term, config["source_language"], config["target_language"], config["glossary"])
 
     unless terms.empty?
+      max_str_size = terms.map{|term| term[:source_term].size}.sort.last
       terms.each do |term|
-        str_term = "#{term[:source_term].bright}\t\t #{term[:target_term]}"
-        str_term << "\t# #{term[:note]}" unless term[:note].empty?
+        target_string = "#{term[:target_term]}"
+        target_string <<  "\t# #{term[:note]}" unless term[:note].empty?
         if repository.glossary_counts > 1
           color = (term[:name] == config["glossary"]) ? :green : :cyan
-          str_term << "\t(#{term[:name]})".color(color)
+          target_string << "\t(#{term[:name]})".color(color)
         end
-        puts "  #{str_term}"
+        printf("  %-#{max_str_size+10}s %s\n", term[:source_term].bright, target_string)
       end
     else
       "source-term <#{source_term}> not found"
