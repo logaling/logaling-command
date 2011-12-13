@@ -139,13 +139,14 @@ class Logaling::Command < Thor
     unless terms.empty?
       max_str_size = terms.map{|term| term[:source_term].size}.sort.last
       terms.each do |term|
-        target_string = "#{term[:target_term]}"
+        target_string = "#{term[:target_term].bright}"
         target_string <<  "\t# #{term[:note]}" unless term[:note].empty?
         if repository.glossary_counts > 1
           color = (term[:name] == config["glossary"]) ? :green : :cyan
           target_string << "\t(#{term[:name]})".color(color)
         end
-        printf("  %-#{max_str_size+10}s %s\n", term[:source_term].bright, target_string)
+        source_string = term[:source_term].split(source_term).insert(1, source_term.dup.bright).join
+        printf("  %-#{max_str_size+10}s %s\n", source_string, target_string)
       end
     else
       "source-term <#{source_term}> not found"
