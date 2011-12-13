@@ -68,8 +68,8 @@ module Logaling
       end
     end
 
-    def registered_project_counts
-      Dir[File.join(logaling_projects_path, "*")].size
+    def glossary_counts
+      [registered_projects, imported_glossaries].map(&:size).inject(&:+)
     end
 
     def config_path
@@ -100,6 +100,14 @@ module Logaling
 
     def cache_path
       File.join(@path, "cache")
+    end
+
+    def registered_projects
+      Dir[File.join(logaling_projects_path, "*")]
+    end
+
+    def imported_glossaries
+      Dir[File.join(cache_path, "*")]
     end
   end
 end
