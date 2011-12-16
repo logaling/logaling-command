@@ -57,7 +57,7 @@ module Logaling
         subject {repository.lookup("user", "en", "ja", project)}
 
         it 'succeed at find by term' do
-          should be_include({:name=>"spec", :source_language=>"en", :target_language=>"ja", :source_term=>"user", :target_term=>"ユーザー", :note=>''})
+          should be_include({:name=>"spec", :source_language=>"en", :target_language=>"ja", :source_term=>"user", :target_term=>"ユーザー", :note=>""})
         end
 
         after do
@@ -76,14 +76,14 @@ module Logaling
         before do
           FileUtils.mkdir_p(File.dirname(glossary_path))
           FileUtils.touch(glossary_path)
-          glossary.add("spec", "スペック", "備考")
+          glossary.add("spec_logaling", "スペック", "備考")
           repository.index
         end
 
-        subject { logaling_db.open(db_home, "utf8"){|db| logaling_db.lookup("spec")} }
+        subject { logaling_db.open(db_home, "utf8"){|db| logaling_db.lookup("spec_logaling")} }
 
         it 'glossaries should be indexed' do
-          should be_include({:name=>"spec", :source_language=>"en", :target_language=>"ja", :source_term=>"spec", :target_term=>"スペック", :note=>"備考"})
+          should be_include({:name=>"spec", :source_language=>"en", :target_language=>"ja", :source_term=>"spec_logaling", :target_term=>"スペック", :note=>"備考"})
         end
 
         after do
@@ -102,7 +102,7 @@ module Logaling
         subject { logaling_db.open(db_home, "utf8"){|db| logaling_db.lookup("user")} }
 
         it 'glossaries should be indexed' do
-          should == [{:name=>"spec", :source_language=>"en", :target_language=>"ja", :source_term=>"user", :target_term=>"ユーザ", :note=>''}]
+          should be_include({:name=>"spec", :source_language=>"en", :target_language=>"ja", :source_term=>"user", :target_term=>"ユーザ", :note=>''})
         end
 
         after do
@@ -114,19 +114,36 @@ module Logaling
         before do
           FileUtils.mkdir_p(File.dirname(glossary_path))
           FileUtils.touch(csv_path)
-          File.open(csv_path, "w"){|f| f.puts "test,テスト"}
+          File.open(csv_path, "w"){|f| f.puts "test_logaling,テスト"}
           repository.index
         end
 
-        subject { logaling_db.open(db_home, "utf8"){|db| logaling_db.lookup("test")} }
+        subject { logaling_db.open(db_home, "utf8"){|db| logaling_db.lookup("test_logaling")} }
 
         it 'glossaries should be indexed' do
-          should == [{:name=>"spec", :source_language=>"en", :target_language=>"ja", :source_term=>"test", :target_term=>"テスト", :note=>''}]
+          should be_include({:name=>"spec", :source_language=>"en", :target_language=>"ja", :source_term=>"test_logaling", :target_term=>"テスト", :note=>""})
         end
 
         after do
           FileUtils.remove_entry_secure(csv_path, true)
         end
+      end
+    end
+
+    context 'when glossary exist but not modified' do
+      let(:index_at) { File.join(LOGALING_HOME, 'db', 'index_at') }
+      before do
+        glossary.add("index_test", "インデックスのテスト", "備考")
+        repository.index
+        @timestamp = File.mtime(index_at)
+        sleep(1)
+        repository.index
+      end
+
+      subject { File.mtime(index_at) }
+
+      it 'should not be indexed' do
+        should == @timestamp
       end
     end
 

@@ -93,26 +93,26 @@ module Logaling
     describe '#delete' do
       context 'bilingual pair exists' do
         before do
-          glossary.add("delete", "てすと1", "備考")
-          glossary.add("delete", "てすと2", "備考")
-          glossary.delete("delete", "てすと1")
+          glossary.add("delete_logaling", "てすと1", "備考")
+          glossary.add("delete_logaling", "てすと2", "備考")
+          glossary.delete("delete_logaling", "てすと1")
           repository.index
-          @result = repository.lookup("delete", "en", "ja", project)
+          @result = repository.lookup("delete_logaling", "en", "ja", project)
         end
 
         it 'should delete the bilingual pair' do
-          @result.should include({:name=>"spec", :source_language=>"en", :target_language=>"ja", :source_term=>"delete", :target_term=>"てすと2", :note=>"備考"})
-          @result.should_not include({:name=>"spec", :source_language=>"en", :target_language=>"ja", :source_term=>"delete", :target_term=>"てすと1", :note=>"備考"})
+          @result.should include({:name=>"spec", :source_language=>"en", :target_language=>"ja", :source_term=>"delete_logaling", :target_term=>"てすと2", :note=>"備考"})
+          @result.should_not include({:name=>"spec", :source_language=>"en", :target_language=>"ja", :source_term=>"delete_logaling", :target_term=>"てすと1", :note=>"備考"})
         end
       end
 
       context 'bilingual pair does not exist' do
         before do
-          glossary.add("user", "ユーザ", "ユーザーではない")
+          glossary.add("user_logaling", "ユーザ", "ユーザーではない")
         end
 
         it {
-          -> { glossary.delete("user", "ユーザー") }.should raise_error(Logaling::TermError)
+          -> { glossary.delete("user_logaling", "ユーザー") }.should raise_error(Logaling::TermError)
         }
       end
     end
@@ -120,46 +120,46 @@ module Logaling
     describe '#delete_all' do
       context 'source_term not found' do
         before do
-          glossary.add("user", "ユーザ", "備考")
+          glossary.add("user_logaling", "ユーザ", "備考")
         end
 
         it {
-          -> { glossary.delete_all("usr") }.should raise_error(Logaling::TermError)
+          -> { glossary.delete_all("usr_logaling") }.should raise_error(Logaling::TermError)
         }
       end
 
       context 'source_term found' do
         context 'there is only 1 bilingual pair' do
           before do
-            glossary.add("user", "ユーザ", "備考")
-            glossary.delete_all("user")
+            glossary.add("user_logaling", "ユーザ", "備考")
+            glossary.delete_all("user_logaling")
             repository.index
-            @result = repository.lookup("user", "en", "ja", project)
+            @result = repository.lookup("user_logaling", "en", "ja", project)
           end
 
           it 'should delete the term' do
-            @result.should_not include({:name=>"spec", :source_language=>"en", :target_language=>"ja", :source_term=>"user", :target_term=>"ユーザ", :note=>"備考"})
+            @result.should_not include({:name=>"spec", :source_language=>"en", :target_language=>"ja", :source_term=>"user_logaling", :target_term=>"ユーザ", :note=>"備考"})
           end
         end
 
         context 'there are more than 1 bilingual pair' do
           before do
-            glossary.add("user", "ユーザ1", "備考")
-            glossary.add("user", "ユーザ2", "備考")
-            glossary.add("delete", "てすと1", "備考")
-            glossary.add("delete", "てすと2", "備考")
-            glossary.delete_all("delete", true)
+            glossary.add("user_logaling", "ユーザ1", "備考")
+            glossary.add("user_logaling", "ユーザ2", "備考")
+            glossary.add("delete_logaling", "てすと1", "備考")
+            glossary.add("delete_logaling", "てすと2", "備考")
+            glossary.delete_all("delete_logaling", true)
             repository.index
-            @result = repository.lookup("delete", "en", "ja", project)
+            @result = repository.lookup("delete_logaling", "en", "ja", project)
           end
 
           it {
-            -> { glossary.delete_all("user") }.should raise_error(Logaling::TermError)
+            -> { glossary.delete_all("user_logaling") }.should raise_error(Logaling::TermError)
           }
 
           it "should delete terms when force option is true" do
-            @result.should_not include({:name=>"spec", :source_language=>"en", :target_language=>"ja", :source_term=>"delete", :target_term=>"てすと1", :note=>"備考"})
-            @result.should_not include({:name=>"spec", :source_language=>"en", :target_language=>"ja", :source_term=>"delete", :target_term=>"てすと2", :note=>"備考"})
+            @result.should_not include({:name=>"spec", :source_language=>"en", :target_language=>"ja", :source_term=>"delete_loglaing", :target_term=>"てすと1", :note=>"備考"})
+            @result.should_not include({:name=>"spec", :source_language=>"en", :target_language=>"ja", :source_term=>"delete_logaling", :target_term=>"てすと2", :note=>"備考"})
           end
         end
       end
