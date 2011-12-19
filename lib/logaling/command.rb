@@ -45,11 +45,13 @@ class Logaling::Command < Thor
   def new(project_name, source_language, target_language=nil)
     unless File.exist?(LOGALING_CONFIG)
       FileUtils.mkdir_p(File.join(LOGALING_CONFIG, "glossary"))
+      #---kokokara
       File.open(File.join(LOGALING_CONFIG, "config"), 'w') do |config|
         config.puts "--glossary #{project_name}"
         config.puts "--source-language #{source_language}"
         config.puts "--target-language #{target_language}" if target_language
       end
+      #---kokomade
       register unless options["no-register"]
       say "Successfully created #{LOGALING_CONFIG}"
     else
@@ -185,7 +187,8 @@ class Logaling::Command < Thor
   end
 
   def load_config_and_merge_options(required={})
-    config_list = load_config
+    config_list ||= {}
+    find_config.each{|type, path| config_list[type] = load_config(path)}
     global_config = config_list["global_config"] ? config_list["global_config"] : {}
     project_config = config_list["project_config"] ? config_list["project_config"] : {}
 
@@ -213,17 +216,13 @@ class Logaling::Command < Thor
     config
   end
 
-  def load_config
+  def load_config(config_path=nil)
     config ||= {}
-    unless find_config.empty?
-      config_paths = find_config
-      config_paths.each do |config_type, config_path|
-        config[config_type] ||= {}
-        File.readlines(config_path).map{|l| l.chomp.split " "}.each do |option|
-          key = option[0].sub(/^[\-]{2}/, "")
-          value = option[1]
-          config[config_type][key] = value
-        end
+    if config_path
+      File.readlines(config_path).map{|l| l.chomp.split " "}.each do |option|
+        key = option[0].sub(/^[\-]{2}/, "")
+        value = option[1]
+        config[key] = value
       end
     end
     config
