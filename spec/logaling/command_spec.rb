@@ -211,6 +211,37 @@ describe Logaling::Command do
         subject["note"].should == "備考"
       end
     end
+
+    context 'project config does not have TARGET-LANGUAGE' do
+      let(:command2) { Logaling::Command.new([], {}) }
+      let(:global_config) { File.join(LOGALING_HOME, 'config') }
+      before do
+        FileUtils.remove_entry_secure(Logaling::Command::LOGALING_CONFIG, true)
+        command2.new('spec2', 'en')
+        FileUtils.touch(global_config)
+        File.open(global_config, "w") do |f| 
+          f.puts "--target-language fr"
+        end
+      end
+
+      context 'but global config have it' do
+        before do
+          command2.add('config test', '設定ファイルのテスト')
+          @stdout = capture(:stdout) {command2.lookup("config")}
+        end
+
+        it "should use global config's TARGET-LANGUAGE" do
+          @stdout.should include "config"
+          @stdout.should include "test"
+          @stdout.should include "設定ファイルのテスト"
+          @stdout.should include "(spec2)"
+        end
+      end
+
+      after do
+        FileUtils.remove_entry_secure(global_config, true)
+      end
+    end
   end
 
   describe "#update" do

@@ -185,10 +185,14 @@ class Logaling::Command < Thor
   end
 
   def load_config_and_merge_options(required={})
-    config = load_config
-    config["glossary"] = options["glossary"] ? options["glossary"] : config["glossary"]
-    config["source-language"] = options["source-language"] ? options["source-language"] : config["source-language"]
-    config["target-language"] = options["target-language"] ? options["target-language"] : config["target-language"]
+    config_list = load_config
+    global_config = config_list["global_config"] ? config_list["global_config"] : {}
+    project_config = config_list["project_config"] ? config_list["project_config"] : {}
+
+    config ||= {}
+    config["glossary"] = options["glossary"] ? options["glossary"] : (project_config["glossary"] ? project_config["glossary"] : global_config["glossary"])
+    config["source-language"] = options["source-language"] ? options["source-language"] : (project_config["source-language"] ? project_config["source-language"] : global_config["source-language"])
+    config["target-language"] = options["target-language"] ? options["target-language"] : (project_config["target-language"] ? project_config["target-language"] : global_config["target-language"])
 
     required.each do |required_option, message|
       raise(Logaling::CommandFailed, message) unless config[required_option]
@@ -198,18 +202,28 @@ class Logaling::Command < Thor
   end
 
   def find_config
-    File.join(find_dotfile, 'config')
+    config ||= {}
+    config["project_config"] = File.join(find_dotfile, 'config')
+    config["global_config"] = global_config_path if global_config_path
+    config
   rescue Logaling::CommandFailed
-    repository.config_path
+    config ||= {}
+    config["project_config"] = repository.config_path if repository.config_path
+    config["global_config"] = global_config_path if global_config_path
+    config
   end
 
   def load_config
     config ||= {}
-    if config_path = find_config
-      File.readlines(config_path).map{|l| l.chomp.split " "}.each do |option|
-        key = option[0].sub(/^[\-]{2}/, "")
-        value = option[1]
-        config[key] = value
+    unless find_config.empty?
+      config_paths = find_config
+      config_paths.each do |config_type, config_path|
+        config[config_type] ||= {}
+        File.readlines(config_path).map{|l| l.chomp.split " "}.each do |option|
+          key = option[0].sub(/^[\-]{2}/, "")
+          value = option[1]
+          config[config_type][key] = value
+        end
       end
     end
     config
@@ -232,4 +246,10 @@ class Logaling::Command < Thor
       end
     end
   end
+
+  def global_config_path
+    path = File.join(LOGALING_HOME, "config")
+    File.exist?(path) ? path : nil
+  end
+
 end
