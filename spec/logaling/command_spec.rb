@@ -175,6 +175,68 @@ describe Logaling::Command do
     end
   end
 
+  describe '#config' do
+    let(:project_config) { File.join(Logaling::Command::LOGALING_CONFIG, 'config') }
+    let(:global_config) { File.join(LOGALING_HOME, 'config') }
+
+    context 'with argument "target-language"' do
+      before do
+        command.options = base_options.merge("target-language" => "fr")
+        command.new('spec', 'en')
+        command.config
+        @config = File.read(project_config)
+      end
+
+      it 'should overwrite target-language' do
+        @config.should include "--target-language fr"
+      end
+    end
+
+    context 'with argument "source-language"' do
+      before do
+        command.options = base_options.merge("source-language" => "ja")
+        command.new('spec', 'en')
+        command.config
+        @config = File.read(project_config)
+      end
+
+      it 'should overwrite source-language' do
+        @config.should include "--source-language ja"
+      end
+    end
+
+    context 'with argument "source-language" and "target-language"' do
+      before do
+        command.options = base_options.merge("source-language" => "ja", "target-language" => "fr")
+        command.new('spec', 'en')
+        command.config
+        @config = File.read(project_config)
+      end
+
+      it 'should overwrite source-language and target-language' do
+        @config.should include "--source-language ja"
+        @config.should include "--target-language fr"
+      end
+    end
+
+    context 'with argument "--global" and "target-language"' do
+      before do
+        command.options = base_options.merge("target-language" => "ja", "global" => true)
+        command.new('spec', 'en')
+        command.config
+        @config = File.read(global_config)
+      end
+
+      it 'should create LOGALING_HOME/config and write target-language' do
+        @config.should include "--target-language ja"
+      end
+
+      after do
+        FileUtils.remove_entry_secure(global_config, true)
+      end
+    end
+  end
+
   describe '#add' do
     before do
       command.new('spec', 'en', 'ja')

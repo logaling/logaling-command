@@ -45,13 +45,10 @@ class Logaling::Command < Thor
   def new(project_name, source_language, target_language=nil)
     unless File.exist?(LOGALING_CONFIG)
       FileUtils.mkdir_p(File.join(LOGALING_CONFIG, "glossary"))
-      #---kokokara
-      File.open(File.join(LOGALING_CONFIG, "config"), 'w') do |config|
-        config.puts "--glossary #{project_name}"
-        config.puts "--source-language #{source_language}"
-        config.puts "--target-language #{target_language}" if target_language
-      end
-      #---kokomade
+      config = {"glossary" => project_name, "source-language" => source_language}
+      config["target-language"] = target_language if target_language
+      write_config(File.join(LOGALING_CONFIG, "config"), config)
+
       register unless options["no-register"]
       say "Successfully created #{LOGALING_CONFIG}"
     else
@@ -100,6 +97,35 @@ class Logaling::Command < Thor
     say e.message
   rescue Logaling::GlossaryNotFound => e
     say "#{config['glossary']} is not yet registered."
+  end
+
+  desc 'config [-S SOURCE LANGUAGE(optional)] [-T TARGET LANGUAGE(optional)] [--global(optional)]', 'Set config.'
+  method_option "global", type: :boolean, default: false
+  method_option "source-language", type: :string, aliases: "-S"
+  method_option "target-language", type: :string, aliases: "-T"
+  def config
+    if !options['source-language'] && !options['target-language']
+      say "Plese input source language or target language."
+      say "Try 'loga config -S en -T ja'."
+    else
+      if options["global"]
+        config_path = File.join(LOGALING_HOME, "config")
+        FileUtils.touch(config_path) unless File.exist?(config_path)
+      else
+        if find_dotfile
+          config_path = File.join(find_dotfile, "config")
+        else
+          say ".logaling not found."
+        end
+      end
+
+      if File.exist?(config_path)
+        config = load_config(config_path)
+        config = merge_options(options, config)
+        write_config(config_path, config)
+        say "Successfully set config."
+      end
+    end
   end
 
   desc 'add [SOURCE TERM] [TARGET TERM] [NOTE(optional)]', 'Add term to glossary.'
@@ -192,15 +218,21 @@ class Logaling::Command < Thor
     global_config = config_list["global_config"] ? config_list["global_config"] : {}
     project_config = config_list["project_config"] ? config_list["project_config"] : {}
 
-    config ||= {}
-    config["glossary"] = options["glossary"] ? options["glossary"] : (project_config["glossary"] ? project_config["glossary"] : global_config["glossary"])
-    config["source-language"] = options["source-language"] ? options["source-language"] : (project_config["source-language"] ? project_config["source-language"] : global_config["source-language"])
-    config["target-language"] = options["target-language"] ? options["target-language"] : (project_config["target-language"] ? project_config["target-language"] : global_config["target-language"])
+    config = merge_options(project_config, global_config)
+    config = merge_options(options, config)
 
     required.each do |required_option, message|
       raise(Logaling::CommandFailed, message) unless config[required_option]
     end
 
+    config
+  end
+
+  def merge_options(options, secondary_options)
+    config ||={}
+    config["glossary"] = options["glossary"] ? options["glossary"] : secondary_options["glossary"]
+    config["source-language"] = options["source-language"] ? options["source-language"] : secondary_options["source-language"]
+    config["target-language"] = options["target-language"] ? options["target-language"] : secondary_options["target-language"]
     config
   end
 
@@ -251,4 +283,11 @@ class Logaling::Command < Thor
     File.exist?(path) ? path : nil
   end
 
+  def write_config(config_path, config)
+    File.open(config_path, 'w') do |fp|
+      fp.puts "--glossary #{config['glossary']}" if config['glossary']
+      fp.puts "--source-language #{config['source-language']}" if config['source-language']
+      fp.puts "--target-language #{config['target-language']}" if config['target-language']
+    end
+  end
 end
