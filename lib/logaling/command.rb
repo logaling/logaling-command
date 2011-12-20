@@ -105,7 +105,7 @@ class Logaling::Command < Thor
   method_option "target-language", type: :string, aliases: "-T"
   def config
     if !options['source-language'] && !options['target-language']
-      say "Plese input source language or target language."
+      say "Please input source language or target language."
       say "Try 'loga config -S en -T ja'."
     else
       if options["global"]
