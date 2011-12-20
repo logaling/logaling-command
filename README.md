@@ -17,7 +17,7 @@ Add term to glossary:
 
   % loga add developer 開発者
 
-Lookup glosasry:
+Lookup glossary:
 
   % loga lookup develop<br/>
     developer           ソフトウェア開発者 (my_glossary)
