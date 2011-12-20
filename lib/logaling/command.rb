@@ -99,33 +99,21 @@ class Logaling::Command < Thor
     say "#{config['glossary']} is not yet registered."
   end
 
-  desc 'config [-S SOURCE LANGUAGE(optional)] [-T TARGET LANGUAGE(optional)] [--global(optional)]', 'Set config.'
+  desc 'config [KEY] [VALUE] [--global(optional)]', 'Set config.'
   method_option "global", type: :boolean, default: false
-  method_option "source-language", type: :string, aliases: "-S"
-  method_option "target-language", type: :string, aliases: "-T"
-  def config
-    if !options['source-language'] && !options['target-language']
-      say "Please input source language or target language."
-      say "Try 'loga config -S en -T ja'."
-    else
-      if options["global"]
-        config_path = File.join(LOGALING_HOME, "config")
-        FileUtils.touch(config_path) unless File.exist?(config_path)
-      else
-        if find_dotfile
-          config_path = File.join(find_dotfile, "config")
-        else
-          say ".logaling not found."
-        end
-      end
+  def config(key, value)
+    support_keys = %w(glossary source-language target-language)
+    raise Logaling::CommandFailed, "#{key} is unsupported option" unless support_keys.include?(key)
 
-      if File.exist?(config_path)
-        config = load_config(config_path)
-        config = merge_options(options, config)
-        write_config(config_path, config)
-        say "Successfully set config."
-      end
-    end
+    config_path = options["global"] ? File.join(LOGALING_HOME, "config") : File.join(find_dotfile, "config")
+    FileUtils.touch(config_path) unless File.exist?(config_path)
+
+    config = load_config(config_path)
+    config = merge_options({key => value}, config)
+    write_config(config_path, config)
+    say "Successfully set config."
+  rescue Logaling::CommandFailed => e
+    say e.message
   end
 
   desc 'add [SOURCE TERM] [TARGET TERM] [NOTE(optional)]', 'Add term to glossary.'
