@@ -22,7 +22,7 @@ require "logaling/glossary"
 require "logaling/external_glossary"
 
 class Logaling::Command < Thor
-  VERSION = "0.0.9"
+  VERSION = "0.1.0"
   LOGALING_CONFIG = '.logaling'
 
   map '-a' => :add,
