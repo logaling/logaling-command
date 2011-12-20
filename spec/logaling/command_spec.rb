@@ -179,56 +179,41 @@ describe Logaling::Command do
     let(:project_config) { File.join(Logaling::Command::LOGALING_CONFIG, 'config') }
     let(:global_config) { File.join(LOGALING_HOME, 'config') }
 
+    subject { File.read(project_config) }
+
     context 'with argument "target-language"' do
       before do
-        command.options = base_options.merge("target-language" => "fr")
         command.new('spec', 'en')
-        command.config
-        @config = File.read(project_config)
+        command.config("target-language", "fr")
       end
 
       it 'should overwrite target-language' do
-        @config.should include "--target-language fr"
+        should include "--target-language fr"
       end
     end
 
     context 'with argument "source-language"' do
       before do
-        command.options = base_options.merge("source-language" => "ja")
         command.new('spec', 'en')
-        command.config
-        @config = File.read(project_config)
+        command.config("source-language", "ja")
       end
 
       it 'should overwrite source-language' do
-        @config.should include "--source-language ja"
-      end
-    end
-
-    context 'with argument "source-language" and "target-language"' do
-      before do
-        command.options = base_options.merge("source-language" => "ja", "target-language" => "fr")
-        command.new('spec', 'en')
-        command.config
-        @config = File.read(project_config)
-      end
-
-      it 'should overwrite source-language and target-language' do
-        @config.should include "--source-language ja"
-        @config.should include "--target-language fr"
+        should include "--source-language ja"
       end
     end
 
     context 'with argument "--global" and "target-language"' do
       before do
-        command.options = base_options.merge("target-language" => "ja", "global" => true)
+        command.options = base_options.merge("global" => true)
         command.new('spec', 'en')
-        command.config
-        @config = File.read(global_config)
+        command.config("target-language", "ja")
       end
 
+      subject { File.read(global_config) }
+
       it 'should create LOGALING_HOME/config and write target-language' do
-        @config.should include "--target-language ja"
+        should include "--target-language ja"
       end
 
       after do
