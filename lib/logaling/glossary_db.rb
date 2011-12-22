@@ -20,6 +20,7 @@ require "yaml"
 require "fileutils"
 require 'groonga'
 require 'csv'
+require 'cgi'
 
 module Logaling
   class GlossaryDB
@@ -150,7 +151,6 @@ module Logaling
     end
 
     def struct_snipped_text(snipped_text)
-      require 'cgi'
       word_list = snipped_text.split(/(<snippet>[^<]*<\/snippet>)/)
       structed_source_term = word_list.map{|word|
         replaced_word = word.sub(/<snippet>([^<]*)<\/snippet>/){|match| $1}
