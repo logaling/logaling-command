@@ -77,20 +77,21 @@ module Logaling
         {:key=>"source_term", :order=>'ascending'},
         {:key=>"target_term", :order=>'ascending'}])
 
-      snippet = Groonga::Snippet.new(:width => 100,
-                                     :default_open_tag => '<snippet>',
-                                     :default_close_tag => '</snippet>',
-                                     :html_escape => false,
-                                     :normalize => true)
+      options = {:width => 100,
+                 :html_escape => true,
+                 :normalize => true}
+      snippet = records_raw.expression.snippet(["<snippet>", "</snippet>"], options)
 
-      snippet.add_keyword(source_term)
-
+      snipped_source_term = []
       records.map do |record|
         term = record.key
+        snipped_text = snippet.execute(term.source_term).join
+
         {:name => term.name,
          :source_language => term.source_language,
          :target_language => term.target_language,
-         :source_term => snippet.execute(term.source_term).join,
+         :source_term => term.source_term,
+         :snipped_source_term => struct_snipped_text(snipped_text),
          :target_term => term.target_term,
          :note => term.note || ''}
       end
@@ -146,6 +147,20 @@ module Logaling
 
     def closed?
       @database.nil? or @database.closed?
+    end
+
+    def struct_snipped_text(snipped_text)
+      require 'cgi'
+      word_list = snipped_text.split(/(<snippet>[^<]*<\/snippet>)/)
+      structed_source_term = word_list.map{|word|
+        replaced_word = word.sub(/<snippet>([^<]*)<\/snippet>/){|match| $1}
+        if replaced_word == word
+          CGI.unescapeHTML(word)
+        else
+          {:keyword => CGI.unescapeHTML(replaced_word)}
+        end
+      }
+      structed_source_term
     end
   end
 end
