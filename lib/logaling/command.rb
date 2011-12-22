@@ -161,7 +161,7 @@ class Logaling::Command < Thor
           color = (term[:name] == config["glossary"]) ? :green : :cyan
           target_string << "\t(#{term[:name]})".color(color)
         end
-        source_string = term[:source_term].split(source_term).insert(1, source_term.dup.bright).join
+        source_string = term[:source_term].gsub(/<snippet>([^<]*)<\/snippet>/){|match| $1.bright}
         printf("  %-#{max_str_size+10}s %s\n", source_string, target_string)
       end
     else
