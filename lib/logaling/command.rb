@@ -19,7 +19,6 @@ require 'thor'
 require 'rainbow'
 require "logaling/repository"
 require "logaling/glossary"
-require "logaling/external_glossary"
 
 class Logaling::Command < Thor
   VERSION = "0.1.1"
@@ -59,6 +58,7 @@ class Logaling::Command < Thor
   desc 'import', 'Import external glossary'
   method_option "list", type: :boolean, default: false
   def import(external_glossary=nil)
+    require "logaling/external_glossary"
     Logaling::ExternalGlossary.load
     if options["list"]
       Logaling::ExternalGlossary.list.each {|glossary| say "#{glossary.name.bright} : #{glossary.description}" }
