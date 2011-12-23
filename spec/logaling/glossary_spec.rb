@@ -101,8 +101,8 @@ module Logaling
         end
 
         it 'should delete the bilingual pair' do
-          @result.should include({:name=>"spec", :source_language=>"en", :target_language=>"ja", :source_term=>"delete_logaling", :target_term=>"てすと2", :note=>"備考"})
-          @result.should_not include({:name=>"spec", :source_language=>"en", :target_language=>"ja", :source_term=>"delete_logaling", :target_term=>"てすと1", :note=>"備考"})
+          @result.any?{|term| term[:source_term] == "delete_logaling" && term[:target_term] == "てすと2"}.should be_true
+          @result.any?{|term| term[:source_term] == "delete_logaling" && term[:target_term] == "てすと1"}.should be_false
         end
       end
 
@@ -138,7 +138,7 @@ module Logaling
           end
 
           it 'should delete the term' do
-            @result.should_not include({:name=>"spec", :source_language=>"en", :target_language=>"ja", :source_term=>"user_logaling", :target_term=>"ユーザ", :note=>"備考"})
+            @result.any?{|term| term[:source_term] == "user_logaling" && term[:target_term] == "ユーザ"}.should be_false
           end
         end
 
@@ -158,8 +158,8 @@ module Logaling
           }
 
           it "should delete terms when force option is true" do
-            @result.should_not include({:name=>"spec", :source_language=>"en", :target_language=>"ja", :source_term=>"delete_loglaing", :target_term=>"てすと1", :note=>"備考"})
-            @result.should_not include({:name=>"spec", :source_language=>"en", :target_language=>"ja", :source_term=>"delete_logaling", :target_term=>"てすと2", :note=>"備考"})
+            @result.any?{|term| term[:source_term] == "delete_logaling" && term[:target_term] == "てすと1"}.should be_false
+            @result.any?{|term| term[:source_term] == "delete_logaling" && term[:target_term] == "てすと2"}.should be_false
           end
         end
       end
