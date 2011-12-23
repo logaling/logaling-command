@@ -42,7 +42,7 @@ class Logaling::ExternalGlossary
     end
 
     def name
-      self.inspect.underscore.gsub(/.*\//,'')
+      self.to_s.underscore.gsub(/.*\//,'')
     end
 
     def description val=nil
