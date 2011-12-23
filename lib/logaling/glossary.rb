@@ -17,6 +17,7 @@
 
 require 'psych'
 require "yaml"
+require "csv"
 require "fileutils"
 
 module Logaling
