@@ -409,6 +409,49 @@ describe Logaling::Command do
     end
   end
 
+  describe "#list" do
+    let(:csv_path) { File.join(File.dirname(glossary_path), "spec.ja.en.csv") }
+    before do
+      command.new('spec', 'en', 'ja')
+      command.add("spec", "スペック", "備考")
+      command.add("spec-test", "スペックてすと", "備考")
+      command.add("spec-test-test", "スペックてすとてすと", "備考")
+
+      FileUtils.mkdir_p(File.dirname(glossary_path))
+      FileUtils.touch(csv_path)
+      File.open(csv_path, "w"){|f| f.puts "test_logaling,テスト"}
+    end
+
+    context 'when .logaling exists' do
+      before do
+        @stdout = capture(:stdout) {command.list}
+      end
+
+      it 'should show terms a list' do
+        @stdout.should include "spec"
+        @stdout.should include "spec-test"
+        @stdout.should include "spec-test-test"
+        @stdout.should_not include "test_logaling"
+      end
+    end
+
+    context 'with arguments glossary' do
+      before do
+        command.options = base_options.merge("glossary" => "spec", "source-language" => "ja", "target-language" => "en")
+        @stdout = capture(:stdout) {command.list}
+      end
+
+      it 'should show terms a list' do
+        @stdout.should include "test_logaling"
+        @stdout.should_not include "spec-test-test"
+      end
+    end
+
+    after do
+      FileUtils.remove_entry_secure(csv_path, true)
+    end
+  end
+
   after do
     FileUtils.remove_entry_secure(Logaling::Command::LOGALING_CONFIG, true)
     FileUtils.remove_entry_secure(File.join(LOGALING_HOME, 'projects', 'spec'), true)
