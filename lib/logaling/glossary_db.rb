@@ -94,6 +94,31 @@ module Logaling
       end
     end
 
+    def list(glossary, source_language, target_language)
+      records_raw = Groonga["glossaries"].select do |record|
+        [
+          record.name == glossary,
+          record.source_language == source_language,
+          record.target_language == target_language
+        ]
+      end
+
+      records = records_raw.sort([
+        {:key=>"source_term", :order=>'ascending'},
+        {:key=>"target_term", :order=>'ascending'}])
+
+      records.map do |record|
+        term = record.key
+
+        {:name => term.name,
+         :source_language => term.source_language,
+         :target_language => term.target_language,
+         :source_term => term.source_term,
+         :target_term => term.target_term,
+         :note => term.note || ''}
+      end
+    end
+
     private
     def add_glossary(name, source_language, target_language, source_term, target_term, note)
       Groonga["glossaries"].add(:name => name,

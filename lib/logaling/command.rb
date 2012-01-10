@@ -176,6 +176,32 @@ class Logaling::Command < Thor
     say "logaling-command version #{Logaling::Command::VERSION}"
   end
 
+  desc 'list', 'Show list.'
+  def list
+    required_options = {
+      "glossary" => "input glossary name '-g <glossary name>'",
+      "source-language" => "input source-language code '-S <source-language code>'",
+      "target-language" => "input target-language code '-T <target-language code>'"
+    }
+    config = load_config_and_merge_options(required_options)
+
+    repository.index
+    terms = repository.list(config["glossary"], config["source-language"], config["target-language"])
+    unless terms.empty?
+      max_str_size = terms.map{|term| term[:source_term].size}.sort.last
+      terms.each do |term|
+        target_string = "#{term[:target_term]}"
+        target_string <<  "\t# #{term[:note]}" unless term[:note].empty?
+        printf("  %-#{max_str_size+10}s %s\n", term[:source_term], target_string)
+      end
+    else
+      "glossary <#{config['glossary']}> not found"
+    end
+
+  rescue Logaling::CommandFailed, Logaling::TermError => e
+    say e.message
+  end
+
   private
   def repository
     @repository ||= Logaling::Repository.new(LOGALING_HOME)
