@@ -65,11 +65,21 @@ module Logaling
       end
     end
 
-    def lookup(source_term)
-      records_raw = Groonga["glossaries"].select do |record|
-        record.source_term =~ source_term
+    def lookup(source_term, source_language, target_language, glossary)
+      records_selected = Groonga["glossaries"].select do |record|
+        conditions = [record.source_term =~ source_term]
+        conditions << (record.source_language =~ source_language) if source_language
+        conditions << (record.target_language =~ target_language) if target_language
+        conditions
       end
-      records = records_raw.sort([
+      specified_glossary = records_selected.select do |record|
+        record.name == glossary
+      end
+      specified_glossary.each do |record|
+        record.key._score += 10
+      end
+      records = records_selected.sort([
+        {:key=>"_score", :order=>'descending'},
         {:key=>"name", :order=>'ascending'},
         {:key=>"source_term", :order=>'ascending'},
         {:key=>"target_term", :order=>'ascending'}])
@@ -77,7 +87,7 @@ module Logaling
       options = {:width => 100,
                  :html_escape => true,
                  :normalize => true}
-      snippet = records_raw.expression.snippet(["<snippet>", "</snippet>"], options)
+      snippet = records_selected.expression.snippet(["<snippet>", "</snippet>"], options)
 
       snipped_source_term = []
       records.map do |record|
