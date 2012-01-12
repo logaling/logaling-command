@@ -129,6 +129,49 @@ module Logaling
       end
     end
 
+    def get_bilingual_pair(source_term, target_term, glossary)
+      records = Groonga["glossaries"].select do |record|
+        [
+          record.name == glossary,
+          record.source_term == source_term,
+          record.target_term == target_term
+        ]
+      end
+
+      records.map do |record|
+        term = record.key
+
+        {:name => term.name,
+         :source_language => term.source_language,
+         :target_language => term.target_language,
+         :source_term => term.source_term,
+         :target_term => term.target_term,
+         :note => term.note || ''}
+      end
+    end
+
+    def get_bilingual_pair_with_note(source_term, target_term, note, glossary)
+      records = Groonga["glossaries"].select do |record|
+        [
+          record.name == glossary,
+          record.source_term == source_term,
+          record.target_term == target_term,
+          record.note == note
+        ]
+      end
+
+      records.map do |record|
+        term = record.key
+
+        {:name => term.name,
+         :source_language => term.source_language,
+         :target_language => term.target_language,
+         :source_term => term.source_term,
+         :target_term => term.target_term,
+         :note => term.note || ''}
+      end
+    end
+
     private
     def add_glossary(name, source_language, target_language, source_term, target_term, note)
       Groonga["glossaries"].add(:name => name,

@@ -43,16 +43,6 @@ module Logaling
         end
       end
 
-      context 'with arguments show existing bilingual pair' do
-        before do
-          glossary.add("user", "ユーザ", "ユーザーではない")
-        end
-
-        it {
-          -> { glossary.add("user", "ユーザ", "ユーザーではない") }.should raise_error(Logaling::TermError)
-        }
-      end
-
       context "when the glossary not found" do
         before do
           glossary.add("test", "テスト", "テスト")
