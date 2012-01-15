@@ -160,7 +160,13 @@ module Logaling
     end
 
     def bilingual_pair_exists_and_has_same_note?(glossary, source_term, target_term, note)
-      target_terms(glossary, source_term).any?{|data| data['target_term'] == target_term && data['note'] == note}
+      target_terms(glossary, source_term).any? do |data|
+        if note.empty?
+          data['target_term'] == target_term
+        else
+          data['target_term'] == target_term && data['note'] == note
+        end
+      end
     end
 
     def target_terms(glossary, source_term)

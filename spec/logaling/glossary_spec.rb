@@ -89,7 +89,13 @@ module Logaling
         }
       end
 
-      context 'with note arguments show exisiting bilingual pair and note ' do
+      context 'with note arguments show exisiting bilingual pair' do
+        it {
+          -> { glossary.update("user", "ユーザ", "ユーザ", "") }.should raise_error(Logaling::TermError)
+        }
+      end
+
+      context 'with note arguments show exisiting bilingual pair and note' do
         it {
           -> { glossary.update("user", "ユーザ", "ユーザ", "ユーザーではない") }.should raise_error(Logaling::TermError)
         }
