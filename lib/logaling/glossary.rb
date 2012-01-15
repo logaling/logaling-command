@@ -85,8 +85,11 @@ module Logaling
       raise GlossaryNotFound unless File.exist?(@path)
 
       glossary = Glossary.load_glossary(@path)
-      if bilingual_pair_exists?(glossary, source_term, new_target_term)
-        raise TermError, "term '#{source_term}: #{target_term}' already exists in '#{@glossary}'"
+      if bilingual_pair_exists_and_has_same_note?(glossary, source_term, new_target_term, note)
+        err_msg = "term '#{source_term}: #{target_term}"
+        err_msg << "(#{note})" unless note.empty?
+        err_msg << "' already exists in '#{@glossary}'"
+        raise TermError, err_msg
       end
 
       target_index = find_term_index(glossary, source_term, target_term)
@@ -154,6 +157,10 @@ module Logaling
 
     def bilingual_pair_exists?(glossary, source_term, target_term)
       target_terms(glossary, source_term).any?{|data| data['target_term'] == target_term }
+    end
+
+    def bilingual_pair_exists_and_has_same_note?(glossary, source_term, target_term, note)
+      target_terms(glossary, source_term).any?{|data| data['target_term'] == target_term && data['note'] == note}
     end
 
     def target_terms(glossary, source_term)
