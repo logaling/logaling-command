@@ -55,15 +55,7 @@ module Logaling
 
       terms = []
       Logaling::GlossaryDB.open(logaling_db_home, "utf8") do |db|
-        terms = db.lookup(source_term)
-        terms.delete_if{|term| term[:source_language] != source_language } if source_language
-        terms.delete_if{|term| term[:target_language] != target_language } if target_language
-        if glossary && !terms.empty?
-          # order by glossary
-          specified = terms.select{|term| term[:name] == glossary}
-          other = terms.select{|term| term[:name] != glossary}
-          terms = specified.concat(other)
-        end
+        terms = db.lookup(source_term, source_language, target_language, glossary)
       end
       terms
     end
