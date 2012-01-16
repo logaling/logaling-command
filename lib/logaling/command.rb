@@ -158,8 +158,13 @@ class Logaling::Command < Thor
         target_string = "#{term[:target_term].bright}"
         target_string <<  "\t# #{term[:note]}" unless term[:note].empty?
         if repository.glossary_counts > 1
-          color = (term[:name] == config["glossary"]) ? :green : :cyan
-          target_string << "\t(#{term[:name]})".color(color)
+          target_string << "\t"
+          glossary_name = "(#{term[:name]})"
+          if term[:name] == config["glossary"]
+            target_string << glossary_name.foreground(:white).background(:green)
+          else
+            target_string << glossary_name
+          end
         end
         source_string = term[:snipped_source_term].map{|word|  word.is_a?(Hash) ? word[:keyword].bright : word }.join
         printf("  %-#{max_str_size+10}s %s\n", source_string, target_string)
