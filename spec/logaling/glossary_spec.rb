@@ -84,18 +84,6 @@ module Logaling
           -> { glossary.update("user", "ユーザ", "ユーザ", "") }.should raise_error(Logaling::TermError)
         }
       end
-
-      context 'with note arguments show exisiting bilingual pair and note' do
-        it {
-          -> { glossary.update("user", "ユーザ", "ユーザ", "ユーザーではない") }.should raise_error(Logaling::TermError)
-        }
-      end
-
-      context 'with note arguments show existing bilingual pair and different note' do
-        it {
-          -> { glossary.update("user", "ユーザ", "ユーザ", "最後の音引きはいらない") }.should_not raise_error(Logaling::TermError)
-        }
-      end
     end
 
     describe '#delete' do

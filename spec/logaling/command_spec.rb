@@ -293,35 +293,40 @@ describe Logaling::Command do
 
   describe "#update" do
     before do
+      FileUtils.remove_entry_secure(File.join(LOGALING_HOME, "db", "index_at"), true)
       command.new('spec', 'en', 'ja')
       command.add("spec", "テスト", "備考")
-    end
-
-    context "not given source-term option" do
-      # should show err
-    end
-
-    context "not given target-term option" do
-      #should show err
-    end
-
-    context "not given new-target-term option" do
-      #should show err
     end
 
     context "with arguments except note" do
       before do
         command.update("spec", "テスト", "スペック")
+        @yaml = YAML::load_file(glossary_path).find{|h| h["source_term"] == "spec" }
       end
-
-      subject { YAML::load_file(glossary_path).find{|h| h["source_term"] == "spec" }}
 
       it "term's target_term should be updated" do
-        subject["target_term"].should == "スペック"
+        @yaml.should == {"source_term"=>"spec", "target_term"=>"スペック", "note"=>"備考"}
+      end
+    end
+
+    context 'with exisiting bilingual pair and note' do
+      before do
+        @stdout = capture(:stdout) { command.update("spec", "テスト", "テスト", "備考") }
       end
 
-      it "term's note should not be updated" do
-        subject["note"].should == "備考"
+      it 'should show error message' do
+        @stdout.should include "already exists"
+      end
+    end
+
+    context 'with existing bilingual pair and different note' do
+      before do
+        command.update("spec", "テスト", "テスト", "備考だけ書き換え")
+        @yaml = YAML::load_file(glossary_path).find{|h| h["source_term"] == "spec" }
+      end
+
+      it "should update note" do
+        @yaml.should == {"source_term"=>"spec", "target_term"=>"テスト", "note"=>"備考だけ書き換え"}
       end
     end
   end
