@@ -67,22 +67,29 @@ module Logaling
         }
       end
 
-      context 'with source-term arguments show not existing bilingual pair' do
+      context 'with source-term show not existing bilingual pair' do
         it {
           -> { glossary.update("use", "ユーザ", "ユーザー", "やっぱりユーザー") }.should raise_error(Logaling::TermError)
         }
       end
 
-      context 'with target-term arguments show not existing bilingual pair' do
+      context 'with target-term show not existing bilingual pair' do
         it {
           -> { glossary.update("user", "ユー", "ユーザー", "やっぱりユーザー") }.should raise_error(Logaling::TermError)
         }
       end
 
-      context 'with note arguments show exisiting bilingual pair' do
-        it {
-          -> { glossary.update("user", "ユーザ", "ユーザ", "") }.should raise_error(Logaling::TermError)
-        }
+      context 'with same target-term and empty note' do
+        before do
+          glossary.update("user", "ユーザ", "ユーザ", "")
+        end
+
+        it 'should clear note' do
+          yaml = YAML::load_file(glossary_path)
+          term = yaml.index({"source_term"=>"user", "target_term"=>"ユーザ", "note"=>""})
+          term.should_not be_nil
+        end
+
       end
     end
 

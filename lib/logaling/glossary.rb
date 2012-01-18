@@ -130,7 +130,9 @@ module Logaling
     end
 
     def rebuild_term(current, source_term, target_term, note)
-      note = current['note'] if note.nil? || note == ""
+      if current['target_term'] != target_term && (note.nil? || note == "")
+        note = current['note']
+      end
       target_term = current['target_term'] if target_term == ""
       build_term(source_term, target_term, note)
     end
