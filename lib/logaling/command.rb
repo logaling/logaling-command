@@ -118,6 +118,13 @@ class Logaling::Command < Thor
 
   desc 'add [SOURCE TERM] [TARGET TERM] [NOTE(optional)]', 'Add term to glossary.'
   def add(source_term, target_term, note='')
+    config = load_config_and_merge_options
+    repository.index
+
+    if repository.bilingual_pair_exists?(source_term, target_term, config["glossary"])
+      raise Logaling::TermError, "term '#{source_term}: #{target_term}' already exists in '#{config["glossary"]}'"
+    end
+
     glossary.add(source_term, target_term, note)
   rescue Logaling::CommandFailed, Logaling::TermError => e
     say e.message
@@ -139,6 +146,13 @@ class Logaling::Command < Thor
 
   desc 'update [SOURCE TERM] [TARGET TERM] [NEW TARGET TERM], [NOTE(optional)]', 'Update term.'
   def update(source_term, target_term, new_target_term, note='')
+    config = load_config_and_merge_options
+    repository.index
+
+    if repository.bilingual_pair_exists_and_has_same_note?(source_term, new_target_term, note, config["glossary"])
+      raise Logaling::TermError, "term '#{source_term}: #{new_target_term}' already exists in '#{config["glossary"]}'"
+    end
+
     glossary.update(source_term, target_term, new_target_term, note)
   rescue Logaling::CommandFailed, Logaling::TermError => e
     say e.message

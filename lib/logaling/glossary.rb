@@ -73,10 +73,6 @@ module Logaling
       FileUtils.touch(@path) unless File.exist?(@path)
 
       glossary = Glossary.load_glossary(@path)
-      if bilingual_pair_exists?(glossary, source_term, target_term)
-        raise TermError, "term '#{source_term}: #{target_term}' already exists in '#{@glossary}'"
-      end
-
       glossary << build_term(source_term, target_term, note)
       dump_glossary(glossary)
     end
@@ -85,12 +81,6 @@ module Logaling
       raise GlossaryNotFound unless File.exist?(@path)
 
       glossary = Glossary.load_glossary(@path)
-      if bilingual_pair_exists_and_has_same_note?(glossary, source_term, new_target_term, note)
-        err_msg = "term '#{source_term}: #{target_term}"
-        err_msg << "(#{note})" unless note.empty?
-        err_msg << "' already exists in '#{@glossary}'"
-        raise TermError, err_msg
-      end
 
       target_index = find_term_index(glossary, source_term, target_term)
       if target_index
@@ -140,7 +130,9 @@ module Logaling
     end
 
     def rebuild_term(current, source_term, target_term, note)
-      note = current['note'] if note.nil? || note == ""
+      if current['target_term'] != target_term && (note.nil? || note == "")
+        note = current['note']
+      end
       target_term = current['target_term'] if target_term == ""
       build_term(source_term, target_term, note)
     end
@@ -151,20 +143,6 @@ module Logaling
           term['source_term'] == source_term
         else
           term['source_term'] == source_term && term['target_term'] == target_term
-        end
-      end
-    end
-
-    def bilingual_pair_exists?(glossary, source_term, target_term)
-      target_terms(glossary, source_term).any?{|data| data['target_term'] == target_term }
-    end
-
-    def bilingual_pair_exists_and_has_same_note?(glossary, source_term, target_term, note)
-      target_terms(glossary, source_term).any? do |data|
-        if note.empty?
-          data['target_term'] == target_term
-        else
-          data['target_term'] == target_term && data['note'] == note
         end
       end
     end
