@@ -20,6 +20,8 @@ require 'cgi'
 
 module Logaling
   class GlossaryDB
+    @@version = 1
+
     def self.open(base_path, encoding, &blk)
       blk ? GlossaryDB.new.open(base_path, encoding, &blk) : GlossaryDB.new.open(base_path, encoding)
     end
@@ -47,8 +49,12 @@ module Logaling
     end
 
     def recreate_table
-      remove_schema
-      populate_schema
+      version = Groonga["configurations"] ? get_config("version") : 0
+      if version.to_i != @@version
+        remove_schema
+        populate_schema
+        add_config("version", @@version.to_s)
+      end
     end
 
     def close
@@ -194,6 +200,11 @@ module Logaling
 
     def populate_schema
       Groonga::Schema.define do |schema|
+        schema.create_table("configurations") do |table|
+          table.short_text("conf_key")
+          table.text("conf_value")
+        end
+
         schema.create_table("glossaries") do |table|
           table.short_text("name")
           table.short_text("source_language")
@@ -215,6 +226,7 @@ module Logaling
 
     def remove_schema
       Groonga::Schema.define do |schema|
+        schema.remove_table("configurations") if Groonga["configurations"]
         schema.remove_table("glossaries") if Groonga["glossaries"]
         schema.remove_table("terms") if Groonga["terms"]
       end
@@ -235,6 +247,21 @@ module Logaling
         end
       }
       structed_source_term
+    end
+
+    def get_config(conf_key)
+      records = Groonga["configurations"].select do |record|
+        record.conf_key == conf_key
+      end
+      value = records.map do |record|
+        config = record.key
+        config.conf_value
+      end
+      value.size > 0 ? value[0] : ""
+    end
+
+    def add_config(conf_key, conf_value)
+      Groonga["configurations"].add(:conf_key => conf_key, :conf_value => conf_value)
     end
   end
 end
