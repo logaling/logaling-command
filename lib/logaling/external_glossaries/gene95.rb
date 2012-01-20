@@ -23,8 +23,7 @@ module Logaling
     target_language 'ja'
 
     def convert
-      buffer = ""
-      CSV.generate(buffer) do |csv|
+      CSV.generate do |csv|
         puts "downloading gene95 dictionary..."
         Zlib::GzipReader.open(open('http://www.namazu.org/~tsuchiya/sdic/data/gene95.tar.gz')) do |gz|
           contents = false
