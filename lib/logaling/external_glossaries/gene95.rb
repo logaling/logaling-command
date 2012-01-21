@@ -25,15 +25,18 @@ module Logaling
     def convert
       CSV.generate do |csv|
         puts "downloading gene95 dictionary..."
-        Zlib::GzipReader.open(open('http://www.namazu.org/~tsuchiya/sdic/data/gene95.tar.gz')) do |gz|
-          contents = false
+        url = 'http://www.namazu.org/~tsuchiya/sdic/data/gene95.tar.gz'
+        Zlib::GzipReader.open(open(url)) do |gz|
           puts "importing gene95 dictionary..."
-          gz.readlines.map{|l| l.encode("UTF-8", "CP932", undef: :replace, replace: '').strip }.each_slice(2) do |source, target|
-            if contents
-              csv << [ source.split("    ").map(&:strip)[0], target ]
-            else
-              contents = true
-            end
+
+          2.times { gz.gets } # skip header
+
+          preprocessed_lines = gz.readlines.map do |line|
+            line.encode("UTF-8", "CP932", undef: :replace, replace: '').chomp
+          end
+
+          preprocessed_lines.each_slice(2) do |source, target|
+            csv << [source.sub(/(    .*)/, ''), target]
           end
         end
       end
