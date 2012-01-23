@@ -88,8 +88,6 @@ module Logaling
           end
         end
       end
-
-      FileUtils.touch(index_at_file)
     end
 
     def glossary_counts
@@ -132,20 +130,6 @@ module Logaling
     end
 
     private
-    def latest_index?
-      if File.exist?(index_at_file)
-        index_at = File.mtime(index_at_file)
-        all_glossary_files = [cache_path, registered_projects.map{|path| File.join(path, "glossary")}].flatten.map{|path| get_all_glossary_paths(path)}.flatten
-        unless Dir.glob(all_glossary_files).any?{|file| File.mtime(file) >= index_at }
-          true
-        else
-          false
-        end
-      else
-        false
-      end
-    end
-
     def get_glossaries(path)
       Dir.glob(get_all_glossary_paths(path)).map do |file|
         glossary_name, source_language, target_language = File::basename(file, ".*").split(".")
@@ -179,10 +163,6 @@ module Logaling
 
     def imported_glossaries
       Dir[File.join(cache_path, "*")]
-    end
-
-    def index_at_file
-      File.join(logaling_db_home, "index_at")
     end
   end
 end
