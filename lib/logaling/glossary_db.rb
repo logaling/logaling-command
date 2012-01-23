@@ -20,7 +20,7 @@ require 'cgi'
 
 module Logaling
   class GlossaryDB
-    @@version = 1
+    VERSION = 1
 
     def self.open(base_path, encoding, &blk)
       blk ? GlossaryDB.new.open(base_path, encoding, &blk) : GlossaryDB.new.open(base_path, encoding)
@@ -50,10 +50,10 @@ module Logaling
 
     def recreate_table
       version = Groonga["configurations"] ? get_config("version") : 0
-      if version.to_i != @@version
+      if version.to_i != VERSION
         remove_schema
         populate_schema
-        add_config("version", @@version.to_s)
+        add_config("version", VERSION.to_s)
       end
     end
 
