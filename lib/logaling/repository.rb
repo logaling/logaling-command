@@ -71,18 +71,21 @@ module Logaling
     end
 
     def index
-      return if latest_index?
       projects = Dir[File.join(@path, "projects", "*")]
 
       Logaling::GlossaryDB.open(logaling_db_home, "utf8") do |db|
         db.recreate_table
         projects.each do |project|
-          get_glossaries_from_project(project).each do |glossary, glossary_name, source_language, target_language|
-            db.index_glossary(glossary, glossary_name, source_language, target_language)
+          get_glossaries_from_project(project).each do |glossary_path, glossary_name, glossary_source, source_language, target_language, indexed_at|
+            unless db.glossary_source_exist?(glossary_source, indexed_at)
+              db.index_glossary(Glossary.load(glossary_path), glossary_name, glossary_source, source_language, target_language, indexed_at)
+            end
           end
         end
-        get_glossaries(cache_path).each do |glossary, glossary_name, source_language, target_language|
-          db.index_glossary(glossary, glossary_name, source_language, target_language)
+        get_glossaries(cache_path).each do |glossary_path, glossary_name, glossary_source, source_language, target_language, indexed_at|
+          unless db.glossary_source_exist?(glossary_source, indexed_at)
+            db.index_glossary(Glossary.load(glossary_path), glossary_name, glossary_source, source_language, target_language, indexed_at)
+          end
         end
       end
 
@@ -146,7 +149,7 @@ module Logaling
     def get_glossaries(path)
       Dir.glob(get_all_glossary_paths(path)).map do |file|
         glossary_name, source_language, target_language = File::basename(file, ".*").split(".")
-        [Glossary.load(file), glossary_name, source_language, target_language]
+        [file, glossary_name, File::basename(file), source_language, target_language, File.mtime(file)]
       end
     end
 

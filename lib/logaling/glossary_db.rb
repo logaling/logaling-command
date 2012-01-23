@@ -62,13 +62,18 @@ module Logaling
       @database = nil
     end
 
-    def index_glossary(glossary, glossary_name, source_language, target_language)
+    def index_glossary(glossary, glossary_name, glossary_source, source_language, target_language, indexed_at)
+      delete_translations_by_glossary_source(glossary_source)
+      delete_glossary(glossary_name)
+      delete_glossary_source(glossary_source)
+
+      add_glossary_source(glossary_source, indexed_at)
       add_glossary(glossary_name)
       glossary.each do |term|
         source_term = term['source_term']
         target_term = term['target_term']
         note = term['note']
-        add_translations(glossary_name, source_language, target_language, source_term, target_term, note)
+        add_translation(glossary_name, glossary_source, source_language, target_language, source_term, target_term, note)
       end
     end
 
@@ -178,23 +183,64 @@ module Logaling
       end
     end
 
+    def glossary_source_exist?(glossary_source, indexed_at)
+      glossary = Groonga["glossary_sources"].select do |record|
+        [
+          record.key == glossary_source,
+          record.indexed_at == indexed_at
+        ]
+      end
+      !glossary.size.zero?
+    end
+
     private
-    def add_glossary(glossary_name)
-      name = Groonga["glossaries"].select{|record| record.key == glossary_name}
-      if name.size.zero?
-        now = Time.now
-        Groonga["glossaries"].add(glossary_name, :indexed_at => now)
+    def delete_glossary_source(glossary_source)
+      records = Groonga["glossary_sources"].select do |record|
+        record.key == glossary_source
+      end
+
+      records.each do |record|
+        record.key.delete
       end
     end
 
-    def add_translations(glossary_name, source_language, target_language, source_term, target_term, note)
+    def add_glossary_source(glossary_source, indexed_at)
+      Groonga["glossary_sources"].add(glossary_source, :indexed_at => indexed_at)
+    end
+
+    def delete_glossary(glossary_name)
+      records = Groonga["glossaries"].select do |record|
+        record.key == glossary_name
+      end
+
+      records.each do |record|
+        record.key.delete
+      end
+    end
+
+    def add_glossary(glossary_name)
+      Groonga["glossaries"].add(glossary_name)
+    end
+
+    def delete_translations_by_glossary_source(glossary_source)
+      records = Groonga["translations"].select do |record|
+        record.glossary_source == glossary_source
+      end
+
+      records.each do |record|
+        record.key.delete
+      end
+    end
+
+    def add_translation(glossary_name, glossary_source, source_language, target_language, source_term, target_term, note)
       Groonga["translations"].add(:glossary => glossary_name,
-                                :source_language => source_language,
-                                :target_language => target_language,
-                                :source_term => source_term,
-                                :target_term => target_term,
-                                :note => note,
-                               )
+                                  :glossary_source => glossary_source,
+                                  :source_language => source_language,
+                                  :target_language => target_language,
+                                  :source_term => source_term,
+                                  :target_term => target_term,
+                                  :note => note,
+                                 )
     end
 
     def reset_context(encoding)
@@ -213,14 +259,20 @@ module Logaling
           table.text("conf_value")
         end
 
-        schema.create_table("glossaries",
+        schema.create_table("glossary_sources",
                            :type => :hash,
                            :key_type => "ShortText") do |table|
           table.time("indexed_at")
         end
 
+        schema.create_table("glossaries",
+                           :type => :hash,
+                           :key_type => "ShortText") do |table|
+        end
+
         schema.create_table("translations") do |table|
           table.reference("glossary", "glossaries")
+          table.reference("glossary_source", "glossary_sources")
           table.short_text("source_language")
           table.short_text("target_language")
           table.short_text("source_term")
@@ -243,6 +295,7 @@ module Logaling
         schema.remove_table("configurations") if Groonga["configurations"]
         schema.remove_table("translations") if Groonga["translations"]
         schema.remove_table("glossaries") if Groonga["glossaries"]
+        schema.remove_table("glossary_sources") if Groonga["glossary_sources"]
         schema.remove_table("terms") if Groonga["terms"]
       end
     end
