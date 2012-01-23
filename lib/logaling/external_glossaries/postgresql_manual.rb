@@ -1,4 +1,5 @@
 # Copyright (C) 2011  Miho SUZUKI
+# Copyright (C) 2012  Kouhei Sutou <kou@clear-code.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,15 +22,14 @@ module Logaling
     description     'PostgreSQL7.1 Manual (http://osb.sraoss.co.jp/PostgreSQL/Manual/)'
     source_language 'en'
     target_language 'ja'
+    output_format   'csv'
 
-    def convert
-      buffer = ""
-      CSV.generate(buffer) do |csv|
-        doc = ::Nokogiri::HTML(open("http://osb.sraoss.co.jp/PostgreSQL/Manual/word.html", "r:iso-2022-jp").read.encode("utf-8"))
-        doc.css('table table tr')[2..-1].each do |tr|
-          if tr.children[2]
-            csv << [tr.children[2].text, tr.children[4].text]
-          end
+    private
+    def convert_to_csv(csv)
+      doc = ::Nokogiri::HTML(open("http://osb.sraoss.co.jp/PostgreSQL/Manual/word.html", "r:iso-2022-jp").read.encode("utf-8"))
+      doc.css('table table tr')[2..-1].each do |tr|
+        if tr.children[2]
+          csv << [tr.children[2].text, tr.children[4].text]
         end
       end
     end

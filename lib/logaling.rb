@@ -1,6 +1,7 @@
-# -*- encoding: utf-8 -*-
+# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2011  Miho SUZUKI
+# Copyright (C) 2011  Kouhei Sutou <kou@clear-code.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,4 +26,5 @@ module Logaling
   class GlossaryNotFound < LogalingError; end
   class GlossaryDBNotFound < LogalingError; end
   class ExternalGlossaryNotFound < LogalingError; end
+  class UnsupportedFormat < LogalingError; end
 end

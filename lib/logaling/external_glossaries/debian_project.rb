@@ -1,4 +1,5 @@
 # Copyright (C) 2011  Miho SUZUKI
+# Copyright (C) 2012  Kouhei Sutou <kou@clear-code.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,15 +22,14 @@ module Logaling
     description     'Debian JP Project (http://www.debian.or.jp/community/translate/)'
     source_language 'en'
     target_language 'ja'
+    output_format   'csv'
 
-    def convert
-      buffer = ""
-      CSV.generate(buffer) do |csv|
-        doc = ::Nokogiri::HTML(open("http://www.debian.or.jp/community/translate/trans_table.html", "r"))
-        doc.css('dl').each do |dl|
-          dl.children.each_slice(3) do |dt, dd, _|
-            csv << [dt.text, dd.text.gsub(/(^\/|\/$)/,'')]
-          end
+    private
+    def convert_to_csv(csv)
+      doc = ::Nokogiri::HTML(open("http://www.debian.or.jp/community/translate/trans_table.html", "r"))
+      doc.css('dl').each do |dl|
+        dl.children.each_slice(3) do |dt, dd, _|
+          csv << [dt.text, dd.text.gsub(/(^\/|\/$)/,'')]
         end
       end
     end

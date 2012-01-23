@@ -1,4 +1,5 @@
 # Copyright (C) 2011  Miho SUZUKI
+# Copyright (C) 2012  Kouhei Sutou <kou@clear-code.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,14 +22,13 @@ module Logaling
     description     'GNOME Translation Project Ja (http://live.gnome.org/TranslationProjectJa)'
     source_language 'en'
     target_language 'ja'
+    output_format   'csv'
 
-    def convert
-      buffer = ""
-      CSV.generate(buffer) do |csv|
-        doc = ::Nokogiri::HTML(open("http://www.gnome.gr.jp/l10n/trans-terms.html", "r"))
-        doc.css('table tr')[1..-1].each do |tr|
-          csv << [tr.children[0].text, tr.children[1].text]
-        end
+    private
+    def convert_to_csv(csv)
+      doc = ::Nokogiri::HTML(open("http://www.gnome.gr.jp/l10n/trans-terms.html", "r"))
+      doc.css('table tr')[1..-1].each do |tr|
+        csv << [tr.children[0].text, tr.children[1].text]
       end
     end
   end

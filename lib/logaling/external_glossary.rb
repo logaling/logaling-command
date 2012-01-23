@@ -56,14 +56,32 @@ class Logaling::ExternalGlossary
     def target_language val=nil
       @target_language ||= val
     end
+
+    def output_format(*args)
+      if args.empty?
+        @output_format ||= "csv"
+      else
+        @output_format = args.first
+      end
+    end
   end
 
   def import
-    File.open(import_file_name, "w") {|f| f.write(self.convert) }
+    File.open(import_file_name, "w") do |output|
+      output_format = self.class.output_format
+      output_format = output_format.to_s if output_format.is_a?(Symbol)
+      case output_format
+      when "csv"
+        convert_to_csv(CSV.new(output))
+      else
+        raise UnsupportedFormat, "unsupported format: <#{output_format}>"
+      end
+    end
   end
 
   private
   def import_file_name
-    [self.class.name, self.class.source_language, self.class.target_language, 'csv'].join('.')
+    [self.class.name, self.class.source_language,
+     self.class.target_language, self.class.output_format].join('.')
   end
 end

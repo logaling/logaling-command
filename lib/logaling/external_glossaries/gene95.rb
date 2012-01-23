@@ -1,4 +1,5 @@
-# Copyright (C) 2012 Koji SHIMADA
+# Copyright (C) 2012  Koji SHIMADA
+# Copyright (C) 2012  Kouhei Sutou <kou@clear-code.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,33 +24,33 @@ module Logaling
     description     'GENE95 Dictionary (http://www.namazu.org/~tsuchiya/sdic/data/gene.html)'
     source_language 'en'
     target_language 'ja'
+    output_format   'csv'
 
-    def convert
-      CSV.generate do |csv|
-        puts "downloading gene95 dictionary..."
-        url = 'http://www.namazu.org/~tsuchiya/sdic/data/gene95.tar.gz'
-        Zlib::GzipReader.open(open(url)) do |gz|
-          puts "importing gene95 dictionary..."
+    private
+    def convert_to_csv(csv)
+      puts "downloading gene95 dictionary..."
+      url = 'http://www.namazu.org/~tsuchiya/sdic/data/gene95.tar.gz'
+      Zlib::GzipReader.open(open(url)) do |gz|
+        puts "importing gene95 dictionary..."
 
-          Gem::Package::TarReader.new(gz) do |tar|
-            tar.each do |entry|
-              case entry.full_name
-              when "gene.txt"
-                lines = StringIO.new(entry.read).each_line
+        Gem::Package::TarReader.new(gz) do |tar|
+          tar.each do |entry|
+            case entry.full_name
+            when "gene.txt"
+              lines = StringIO.new(entry.read).each_line
 
-                2.times { lines.next } # skip header
+              2.times { lines.next } # skip header
 
-                preprocessed_lines = lines.map.map do |line|
-                  line.encode("UTF-8", "CP932",
-                              undef: :replace, replace: '').chomp
-                end
-
-                preprocessed_lines.each_slice(2) do |source, target|
-                  csv << [source.sub(/(    .*)/, ''), target]
-                end
-              else
-                # ignore
+              preprocessed_lines = lines.map.map do |line|
+                line.encode("UTF-8", "CP932",
+                            undef: :replace, replace: '').chomp
               end
+
+              preprocessed_lines.each_slice(2) do |source, target|
+                csv << [source.sub(/(    .*)/, ''), target]
+              end
+            else
+              # ignore
             end
           end
         end
