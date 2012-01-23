@@ -15,6 +15,8 @@
 
 require 'open-uri'
 require 'zlib'
+require 'stringio'
+require 'rubygems/package'
 
 module Logaling
   class Gene95 < ExternalGlossary
@@ -29,14 +31,26 @@ module Logaling
         Zlib::GzipReader.open(open(url)) do |gz|
           puts "importing gene95 dictionary..."
 
-          2.times { gz.gets } # skip header
+          Gem::Package::TarReader.new(gz) do |tar|
+            tar.each do |entry|
+              case entry.full_name
+              when "gene.txt"
+                lines = StringIO.new(entry.read).each_line
 
-          preprocessed_lines = gz.readlines.map do |line|
-            line.encode("UTF-8", "CP932", undef: :replace, replace: '').chomp
-          end
+                2.times { lines.next } # skip header
 
-          preprocessed_lines.each_slice(2) do |source, target|
-            csv << [source.sub(/(    .*)/, ''), target]
+                preprocessed_lines = lines.map.map do |line|
+                  line.encode("UTF-8", "CP932",
+                              undef: :replace, replace: '').chomp
+                end
+
+                preprocessed_lines.each_slice(2) do |source, target|
+                  csv << [source.sub(/(    .*)/, ''), target]
+                end
+              else
+                # ignore
+              end
+            end
           end
         end
       end
