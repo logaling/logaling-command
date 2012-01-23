@@ -77,12 +77,12 @@ module Logaling
       Logaling::GlossaryDB.open(logaling_db_home, "utf8") do |db|
         db.recreate_table
         projects.each do |project|
-          get_glossaries_from_project(project).each do |glossary, name, source_language, target_language|
-            db.index_glossary(glossary, name, source_language, target_language)
+          get_glossaries_from_project(project).each do |glossary, glossary_name, source_language, target_language|
+            db.index_glossary(glossary, glossary_name, source_language, target_language)
           end
         end
-        get_glossaries(cache_path).each do |glossary, name, source_language, target_language|
-          db.index_glossary(glossary, name, source_language, target_language)
+        get_glossaries(cache_path).each do |glossary, glossary_name, source_language, target_language|
+          db.index_glossary(glossary, glossary_name, source_language, target_language)
         end
       end
 
@@ -145,8 +145,8 @@ module Logaling
 
     def get_glossaries(path)
       Dir.glob(get_all_glossary_paths(path)).map do |file|
-        name, source_language, target_language = File::basename(file, ".*").split(".")
-        [Glossary.load(file), name, source_language, target_language]
+        glossary_name, source_language, target_language = File::basename(file, ".*").split(".")
+        [Glossary.load(file), glossary_name, source_language, target_language]
       end
     end
 
