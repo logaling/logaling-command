@@ -204,10 +204,10 @@ class Logaling::Command < Thor
       "target-language" => "input target-language code '-T <target-language code>'"
     }
     config = load_config_and_merge_options(required_options)
-    run_pager
     repository.index
     terms = repository.show(config["glossary"], config["source-language"], config["target-language"])
     unless terms.empty?
+      run_pager
       max_str_size = terms.map{|term| term[:source_term].size}.sort.last
       terms.each do |term|
         target_string = "#{term[:target_term]}"
@@ -224,10 +224,10 @@ class Logaling::Command < Thor
 
   desc 'list', 'Show glossary list.'
   def list
-    run_pager
     repository.index
     glossaries = repository.list
     unless glossaries.empty?
+      run_pager
       glossaries.each do |glossary|
         printf("  %s\n", glossary)
       end
