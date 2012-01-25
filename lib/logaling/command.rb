@@ -174,8 +174,8 @@ class Logaling::Command < Thor
         target_string <<  "\t# #{term[:note]}" unless term[:note].empty?
         if repository.glossary_counts > 1
           target_string << "\t"
-          glossary_name = "(#{term[:name]})"
-          if term[:name] == config["glossary"]
+          glossary_name = "(#{term[:glossary_name]})"
+          if term[:glossary_name] == config["glossary"]
             target_string << glossary_name.foreground(:white).background(:green)
           else
             target_string << glossary_name
