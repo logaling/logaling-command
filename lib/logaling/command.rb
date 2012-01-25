@@ -168,6 +168,7 @@ class Logaling::Command < Thor
 
     unless terms.empty?
       max_str_size = terms.map{|term| term[:source_term].size}.sort.last
+      run_pager
       terms.each do |term|
         target_string = "#{term[:target_term].bright}"
         target_string <<  "\t# #{term[:note]}" unless term[:note].empty?
@@ -203,7 +204,7 @@ class Logaling::Command < Thor
       "target-language" => "input target-language code '-T <target-language code>'"
     }
     config = load_config_and_merge_options(required_options)
-
+    run_pager
     repository.index
     terms = repository.list(config["glossary"], config["source-language"], config["target-language"])
     unless terms.empty?
@@ -322,5 +323,33 @@ class Logaling::Command < Thor
       fp.puts "--source-language #{config['source-language']}" if config['source-language']
       fp.puts "--target-language #{config['target-language']}" if config['target-language']
     end
+  end
+
+  # http://nex-3.com/posts/73-git-style-automatic-paging-in-ruby
+  def run_pager
+    return if ::RUBY_PLATFORM =~ /win32/
+    return unless STDOUT.tty?
+
+    read, write = IO.pipe
+
+    unless Kernel.fork # Child process
+      STDOUT.reopen(write)
+      STDERR.reopen(write) if STDERR.tty?
+      read.close
+      write.close
+      return
+    end
+
+    # Parent process, become pager
+    STDIN.reopen(read)
+    read.close
+    write.close
+
+    ENV['LESS'] = 'FSRX' # Don't page if the input is short enough
+
+    # wait until we have input before we start the pager
+    Kernel.select [STDIN]
+    pager = ENV['PAGER'] || 'less'
+    exec pager rescue exec "/bin/sh", "-c", pager
   end
 end
