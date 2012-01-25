@@ -119,7 +119,7 @@ module Logaling
       end
     end
 
-    def list(glossary, source_language, target_language)
+    def translation_list(glossary, source_language, target_language)
       records_raw = Groonga["translations"].select do |record|
         [
           record.glossary == glossary,

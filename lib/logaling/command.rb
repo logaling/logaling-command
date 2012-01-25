@@ -196,8 +196,8 @@ class Logaling::Command < Thor
     say "logaling-command version #{Logaling::Command::VERSION}"
   end
 
-  desc 'list', 'Show list.'
-  def list
+  desc 'show', 'Show terms in glossary.'
+  def show
     required_options = {
       "glossary" => "input glossary name '-g <glossary name>'",
       "source-language" => "input source-language code '-S <source-language code>'",
@@ -206,7 +206,7 @@ class Logaling::Command < Thor
     config = load_config_and_merge_options(required_options)
     run_pager
     repository.index
-    terms = repository.list(config["glossary"], config["source-language"], config["target-language"])
+    terms = repository.show(config["glossary"], config["source-language"], config["target-language"])
     unless terms.empty?
       max_str_size = terms.map{|term| term[:source_term].size}.sort.last
       terms.each do |term|

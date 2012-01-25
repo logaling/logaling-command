@@ -60,12 +60,12 @@ module Logaling
       terms
     end
 
-    def list(glossary, source_language, target_language)
+    def show(glossary, source_language, target_language)
       raise GlossaryDBNotFound unless File.exist?(logaling_db_home)
 
       terms = []
       Logaling::GlossaryDB.open(logaling_db_home, "utf8") do |db|
-        terms = db.list(glossary, source_language, target_language)
+        terms = db.translation_list(glossary, source_language, target_language)
       end
       terms
     end
