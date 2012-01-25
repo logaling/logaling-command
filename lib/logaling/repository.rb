@@ -70,6 +70,16 @@ module Logaling
       terms
     end
 
+    def list
+      raise GlossaryDBNotFound unless File.exist?(logaling_db_home)
+
+      glossaries = []
+      Logaling::GlossaryDB.open(logaling_db_home, "utf8") do |db|
+        glossaries = db.get_all_glossary
+      end
+      glossaries
+    end
+
     def index
       project_glossaries = Dir[File.join(@path, "projects", "*")].map do |project|
         Dir.glob(get_all_glossary_sources(File.join(project, "glossary")))
@@ -87,7 +97,7 @@ module Logaling
             db.index_glossary(Glossary.load(glossary_source), glossary_name, glossary_source, source_language, target_language, indexed_at)
           end
         end
-        (db.get_all_glossary - all_glossaries).each do |glossary_source|
+        (db.get_all_glossary_source - all_glossaries).each do |glossary_source|
           glossary_name, source_language, target_language = get_glossary(glossary_source)
           puts "now deindex #{glossary_name}..."
           db.deindex_glossary(glossary_name, glossary_source)

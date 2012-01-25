@@ -218,7 +218,24 @@ class Logaling::Command < Thor
       "glossary <#{config['glossary']}> not found"
     end
 
-  rescue Logaling::CommandFailed, Logaling::TermError => e
+  rescue Logaling::CommandFailed, Logaling::GlossaryDBNotFound => e
+    say e.message
+  end
+
+  desc 'list', 'Show glossary list.'
+  def list
+    run_pager
+    repository.index
+    glossaries = repository.list
+    unless glossaries.empty?
+      glossaries.each do |glossary|
+        printf("  %s\n", glossary)
+      end
+    else
+      "There is no registered glossary."
+    end
+
+  rescue Logaling::CommandFailed, Logaling::GlossaryDBNotFound => e
     say e.message
   end
 
