@@ -31,7 +31,6 @@ describe Logaling::Command do
 
   describe '#new' do
     before do
-      sleep(1)
       @project_counts = Dir[File.join(LOGALING_HOME, "projects", "*")].size
     end
 
@@ -120,7 +119,6 @@ describe Logaling::Command do
 
   describe '#unregister' do
     before do
-      sleep(1)
       @project_counts = Dir[File.join(LOGALING_HOME, "projects", "*")].size
     end
 
@@ -187,7 +185,6 @@ describe Logaling::Command do
 
     context 'with argument "target-language"' do
       before do
-        sleep(1)
         command.new('spec', 'en')
         command.config("target-language", "fr")
       end
@@ -229,7 +226,6 @@ describe Logaling::Command do
 
   describe '#add' do
     before do
-      sleep(1)
       command.new('spec', 'en', 'ja')
     end
 
@@ -423,7 +419,6 @@ describe Logaling::Command do
   describe "#show" do
     let(:csv_path) { File.join(File.dirname(glossary_path), "spec.ja.en.csv") }
     before do
-      sleep(1)
       command.new('spec', 'en', 'ja')
       command.add("spec", "スペック", "備考")
       command.add("spec-test", "スペックてすと", "備考")
@@ -467,7 +462,6 @@ describe Logaling::Command do
   describe '#list' do
     context 'when some glossaries are registered' do
       before do
-        sleep(1)
         command.new('spec', 'en', 'ja')
         @stdout = capture(:stdout) {command.list}
       end
@@ -476,10 +470,9 @@ describe Logaling::Command do
         @stdout.should include "spec"
       end
     end
-    #unregisterしたらglossaryの一覽に入らないこと
+
     context 'when a glossary is unregistered' do
       before do
-        sleep(1)
         command.new('spec', 'en', 'ja')
         repository.unregister('spec')
         @stdout = capture(:stdout) {command.list}
