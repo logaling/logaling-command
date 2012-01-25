@@ -62,10 +62,14 @@ module Logaling
       @database = nil
     end
 
-    def index_glossary(glossary, glossary_name, glossary_source, source_language, target_language, indexed_at)
+    def deindex_glossary(glossary_name, glossary_source)
       delete_translations_by_glossary_source(glossary_source)
       delete_glossary(glossary_name)
       delete_glossary_source(glossary_source)
+    end
+
+    def index_glossary(glossary, glossary_name, glossary_source, source_language, target_language, indexed_at)
+      deindex_glossary(glossary_name, glossary_source)
 
       add_glossary_source(glossary_source, indexed_at)
       add_glossary(glossary_name)
@@ -191,6 +195,14 @@ module Logaling
         ]
       end
       !glossary.size.zero?
+    end
+
+    def get_all_glossary
+      glossaries = []
+      Groonga["glossary_sources"].each do |record|
+        glossaries << record.key
+      end
+      glossaries
     end
 
     private

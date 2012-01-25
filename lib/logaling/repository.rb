@@ -71,21 +71,26 @@ module Logaling
     end
 
     def index
-      projects = Dir[File.join(@path, "projects", "*")]
+      project_glossaries = Dir[File.join(@path, "projects", "*")].map do |project|
+        Dir.glob(get_all_glossary_sources(File.join(project, "glossary")))
+      end
+      imported_glossaries = Dir.glob(get_all_glossary_sources(cache_path))
+      all_glossaries = project_glossaries.flatten + imported_glossaries
 
       Logaling::GlossaryDB.open(logaling_db_home, "utf8") do |db|
         db.recreate_table
-        projects.each do |project|
-          get_glossaries_from_project(project).each do |glossary_path, glossary_name, glossary_source, source_language, target_language, indexed_at|
-            unless db.glossary_source_exist?(glossary_source, indexed_at)
-              db.index_glossary(Glossary.load(glossary_path), glossary_name, glossary_source, source_language, target_language, indexed_at)
-            end
+        all_glossaries.each do |glossary_source|
+          indexed_at = File.mtime(glossary_source)
+          unless db.glossary_source_exist?(glossary_source, indexed_at)
+            glossary_name, source_language, target_language = get_glossary(glossary_source)
+            puts "now index #{glossary_name}..."
+            db.index_glossary(Glossary.load(glossary_source), glossary_name, glossary_source, source_language, target_language, indexed_at)
           end
         end
-        get_glossaries(cache_path).each do |glossary_path, glossary_name, glossary_source, source_language, target_language, indexed_at|
-          unless db.glossary_source_exist?(glossary_source, indexed_at)
-            db.index_glossary(Glossary.load(glossary_path), glossary_name, glossary_source, source_language, target_language, indexed_at)
-          end
+        (db.get_all_glossary - all_glossaries).each do |glossary_source|
+          glossary_name, source_language, target_language = get_glossary(glossary_source)
+          puts "now deindex #{glossary_name}..."
+          db.deindex_glossary(glossary_name, glossary_source)
         end
       end
     end
@@ -130,18 +135,12 @@ module Logaling
     end
 
     private
-    def get_glossaries(path)
-      Dir.glob(get_all_glossary_paths(path)).map do |file|
-        glossary_name, source_language, target_language = File::basename(file, ".*").split(".")
-        [file, glossary_name, File::basename(file), source_language, target_language, File.mtime(file)]
-      end
+    def get_glossary(path)
+      glossary_name, source_language, target_language = File::basename(path, ".*").split(".")
+      [glossary_name, source_language, target_language]
     end
 
-    def get_glossaries_from_project(path)
-      get_glossaries(File.join(path, "glossary"))
-    end
-
-    def get_all_glossary_paths(path)
+    def get_all_glossary_sources(path)
       %w(yml tsv csv).map{|type| File.join(path, "*.#{type}") }
     end
 
