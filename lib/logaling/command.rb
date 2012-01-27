@@ -205,7 +205,7 @@ class Logaling::Command < Thor
     }
     config = load_config_and_merge_options(required_options)
     repository.index
-    terms = repository.show(config["glossary"], config["source-language"], config["target-language"])
+    terms = repository.show_glossary(config["glossary"], config["source-language"], config["target-language"])
     unless terms.empty?
       run_pager
       max_str_size = terms.map{|term| term[:source_term].size}.sort.last

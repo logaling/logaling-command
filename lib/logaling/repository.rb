@@ -60,7 +60,7 @@ module Logaling
       terms
     end
 
-    def show(glossary, source_language, target_language)
+    def show_glossary(glossary, source_language, target_language)
       raise GlossaryDBNotFound unless File.exist?(logaling_db_home)
 
       terms = []
