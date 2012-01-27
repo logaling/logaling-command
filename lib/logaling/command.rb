@@ -32,6 +32,8 @@ class Logaling::Command < Thor
       '-n' => :new,
       '-r' => :register,
       '-U' => :unregister,
+      '-L' => :list,
+      '-s' => :show,
       '-v' => :version
 
   class_option "glossary",        type: :string, aliases: "-g"
@@ -196,18 +198,18 @@ class Logaling::Command < Thor
     say "logaling-command version #{Logaling::Command::VERSION}"
   end
 
-  desc 'list', 'Show list.'
-  def list
+  desc 'show', 'Show terms in glossary.'
+  def show
     required_options = {
       "glossary" => "input glossary name '-g <glossary name>'",
       "source-language" => "input source-language code '-S <source-language code>'",
       "target-language" => "input target-language code '-T <target-language code>'"
     }
     config = load_config_and_merge_options(required_options)
-    run_pager
     repository.index
-    terms = repository.list(config["glossary"], config["source-language"], config["target-language"])
+    terms = repository.show_glossary(config["glossary"], config["source-language"], config["target-language"])
     unless terms.empty?
+      run_pager
       max_str_size = terms.map{|term| term[:source_term].size}.sort.last
       terms.each do |term|
         target_string = "#{term[:target_term]}"
@@ -218,7 +220,24 @@ class Logaling::Command < Thor
       "glossary <#{config['glossary']}> not found"
     end
 
-  rescue Logaling::CommandFailed, Logaling::TermError => e
+  rescue Logaling::CommandFailed, Logaling::GlossaryDBNotFound => e
+    say e.message
+  end
+
+  desc 'list', 'Show glossary list.'
+  def list
+    repository.index
+    glossaries = repository.list
+    unless glossaries.empty?
+      run_pager
+      glossaries.each do |glossary|
+        printf("  %s\n", glossary)
+      end
+    else
+      "There is no registered glossary."
+    end
+
+  rescue Logaling::CommandFailed, Logaling::GlossaryDBNotFound => e
     say e.message
   end
 

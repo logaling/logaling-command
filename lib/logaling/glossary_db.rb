@@ -119,7 +119,7 @@ module Logaling
       end
     end
 
-    def list(glossary, source_language, target_language)
+    def translation_list(glossary, source_language, target_language)
       records_raw = Groonga["translations"].select do |record|
         [
           record.glossary == glossary,
@@ -197,12 +197,16 @@ module Logaling
       !glossary.size.zero?
     end
 
+    def get_all_glossary_source
+      Groonga["glossary_sources"].sort([
+        {:key=>"_key", :order=>'ascending'}
+      ]).map{|record| record.key}
+    end
+
     def get_all_glossary
-      glossaries = []
-      Groonga["glossary_sources"].each do |record|
-        glossaries << record.key
-      end
-      glossaries
+      Groonga["glossaries"].sort([
+        {:key=>"_key", :order=>'ascending'}
+      ]).map{|record| record.key}
     end
 
     private

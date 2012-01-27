@@ -22,6 +22,7 @@ describe Logaling::Command do
   let(:command) { Logaling::Command.new([], base_options) }
   let(:glossary_path) { Logaling::Glossary.build_path('spec', 'en', 'ja') }
   let(:target_project_path) { File.join(LOGALING_HOME, "projects", "spec") }
+  let(:repository) { Logaling::Repository.new(LOGALING_HOME) }
 
   before do
     FileUtils.remove_entry_secure(Logaling::Command::LOGALING_CONFIG, true)
@@ -80,6 +81,7 @@ describe Logaling::Command do
 
   describe '#register' do
     before do
+      sleep(1)
       @project_counts = Dir[File.join(LOGALING_HOME, "projects", "*")].size
     end
 
@@ -414,7 +416,7 @@ describe Logaling::Command do
     end
   end
 
-  describe "#list" do
+  describe "#show" do
     let(:csv_path) { File.join(File.dirname(glossary_path), "spec.ja.en.csv") }
     before do
       command.new('spec', 'en', 'ja')
@@ -429,10 +431,10 @@ describe Logaling::Command do
 
     context 'when .logaling exists' do
       before do
-        @stdout = capture(:stdout) {command.list}
+        @stdout = capture(:stdout) {command.show}
       end
 
-      it 'should show terms a list' do
+      it 'should show translation list' do
         @stdout.should include "spec"
         @stdout.should include "spec-test"
         @stdout.should include "spec-test-test"
@@ -443,10 +445,10 @@ describe Logaling::Command do
     context 'with arguments glossary' do
       before do
         command.options = base_options.merge("glossary" => "spec", "source-language" => "ja", "target-language" => "en")
-        @stdout = capture(:stdout) {command.list}
+        @stdout = capture(:stdout) {command.show}
       end
 
-      it 'should show terms a list' do
+      it 'should show translation list' do
         @stdout.should include "test_logaling"
         @stdout.should_not include "spec-test-test"
       end
@@ -454,6 +456,31 @@ describe Logaling::Command do
 
     after do
       FileUtils.remove_entry_secure(csv_path, true)
+    end
+  end
+
+  describe '#list' do
+    context 'when some glossaries are registered' do
+      before do
+        command.new('spec', 'en', 'ja')
+        @stdout = capture(:stdout) {command.list}
+      end
+
+      it 'should list glossaries' do
+        @stdout.should include "spec"
+      end
+    end
+
+    context 'when a glossary is unregistered' do
+      before do
+        command.new('spec', 'en', 'ja')
+        repository.unregister('spec')
+        @stdout = capture(:stdout) {command.list}
+      end
+
+      it 'should not include unregistered glossary' do
+        @stdout.should_not include "spec"
+      end
     end
   end
 

@@ -60,14 +60,24 @@ module Logaling
       terms
     end
 
-    def list(glossary, source_language, target_language)
+    def show_glossary(glossary, source_language, target_language)
       raise GlossaryDBNotFound unless File.exist?(logaling_db_home)
 
       terms = []
       Logaling::GlossaryDB.open(logaling_db_home, "utf8") do |db|
-        terms = db.list(glossary, source_language, target_language)
+        terms = db.translation_list(glossary, source_language, target_language)
       end
       terms
+    end
+
+    def list
+      raise GlossaryDBNotFound unless File.exist?(logaling_db_home)
+
+      glossaries = []
+      Logaling::GlossaryDB.open(logaling_db_home, "utf8") do |db|
+        glossaries = db.get_all_glossary
+      end
+      glossaries
     end
 
     def index
@@ -87,7 +97,7 @@ module Logaling
             db.index_glossary(Glossary.load(glossary_source), glossary_name, glossary_source, source_language, target_language, indexed_at)
           end
         end
-        (db.get_all_glossary - all_glossaries).each do |glossary_source|
+        (db.get_all_glossary_source - all_glossaries).each do |glossary_source|
           glossary_name, source_language, target_language = get_glossary(glossary_source)
           puts "now deindex #{glossary_name}..."
           db.deindex_glossary(glossary_name, glossary_source)
