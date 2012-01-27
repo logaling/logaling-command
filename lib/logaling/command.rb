@@ -32,6 +32,8 @@ class Logaling::Command < Thor
       '-n' => :new,
       '-r' => :register,
       '-U' => :unregister,
+      '-L' => :list,
+      '-s' => :show,
       '-v' => :version
 
   class_option "glossary",        type: :string, aliases: "-g"
