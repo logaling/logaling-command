@@ -21,5 +21,4 @@ LOGALING_HOME = File.expand_path("~/.logaling.d")
 
 require "logaling"
 
-Logaling::Command.start
-
+Logaling::Command::Application.start

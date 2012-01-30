@@ -16,7 +16,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $:.push File.expand_path("../lib", __FILE__)
-require "logaling/command"
+require "logaling/command/version"
 
 Gem::Specification.new do |s|
   s.name        = "logaling-command"

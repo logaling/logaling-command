@@ -17,9 +17,9 @@
 
 require File.join(File.dirname(__FILE__), "..", "spec_helper")
 
-describe Logaling::Command do
+describe Logaling::Command::Application do
   let(:base_options) { {"glossary"=>"spec", "source-language"=>"en", "target-language"=>"ja"} }
-  let(:command) { Logaling::Command.new([], base_options) }
+  let(:command) { Logaling::Command::Application.new([], base_options) }
   let(:glossary_path) { Logaling::Glossary.build_path('spec', 'en', 'ja') }
   let(:target_project_path) { File.join(LOGALING_HOME, "projects", "spec") }
   let(:repository) { Logaling::Repository.new(LOGALING_HOME) }
@@ -262,7 +262,7 @@ describe Logaling::Command do
     end
 
     context 'project config does not have TARGET-LANGUAGE' do
-      let(:command2) { Logaling::Command.new([], {}) }
+      let(:command2) { Logaling::Command::Application.new([], {}) }
       let(:global_config) { File.join(LOGALING_HOME, 'config') }
       before do
         FileUtils.remove_entry_secure(Logaling::Command::LOGALING_CONFIG, true)
