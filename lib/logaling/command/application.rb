@@ -146,7 +146,7 @@ module Logaling::Command
       say "Try 'loga new or register' first."
     end
 
-    desc 'update [SOURCE TERM] [TARGET TERM] [NEW TARGET TERM], [NOTE(optional)]', 'Update term.'
+    desc 'update [SOURCE TERM] [TARGET TERM] [NEW TARGET TERM] [NOTE(optional)]', 'Update term.'
     def update(source_term, target_term, new_target_term, note='')
       config = load_config_and_merge_options
       repository.index
