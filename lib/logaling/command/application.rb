@@ -166,7 +166,7 @@ module Logaling::Command
     def lookup(source_term)
       config = load_config_and_merge_options
       repository.index
-      terms = repository.lookup(source_term, config["source_language"], config["target_language"], config["glossary"])
+      terms = repository.lookup(source_term, config["source-language"], config["target-language"], config["glossary"])
 
       unless terms.empty?
         max_str_size = terms.map{|term| term[:source_term].size}.sort.last
