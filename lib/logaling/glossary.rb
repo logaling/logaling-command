@@ -15,6 +15,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+begin
+  require 'psych'
+rescue LoadError => e
+  raise LoadError unless e.message =~ /psych/
+  puts "please install psych first."
+end
 require "yaml"
 require "csv"
 require "fileutils"
