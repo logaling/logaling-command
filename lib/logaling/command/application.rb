@@ -146,7 +146,7 @@ module Logaling::Command
       say "Try 'loga new or register' first."
     end
 
-    desc 'update [SOURCE TERM] [TARGET TERM] [NEW TARGET TERM], [NOTE(optional)]', 'Update term.'
+    desc 'update [SOURCE TERM] [TARGET TERM] [NEW TARGET TERM] [NOTE(optional)]', 'Update term.'
     def update(source_term, target_term, new_target_term, note='')
       config = load_config_and_merge_options
       repository.index
@@ -166,7 +166,7 @@ module Logaling::Command
     def lookup(source_term)
       config = load_config_and_merge_options
       repository.index
-      terms = repository.lookup(source_term, config["source_language"], config["target_language"], config["glossary"])
+      terms = repository.lookup(source_term, config["source-language"], config["target-language"], config["glossary"])
 
       unless terms.empty?
         max_str_size = terms.map{|term| term[:source_term].size}.sort.last
