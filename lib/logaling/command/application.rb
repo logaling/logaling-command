@@ -163,6 +163,7 @@ module Logaling::Command
     end
 
     desc 'lookup [TERM]', 'Lookup terms.'
+    method_option "output", type: :string, default: "terminal"
     def lookup(source_term)
       config = load_config_and_merge_options
       repository.index
@@ -171,7 +172,8 @@ module Logaling::Command
       unless terms.empty?
         max_str_size = terms.map{|term| term[:source_term].size}.sort.last
         run_pager
-        terms.each do |term|
+        puts("[") if "json" == options["output"]
+        terms.each_with_index do |term, i|
           target_string = "#{term[:target_term].bright}"
           target_string <<  "\t# #{term[:note]}" unless term[:note].empty?
           if repository.glossary_counts > 1
@@ -184,8 +186,25 @@ module Logaling::Command
             end
           end
           source_string = term[:snipped_source_term].map{|word|  word.is_a?(Hash) ? word[:keyword].bright : word }.join
-          printf("  %-#{max_str_size+10}s %s\n", source_string, target_string)
+          source, target = source_string, target_string.split("\t").first
+          note = term[:note]
+          source_language, target_language = config["source-language"], config["target-language"]
+          case options["output"]
+          when "terminal"
+            printf("  %-#{max_str_size+10}s %s\n", source_string, target_string)
+          when "csv"
+            print(CSV.generate {|csv| csv << [source_string, target, note, source_language, target_language]})
+          when "json"
+            puts(",") if i > 0
+            record = {
+              :source => source_string, :target => target,
+              :note => note,
+              :source_language => source_language, :target_language => target_language
+            }
+            print JSON.pretty_generate(record)
+          end
         end
+        puts("\n]") if "json" == options["output"]
       else
         "source-term <#{source_term}> not found"
       end
