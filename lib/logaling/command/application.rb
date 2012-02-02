@@ -80,6 +80,7 @@ module Logaling::Command
       config = load_config_and_merge_options(required_options)
 
       repository.register(logaling_path, config["glossary"])
+      repository.index
       say "#{config['glossary']} is now registered to logaling."
     rescue Logaling::CommandFailed => e
       say e.message
@@ -94,6 +95,7 @@ module Logaling::Command
       config = load_config_and_merge_options(required_options)
 
       repository.unregister(config["glossary"])
+      repository.index
       say "#{config['glossary']} is now unregistered."
     rescue Logaling::CommandFailed => e
       say e.message
