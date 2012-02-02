@@ -23,6 +23,7 @@ describe Logaling::Command::Application do
   let(:glossary_path) { Logaling::Glossary.build_path('spec', 'en', 'ja') }
   let(:target_project_path) { File.join(LOGALING_HOME, "projects", "spec") }
   let(:repository) { Logaling::Repository.new(LOGALING_HOME) }
+  let(:stop_pager) { STDOUT.stub!(:tty?).and_return(false) }
 
   before do
     FileUtils.remove_entry_secure(Logaling::Command::LOGALING_CONFIG, true)
@@ -262,11 +263,9 @@ describe Logaling::Command::Application do
     end
 
     context 'project config does not have TARGET-LANGUAGE' do
-      let(:command2) { Logaling::Command::Application.new([], {}) }
       let(:global_config) { File.join(LOGALING_HOME, 'config') }
       before do
-        FileUtils.remove_entry_secure(Logaling::Command::LOGALING_CONFIG, true)
-        command2.new('spec2', 'en')
+        command.new('spec', 'en')
         FileUtils.touch(global_config)
         File.open(global_config, "w") do |f| 
           f.puts "--target-language fr"
@@ -275,15 +274,14 @@ describe Logaling::Command::Application do
 
       context 'but global config have it' do
         before do
-          command2.add('config test', '設定ファイルのテスト')
-          @stdout = capture(:stdout) {command2.lookup("config")}
+          command.add('config test', '設定ファイルのテスト')
+          stop_pager
+          @stdout = capture(:stdout) {command.lookup("config test")}
         end
 
         it "should use global config's TARGET-LANGUAGE" do
-          @stdout.should include "config"
-          @stdout.should include "test"
+          @stdout.should include "config test"
           @stdout.should include "設定ファイルのテスト"
-          @stdout.should include "(spec2)"
         end
       end
 
@@ -335,12 +333,14 @@ describe Logaling::Command::Application do
 
   describe '#lookup' do
     before do
+      stop_pager
       command.new('spec', 'en', 'ja')
       command.add("spec", "スペック", "備考")
     end
 
     context 'with arguments exist term' do
       before do
+        stop_pager
         @stdout = capture(:stdout) {command.lookup("spec")}
       end
 
@@ -355,33 +355,34 @@ describe Logaling::Command::Application do
   describe "#delete" do
     before do
       command.new('spec', 'en', 'ja')
-      command.add('spec', 'スペック', '備考')
-      command.add('user', 'ユーザ', '備考')
+      command.add('spec', 'スペックろがりん', '備考')
       command.add('test', 'てすと1', '備考')
       command.add('test', 'てすと2', '備考')
     end
 
     context 'with arguments exist term' do
       before do
-        command.delete('spec', 'スペック')
+        command.delete('spec', 'スペックろがりん')
+        stop_pager
         @stdout = capture(:stdout) {command.lookup("spec")}
       end
 
       it 'should delete the term' do
-        @stdout.should_not include "spec : スペック # 備考"
+        @stdout.should_not include "スペックろがりん"
       end
     end
 
     context 'without target_term' do
       context 'only 1 bilingual pair exist' do
-      before do
-        command.delete('user')
-        @stdout = capture(:stdout) {command.lookup("user")}
-      end
+        before do
+          command.delete('spec')
+          stop_pager
+          @stdout = capture(:stdout) {command.lookup("spec")}
+        end
 
-      it 'should delete the term' do
-        @stdout.should_not include "user : ユーザ # 備考"
-      end
+        it 'should delete the term' do
+          @stdout.should_not include "スペックろがりん"
+        end
       end
 
       context 'some bilingual pair exist' do
@@ -391,25 +392,28 @@ describe Logaling::Command::Application do
           end
 
           it "should print usage" do
-            @stdout.should == "There are duplicate terms in glossary.\n" +
-            "If you really want to delete, please put `loga delete [SOURCE_TERM] --force`\n" +
-            " or `loga delete [SOURCE_TERM] [TARGET_TERM]`\n"
+            @stdout.should include "There are duplicate terms in glossary."
+            @stdout.should include "loga delete [SOURCE_TERM] --force"
+            @stdout.should include "loga delete [SOURCE_TERM] [TARGET_TERM]"
           end
         end
 
         context "and called with '--force=true'" do
           before do
+            FileUtils.remove_entry_secure(Logaling::Command::LOGALING_CONFIG, true)
+            FileUtils.remove_entry_secure(File.join(LOGALING_HOME, 'projects', 'spec'), true)
             command.options = base_options.merge("force" => true)
             command.new('spec', 'en', 'ja')
             command.add('term', '用語1', '備考')
             command.add('term', '用語2', '備考')
             command.delete("term")
+            stop_pager
             @stdout = capture(:stdout) {command.lookup("term")}
           end
 
           it 'should delete bilingual pairs' do
-            @stdout.should_not include "term : 用語1 # 備考"
-            @stdout.should_not include "term : 用語2 # 備考"
+            @stdout.should_not include "用語1"
+            @stdout.should_not include "用語2"
           end
         end
       end
@@ -420,37 +424,42 @@ describe Logaling::Command::Application do
     let(:csv_path) { File.join(File.dirname(glossary_path), "spec.ja.en.csv") }
     before do
       command.new('spec', 'en', 'ja')
-      command.add("spec", "スペック", "備考")
       command.add("spec-test", "スペックてすと", "備考")
-      command.add("spec-test-test", "スペックてすとてすと", "備考")
 
       FileUtils.mkdir_p(File.dirname(glossary_path))
       FileUtils.touch(csv_path)
-      File.open(csv_path, "w"){|f| f.puts "test_logaling,テスト"}
+      File.open(csv_path, "w"){|f| f.puts "test_logaling,テストろがりん"}
     end
 
     context 'when .logaling exists' do
       before do
+        stop_pager
         @stdout = capture(:stdout) {command.show}
       end
 
       it 'should show translation list' do
-        @stdout.should include "spec"
-        @stdout.should include "spec-test"
-        @stdout.should include "spec-test-test"
-        @stdout.should_not include "test_logaling"
+        @stdout.should include "スペックてすと"
+        @stdout.should_not include "テストろがりん"
       end
     end
 
     context 'with arguments glossary' do
       before do
+        FileUtils.remove_entry_secure(Logaling::Command::LOGALING_CONFIG, true)
+        FileUtils.remove_entry_secure(File.join(LOGALING_HOME, 'projects', 'spec'), true)
         command.options = base_options.merge("glossary" => "spec", "source-language" => "ja", "target-language" => "en")
+        command.new('spec', 'en', 'ja')
+        command.add("spec-test", "スペックてすと", "備考")
+        FileUtils.mkdir_p(File.dirname(glossary_path))
+        FileUtils.touch(csv_path)
+        File.open(csv_path, "w"){|f| f.puts "test_logaling,テストろがりん"}
+        stop_pager
         @stdout = capture(:stdout) {command.show}
       end
 
       it 'should show translation list' do
-        @stdout.should include "test_logaling"
-        @stdout.should_not include "spec-test-test"
+        @stdout.should include "テストろがりん"
+        @stdout.should_not include "スペックてすと"
       end
     end
 
@@ -460,9 +469,14 @@ describe Logaling::Command::Application do
   end
 
   describe '#list' do
+    before do
+      command.new('spec', 'en', 'ja')
+      command.add('spec logaling', 'すぺっくろがりん')
+    end
+
     context 'when some glossaries are registered' do
       before do
-        command.new('spec', 'en', 'ja')
+        stop_pager
         @stdout = capture(:stdout) {command.list}
       end
 
@@ -473,8 +487,8 @@ describe Logaling::Command::Application do
 
     context 'when a glossary is unregistered' do
       before do
-        command.new('spec', 'en', 'ja')
         repository.unregister('spec')
+        stop_pager
         @stdout = capture(:stdout) {command.list}
       end
 
