@@ -24,6 +24,15 @@ module Logaling::Command
   LOGALING_CONFIG = '.logaling'
 
   class Application < Thor
+
+    def initialize(*args)
+      super
+      @config = load_config_and_merge_options()
+      @source_language = @config["source-language"]
+      @target_language = @config["target-language"]
+      @glossary = glossary
+    end
+
     map '-a' => :add,
         '-d' => :delete,
         '-u' => :update,
@@ -167,46 +176,25 @@ module Logaling::Command
     desc 'lookup [TERM]', 'Lookup terms.'
     method_option "output", type: :string, default: "terminal"
     def lookup(source_term)
-      config = load_config_and_merge_options
       repository.index
-      terms = repository.lookup(source_term, config["source-language"], config["target-language"], config["glossary"])
-
+      terms = repository.lookup(source_term, @source_language, @target_language,
+                                @config["glossary"])
       unless terms.empty?
         max_str_size = terms.map{|term| term[:source_term].size}.sort.last
         run_pager
-        puts("[") if "json" == options["output"]
         terms.each_with_index do |term, i|
-          target_string = "#{term[:target_term].bright}"
-          target_string <<  "\t# #{term[:note]}" unless term[:note].empty?
+          source_string = extract_source_string_and_coloring(term)
+          target_string = term[:target_term].bright
+          note = term[:note].to_s unless term[:note].empty?
           if repository.glossary_counts > 1
-            target_string << "\t"
-            glossary_name = "(#{term[:glossary_name]})"
-            if term[:glossary_name] == config["glossary"]
-              target_string << glossary_name.foreground(:white).background(:green)
-            else
-              target_string << glossary_name
+            glossary_name = term[:glossary_name]
+            if term[:glossary_name] == @config["glossary"]
+              glossary_name = glossary_name.foreground(:white).background(:green)
             end
           end
-          source_string = term[:snipped_source_term].map{|word|  word.is_a?(Hash) ? word[:keyword].bright : word }.join
-          source, target = source_string, target_string.split("\t").first
-          note = term[:note]
-          source_language, target_language = config["source-language"], config["target-language"]
-          case options["output"]
-          when "terminal"
-            printf("  %-#{max_str_size+10}s %s\n", source_string, target_string)
-          when "csv"
-            print(CSV.generate {|csv| csv << [source_string, target, note, source_language, target_language]})
-          when "json"
-            puts(",") if i > 0
-            record = {
-              :source => source_string, :target => target,
-              :note => note,
-              :source_language => source_language, :target_language => target_language
-            }
-            print JSON.pretty_generate(record)
-          end
+          printer(source_string, target_string, note,
+                  glossary_name, max_str_size, i, terms.length)
         end
-        puts("\n]") if "json" == options["output"]
       else
         "source-term <#{source_term}> not found"
       end
@@ -391,6 +379,41 @@ module Logaling::Command
       Kernel.select [STDIN]
       pager = ENV['PAGER'] || 'less'
       exec pager rescue exec "/bin/sh", "-c", pager
+    end
+
+    def extract_source_string_and_coloring(term)
+      source_string = term[:snipped_source_term].map do |word|
+        word.is_a?(Hash) ? word[:keyword].bright : word
+      end
+      source_string = source_string.join
+      source_string
+    end
+
+    def printer(source_string, target_string, note=nil,
+                glossary_name, max_str_size, i, last)
+      case options["output"]
+      when "terminal"
+        unless note
+          format = target_string + "\t" + glossary_name
+        else
+          format = target_string + "\t# " + note + "\t" + glossary_name
+        end
+        printf("  %-#{max_str_size+10}s %s\n", source_string, format)
+      when "csv"
+        items = [source_string, target_string, note,
+                 @source_language, @target_language]
+        print(CSV.generate {|csv| csv << items})
+      when "json"
+        puts("[") if i == 0
+        puts(",") if i > 0
+        record = {
+          :source => source_string, :target => target_string, :note => note,
+          :source_language => @source_language,
+          :target_language => @target_language
+        }
+        print JSON.pretty_generate(record)
+        puts("\n]") if i == last-1
+      end
     end
   end
 end
