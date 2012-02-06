@@ -334,13 +334,13 @@ describe Logaling::Command::Application do
   describe '#lookup' do
     before do
       stop_pager
+      command.options = base_options.merge("output" => "terminal")
       command.new('spec', 'en', 'ja')
       command.add("spec", "スペック", "備考")
     end
 
     context 'with arguments exist term' do
       before do
-        stop_pager
         @stdout = capture(:stdout) {command.lookup("spec")}
       end
 
