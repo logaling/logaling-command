@@ -293,7 +293,6 @@ describe Logaling::Command::Application do
 
   describe "#update" do
     before do
-      FileUtils.remove_entry_secure(File.join(LOGALING_HOME, "db", "index_at"), true)
       command.new('spec', 'en', 'ja')
       command.add("spec", "テスト", "備考")
     end
