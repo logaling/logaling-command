@@ -117,6 +117,7 @@ module Logaling
          :target_term => term.target_term,
          :note => term.note || ''}
       end
+      snippet.close
       records_selected.expression.close
       specified_glossary.expression.close
       formatted_records
