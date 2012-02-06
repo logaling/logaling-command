@@ -226,12 +226,9 @@ describe Logaling::Command::Application do
   end
 
   describe '#add' do
-    before do
-      command.new('spec', 'en', 'ja')
-    end
-
     context 'with arguments have only bilingual pair' do
       before do
+        command.new('spec', 'en', 'ja')
         command.add("spec", "テスト")
       end
 
@@ -248,6 +245,7 @@ describe Logaling::Command::Application do
 
     context 'with arguments have bilingual pair and note' do
       before do
+        command.new('spec', 'en', 'ja')
         command.add("spec", "テスト", "備考")
       end
 
@@ -264,23 +262,22 @@ describe Logaling::Command::Application do
 
     context 'project config does not have TARGET-LANGUAGE' do
       let(:global_config) { File.join(LOGALING_HOME, 'config') }
+      let(:base_options) { {"glossary"=>"spec", "source-language"=>"en"} }
       before do
         command.new('spec', 'en')
-        FileUtils.touch(global_config)
-        File.open(global_config, "w") do |f| 
-          f.puts "--target-language fr"
-        end
       end
 
       context 'but global config have it' do
         before do
-          command.add('config test', '設定ファイルのテスト')
+          command.options = base_options.merge("global" => true, "output" => "terminal")
+          command.config("target-language", "fr")
+          command.add('test-logaling', '設定ファイルのテスト')
           stop_pager
-          @stdout = capture(:stdout) {command.lookup("config test")}
+          @stdout = capture(:stdout) {command.lookup("test-logaling")}
         end
 
         it "should use global config's TARGET-LANGUAGE" do
-          @stdout.should include "config test"
+          @stdout.should include "test-logaling"
           @stdout.should include "設定ファイルのテスト"
         end
       end
