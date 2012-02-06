@@ -152,8 +152,7 @@ module Logaling
             glossary.add("delete_logaling", "てすと1", "備考")
             glossary.add("delete_logaling", "てすと2", "備考")
             glossary.delete_all("delete_logaling", true)
-            repository.index
-            @result = repository.lookup("delete_logaling", "en", "ja", project)
+            @result = Logaling::Glossary.load_glossary_yml(glossary_path)
           end
 
           it {
@@ -161,8 +160,10 @@ module Logaling
           }
 
           it "should delete terms when force option is true" do
-            @result.any?{|term| term[:source_term] == "delete_logaling" && term[:target_term] == "てすと1"}.should be_false
-            @result.any?{|term| term[:source_term] == "delete_logaling" && term[:target_term] == "てすと2"}.should be_false
+            @result.any?{|term| term == {"source_term"=>"delete_logaling", "target_term"=>"てすと1", "note"=>"備考"}}.should be_false
+            @result.any?{|term| term == {"source_term"=>"delete_logaling", "target_term"=>"てすと2", "note"=>"備考"}}.should be_false
+            @result.any?{|term| term == {"source_term"=>"user_logaling", "target_term"=>"ユーザ1", "note"=>"備考"}}.should be_true
+            @result.any?{|term| term == {"source_term"=>"user_logaling", "target_term"=>"ユーザ2", "note"=>"備考"}}.should be_true
           end
         end
       end
