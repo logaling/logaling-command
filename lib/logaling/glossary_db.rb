@@ -106,7 +106,7 @@ module Logaling
       snippet = records_selected.expression.snippet(["<snippet>", "</snippet>"], options)
 
       snipped_source_term = []
-      records.map do |record|
+      formatted_records = records.map do |record|
         term = record.key
         snipped_text = snippet.execute(term.source_term).join
         {:glossary_name => term.glossary.key,
@@ -117,6 +117,9 @@ module Logaling
          :target_term => term.target_term,
          :note => term.note || ''}
       end
+      records_selected.expression.close
+      specified_glossary.expression.close
+      formatted_records
     end
 
     def translation_list(glossary, source_language, target_language)
@@ -132,7 +135,7 @@ module Logaling
         {:key=>"source_term", :order=>'ascending'},
         {:key=>"target_term", :order=>'ascending'}])
 
-      records.map do |record|
+      formatted_records = records.map do |record|
         term = record.key
 
         {:glossary_name => term.glossary.key,
@@ -142,6 +145,8 @@ module Logaling
          :target_term => term.target_term,
          :note => term.note || ''}
       end
+      records_raw.expression.close
+      formatted_records
     end
 
     def get_bilingual_pair(source_term, target_term, glossary)
@@ -153,7 +158,7 @@ module Logaling
         ]
       end
 
-      records.map do |record|
+      formatted_records = records.map do |record|
         term = record.key
 
         {:glossary_name => term.glossary,
@@ -163,6 +168,8 @@ module Logaling
          :target_term => term.target_term,
          :note => term.note || ''}
       end
+      records.expression.close
+      formatted_records
     end
 
     def get_bilingual_pair_with_note(source_term, target_term, note, glossary)
@@ -175,7 +182,7 @@ module Logaling
         ]
       end
 
-      records.map do |record|
+      formatted_records = records.map do |record|
         term = record.key
 
         {:glossary_name => term.glossary,
@@ -185,6 +192,8 @@ module Logaling
          :target_term => term.target_term,
          :note => term.note || ''}
       end
+      records.expression.close
+      formatted_records
     end
 
     def glossary_source_exist?(glossary_source, indexed_at)
@@ -194,6 +203,7 @@ module Logaling
           record.indexed_at == indexed_at
         ]
       end
+      glossary.expression.close
       !glossary.size.zero?
     end
 
@@ -218,6 +228,7 @@ module Logaling
       records.each do |record|
         record.key.delete
       end
+      records.expression.close
     end
 
     def add_glossary_source(glossary_source, indexed_at)
@@ -232,6 +243,7 @@ module Logaling
       records.each do |record|
         record.key.delete
       end
+      records.expression.close
     end
 
     def add_glossary(glossary_name)
@@ -246,6 +258,7 @@ module Logaling
       records.each do |record|
         record.key.delete
       end
+      records.expression.close
     end
 
     def add_translation(glossary_name, glossary_source, source_language, target_language, source_term, target_term, note)
@@ -341,6 +354,7 @@ module Logaling
         config = record.key
         config.conf_value
       end
+      records.expression.close
       value.size > 0 ? value[0] : ""
     end
 
