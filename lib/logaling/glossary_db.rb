@@ -117,6 +117,10 @@ module Logaling
          :target_term => term.target_term,
          :note => term.note || ''}
       end
+    ensure
+      snippet.close
+      records_selected.expression.close
+      specified_glossary.expression.close
     end
 
     def translation_list(glossary, source_language, target_language)
@@ -142,6 +146,8 @@ module Logaling
          :target_term => term.target_term,
          :note => term.note || ''}
       end
+    ensure
+      records_raw.expression.close
     end
 
     def get_bilingual_pair(source_term, target_term, glossary)
@@ -163,6 +169,8 @@ module Logaling
          :target_term => term.target_term,
          :note => term.note || ''}
       end
+    ensure
+      records.expression.close
     end
 
     def get_bilingual_pair_with_note(source_term, target_term, note, glossary)
@@ -185,6 +193,8 @@ module Logaling
          :target_term => term.target_term,
          :note => term.note || ''}
       end
+    ensure
+      records.expression.close
     end
 
     def glossary_source_exist?(glossary_source, indexed_at)
@@ -195,6 +205,8 @@ module Logaling
         ]
       end
       !glossary.size.zero?
+    ensure
+      glossary.expression.close
     end
 
     def get_all_glossary_source
@@ -218,6 +230,8 @@ module Logaling
       records.each do |record|
         record.key.delete
       end
+    ensure
+      records.expression.close
     end
 
     def add_glossary_source(glossary_source, indexed_at)
@@ -232,6 +246,8 @@ module Logaling
       records.each do |record|
         record.key.delete
       end
+    ensure
+      records.expression.close
     end
 
     def add_glossary(glossary_name)
@@ -246,6 +262,8 @@ module Logaling
       records.each do |record|
         record.key.delete
       end
+    ensure
+      records.expression.close
     end
 
     def add_translation(glossary_name, glossary_source, source_language, target_language, source_term, target_term, note)
@@ -342,6 +360,8 @@ module Logaling
         config.conf_value
       end
       value.size > 0 ? value[0] : ""
+    ensure
+      records.expression.close
     end
 
     def add_config(conf_key, conf_value)
