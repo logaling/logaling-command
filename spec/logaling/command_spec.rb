@@ -226,9 +226,12 @@ describe Logaling::Command::Application do
   end
 
   describe '#add' do
+    before do
+      command.new('spec', 'en', 'ja')
+    end
+
     context 'with arguments have only bilingual pair' do
       before do
-        command.new('spec', 'en', 'ja')
         command.add("spec", "テスト")
       end
 
@@ -245,7 +248,6 @@ describe Logaling::Command::Application do
 
     context 'with arguments have bilingual pair and note' do
       before do
-        command.new('spec', 'en', 'ja')
         command.add("spec", "テスト", "備考")
       end
 
