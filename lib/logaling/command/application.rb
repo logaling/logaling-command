@@ -85,31 +85,29 @@ module Logaling::Command
     def register
       logaling_path = find_dotfile
 
-      required_options = {"glossary" => "input glossary name '-g <glossary name>'"}
-      config = load_config_and_merge_options(required_options)
+      check_required_option(@config, {"glossary" => "input glossary name '-g <glossary name>'"})
 
-      @repository.register(logaling_path, config["glossary"])
+      @repository.register(logaling_path, @config["glossary"])
       @repository.index
-      say "#{config['glossary']} is now registered to logaling."
+      say "#{@config['glossary']} is now registered to logaling."
     rescue Logaling::CommandFailed => e
       say e.message
       say "Try 'loga new' first."
     rescue Logaling::GlossaryAlreadyRegistered => e
-      say "#{config['glossary']} is already registered."
+      say "#{@config['glossary']} is already registered."
     end
 
     desc 'unregister', 'Unregister .logaling'
     def unregister
-      required_options = {"glossary" => "input glossary name '-g <glossary name>'"}
-      config = load_config_and_merge_options(required_options)
+      check_required_option(@config, {"glossary" => "input glossary name '-g <glossary name>'"})
 
-      @repository.unregister(config["glossary"])
+      @repository.unregister(@config["glossary"])
       @repository.index
-      say "#{config['glossary']} is now unregistered."
+      say "#{@config['glossary']} is now unregistered."
     rescue Logaling::CommandFailed => e
       say e.message
     rescue Logaling::GlossaryNotFound => e
-      say "#{config['glossary']} is not yet registered."
+      say "#{@config['glossary']} is not yet registered."
     end
 
     desc 'config [KEY] [VALUE] [--global(optional)]', 'Set config.'
@@ -131,11 +129,10 @@ module Logaling::Command
 
     desc 'add [SOURCE TERM] [TARGET TERM] [NOTE(optional)]', 'Add term to glossary.'
     def add(source_term, target_term, note='')
-      config = load_config_and_merge_options
       @repository.index
 
-      if @repository.bilingual_pair_exists?(source_term, target_term, config["glossary"])
-        raise Logaling::TermError, "term '#{source_term}: #{target_term}' already exists in '#{config["glossary"]}'"
+      if @repository.bilingual_pair_exists?(source_term, target_term, @config["glossary"])
+        raise Logaling::TermError, "term '#{source_term}: #{target_term}' already exists in '#{@config["glossary"]}'"
       end
 
       glossary.add(source_term, target_term, note)
@@ -159,11 +156,10 @@ module Logaling::Command
 
     desc 'update [SOURCE TERM] [TARGET TERM] [NEW TARGET TERM] [NOTE(optional)]', 'Update term.'
     def update(source_term, target_term, new_target_term, note='')
-      config = load_config_and_merge_options
       @repository.index
 
-      if @repository.bilingual_pair_exists_and_has_same_note?(source_term, new_target_term, note, config["glossary"])
-        raise Logaling::TermError, "term '#{source_term}: #{new_target_term}' already exists in '#{config["glossary"]}'"
+      if @repository.bilingual_pair_exists_and_has_same_note?(source_term, new_target_term, note, @config["glossary"])
+        raise Logaling::TermError, "term '#{source_term}: #{new_target_term}' already exists in '#{@config["glossary"]}'"
       end
 
       glossary.update(source_term, target_term, new_target_term, note)
@@ -214,9 +210,9 @@ module Logaling::Command
         "source-language" => "input source-language code '-S <source-language code>'",
         "target-language" => "input target-language code '-T <target-language code>'"
       }
-      config = load_config_and_merge_options(required_options)
+      check_required_option(@config, required_options)
       @repository.index
-      terms = @repository.show_glossary(config["glossary"], config["source-language"], config["target-language"])
+      terms = @repository.show_glossary(@config["glossary"], @config["source-language"], @config["target-language"])
       unless terms.empty?
         run_pager
         max_str_size = terms.map{|term| term[:source_term].size}.sort.last
@@ -226,7 +222,7 @@ module Logaling::Command
           printf("  %-#{max_str_size+10}s %s\n", term[:source_term], target_string)
         end
       else
-        "glossary <#{config['glossary']}> not found"
+        "glossary <#{@config['glossary']}> not found"
       end
 
     rescue Logaling::CommandFailed, Logaling::GlossaryDBNotFound => e
@@ -260,14 +256,20 @@ module Logaling::Command
           "source-language" => "input source-language code '-S <source-language code>'",
           "target-language" => "input target-language code '-T <target-language code>'"
         }
-        config = load_config_and_merge_options(required_options)
-        @glossary = Logaling::Glossary.new(config["glossary"], config["source-language"], config["target-language"])
+        check_required_option(@config, required_options)
+        @glossary = Logaling::Glossary.new(@config["glossary"], @config["source-language"], @config["target-language"])
       end
     end
 
     def error(msg)
       STDERR.puts(msg)
       exit 1
+    end
+
+    def check_required_option(config, required={})
+      required.each do |required_option, message|
+        raise(Logaling::CommandFailed, message) unless config[required_option]
+      end
     end
 
     def load_config_and_merge_options(required={})
@@ -279,9 +281,7 @@ module Logaling::Command
       config = merge_options(project_config, global_config)
       config = merge_options(options, config)
 
-      required.each do |required_option, message|
-        raise(Logaling::CommandFailed, message) unless config[required_option]
-      end
+      check_required_option(config, required)
 
       config
     end
