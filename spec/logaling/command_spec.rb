@@ -125,12 +125,12 @@ describe Logaling::Command::Application do
 
     context "when can not find .logaling" do
       before do
-        FileUtils.remove_entry_secure(Logaling::Command::LOGALING_CONFIG, true)
+        #FileUtils.remove_entry_secure(Logaling::Command::LOGALING_CONFIG, true)
       end
 
       context "and call without option" do
         before do
-          command.options = base_options.merge("glossary" => nil)
+          base_options["glossary"] = nil
           @stdout = capture(:stdout) {command.unregister}
         end
 
