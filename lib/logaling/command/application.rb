@@ -272,7 +272,7 @@ module Logaling::Command
       end
     end
 
-    def load_config_and_merge_options(required={})
+    def load_config_and_merge_options
       config_list ||= {}
       find_config.each{|type, path| config_list[type] = load_config(path)}
       global_config = config_list["global_config"] ? config_list["global_config"] : {}
@@ -280,8 +280,6 @@ module Logaling::Command
 
       config = merge_options(project_config, global_config)
       config = merge_options(options, config)
-
-      check_required_option(config, required)
 
       config
     end
