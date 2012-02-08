@@ -27,7 +27,7 @@ module Logaling::Command
 
     def initialize(*args)
       super
-      @config = load_config_and_merge_options()
+      @config = load_config_and_merge_options
       @source_language = @config["source-language"]
       @target_language = @config["target-language"]
     end
