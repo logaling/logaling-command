@@ -37,12 +37,12 @@ describe Logaling::Command::Application do
 
     context 'when .logaling already exists' do
       before do
-        FileUtils.mkdir_p(Logaling::Command::LOGALING_CONFIG)
+        command.new('spec', 'en', 'ja')
         @stdout = capture(:stdout) { command.new('spec', 'en', 'ja') }
       end
 
       it 'print message \"<.logaling path> already exists.\"' do
-        @stdout.should == "#{Logaling::Command::LOGALING_CONFIG} already exists.\n"
+        @stdout.should include "#{Logaling::Command::LOGALING_CONFIG} already exists.\n"
       end
     end
 

@@ -36,6 +36,7 @@ module Logaling
         before do
           glossary.add("user-logaling", "ユーザ", "ユーザーではない")
           glossary.add("user-logaling", "ユーザー", "")
+          File.stub!(:mtime).and_return(Time.now - 1)
           repository.index
           @terms = repository.lookup("user-logaling", "en", "ja", project)
         end
