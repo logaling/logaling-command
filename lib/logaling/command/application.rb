@@ -27,10 +27,10 @@ module Logaling::Command
 
     def initialize(*args)
       super
+      @repository = Logaling::Repository.new(LOGALING_HOME)
       @config = load_config_and_merge_options
       @source_language = @config["source-language"]
       @target_language = @config["target-language"]
-      @repository = Logaling::Repository.new(LOGALING_HOME)
     end
 
     map '-a' => :add,
