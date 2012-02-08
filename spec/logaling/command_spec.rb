@@ -440,26 +440,6 @@ describe Logaling::Command::Application do
       end
     end
 
-    context 'with arguments glossary' do
-      before do
-        FileUtils.remove_entry_secure(Logaling::Command::LOGALING_CONFIG, true)
-        FileUtils.remove_entry_secure(File.join(LOGALING_HOME, 'projects', 'spec'), true)
-        command.options = base_options.merge("glossary" => "spec", "source-language" => "ja", "target-language" => "en")
-        command.new('spec', 'en', 'ja')
-        command.add("spec-test", "スペックてすと", "備考")
-        FileUtils.mkdir_p(File.dirname(glossary_path))
-        FileUtils.touch(csv_path)
-        File.open(csv_path, "w"){|f| f.puts "test_logaling,テストろがりん"}
-        stop_pager
-        @stdout = capture(:stdout) {command.show}
-      end
-
-      it 'should show translation list' do
-        @stdout.should include "テストろがりん"
-        @stdout.should_not include "スペックてすと"
-      end
-    end
-
     after do
       FileUtils.remove_entry_secure(csv_path, true)
     end
