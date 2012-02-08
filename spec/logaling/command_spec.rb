@@ -226,12 +226,9 @@ describe Logaling::Command::Application do
   end
 
   describe '#add' do
-    before do
-      command.new('spec', 'en', 'ja')
-    end
-
     context 'with arguments have only bilingual pair' do
       before do
+        command.new('spec', 'en', 'ja')
         command.add("spec", "テスト")
       end
 
@@ -248,6 +245,7 @@ describe Logaling::Command::Application do
 
     context 'with arguments have bilingual pair and note' do
       before do
+        command.new('spec', 'en', 'ja')
         command.add("spec", "テスト", "備考")
       end
 
@@ -264,15 +262,16 @@ describe Logaling::Command::Application do
 
     context 'project config does not have TARGET-LANGUAGE' do
       let(:global_config) { File.join(LOGALING_HOME, 'config') }
-      let(:base_options) { {"glossary"=>"spec", "source-language"=>"en"} }
+      let(:base_options) { {"glossary"=>"spec", "source-language"=>"en", "output" => "terminal"} }
       before do
+        # create global config file
+        FileUtils.touch(global_config)
+        File.open(global_config, "w"){|f| f.puts "--target-language fr"}
         command.new('spec', 'en')
       end
 
       context 'but global config have it' do
         before do
-          command.options = base_options.merge("global" => true, "output" => "terminal")
-          command.config("target-language", "fr")
           command.add('test-logaling', '設定ファイルのテスト')
           stop_pager
           @stdout = capture(:stdout) {command.lookup("test-logaling")}
