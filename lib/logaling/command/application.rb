@@ -30,6 +30,7 @@ module Logaling::Command
       @config = load_config_and_merge_options
       @source_language = @config["source-language"]
       @target_language = @config["target-language"]
+      @repository = Logaling::Repository.new(LOGALING_HOME)
     end
 
     map '-a' => :add,
@@ -73,7 +74,7 @@ module Logaling::Command
       if options["list"]
         Logaling::ExternalGlossary.list.each {|glossary| say "#{glossary.name.bright} : #{glossary.description}" }
       else
-        repository.import(Logaling::ExternalGlossary.get(external_glossary))
+        @repository.import(Logaling::ExternalGlossary.get(external_glossary))
       end
     rescue Logaling::ExternalGlossaryNotFound
       say "'#{external_glossary}' can't find in import list."
@@ -87,8 +88,8 @@ module Logaling::Command
       required_options = {"glossary" => "input glossary name '-g <glossary name>'"}
       config = load_config_and_merge_options(required_options)
 
-      repository.register(logaling_path, config["glossary"])
-      repository.index
+      @repository.register(logaling_path, config["glossary"])
+      @repository.index
       say "#{config['glossary']} is now registered to logaling."
     rescue Logaling::CommandFailed => e
       say e.message
@@ -102,8 +103,8 @@ module Logaling::Command
       required_options = {"glossary" => "input glossary name '-g <glossary name>'"}
       config = load_config_and_merge_options(required_options)
 
-      repository.unregister(config["glossary"])
-      repository.index
+      @repository.unregister(config["glossary"])
+      @repository.index
       say "#{config['glossary']} is now unregistered."
     rescue Logaling::CommandFailed => e
       say e.message
@@ -131,7 +132,7 @@ module Logaling::Command
     desc 'add [SOURCE TERM] [TARGET TERM] [NOTE(optional)]', 'Add term to glossary.'
     def add(source_term, target_term, note='')
       config = load_config_and_merge_options
-      repository.index
+      @repository.index
 
       if repository.bilingual_pair_exists?(source_term, target_term, config["glossary"])
         raise Logaling::TermError, "term '#{source_term}: #{target_term}' already exists in '#{config["glossary"]}'"
@@ -159,9 +160,9 @@ module Logaling::Command
     desc 'update [SOURCE TERM] [TARGET TERM] [NEW TARGET TERM] [NOTE(optional)]', 'Update term.'
     def update(source_term, target_term, new_target_term, note='')
       config = load_config_and_merge_options
-      repository.index
+      @repository.index
 
-      if repository.bilingual_pair_exists_and_has_same_note?(source_term, new_target_term, note, config["glossary"])
+      if @repository.bilingual_pair_exists_and_has_same_note?(source_term, new_target_term, note, config["glossary"])
         raise Logaling::TermError, "term '#{source_term}: #{new_target_term}' already exists in '#{config["glossary"]}'"
       end
 
@@ -175,8 +176,8 @@ module Logaling::Command
     desc 'lookup [TERM]', 'Lookup terms.'
     method_option "output", type: :string, default: "terminal"
     def lookup(source_term)
-      repository.index
-      terms = repository.lookup(source_term, @source_language, @target_language,
+      @repository.index
+      terms = @repository.lookup(source_term, @source_language, @target_language,
                                 @config["glossary"])
       unless terms.empty?
         max_str_size = terms.map{|term| term[:source_term].size}.sort.last
@@ -185,7 +186,7 @@ module Logaling::Command
           source_string = extract_source_string_and_coloring(term)
           target_string = term[:target_term].bright
           note = term[:note].to_s unless term[:note].empty?
-          if repository.glossary_counts > 1
+          if @repository.glossary_counts > 1
             glossary_name = term[:glossary_name]
             if term[:glossary_name] == @config["glossary"]
               glossary_name = glossary_name.foreground(:white).background(:green)
@@ -214,8 +215,8 @@ module Logaling::Command
         "target-language" => "input target-language code '-T <target-language code>'"
       }
       config = load_config_and_merge_options(required_options)
-      repository.index
-      terms = repository.show_glossary(config["glossary"], config["source-language"], config["target-language"])
+      @repository.index
+      terms = @repository.show_glossary(config["glossary"], config["source-language"], config["target-language"])
       unless terms.empty?
         run_pager
         max_str_size = terms.map{|term| term[:source_term].size}.sort.last
@@ -234,8 +235,8 @@ module Logaling::Command
 
     desc 'list', 'Show glossary list.'
     def list
-      repository.index
-      glossaries = repository.list
+      @repository.index
+      glossaries = @repository.list
       unless glossaries.empty?
         run_pager
         glossaries.each do |glossary|
@@ -250,10 +251,6 @@ module Logaling::Command
     end
 
     private
-    def repository
-      @repository ||= Logaling::Repository.new(LOGALING_HOME)
-    end
-
     def glossary
       if @glossary
         @glossary
@@ -304,7 +301,7 @@ module Logaling::Command
       config
     rescue Logaling::CommandFailed
       config ||= {}
-      config["project_config"] = repository.config_path if repository.config_path
+      config["project_config"] = @repository.config_path if @repository.config_path
       config["global_config"] = global_config_path if global_config_path
       config
     end
