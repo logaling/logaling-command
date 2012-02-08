@@ -134,7 +134,7 @@ module Logaling::Command
       config = load_config_and_merge_options
       @repository.index
 
-      if repository.bilingual_pair_exists?(source_term, target_term, config["glossary"])
+      if @repository.bilingual_pair_exists?(source_term, target_term, config["glossary"])
         raise Logaling::TermError, "term '#{source_term}: #{target_term}' already exists in '#{config["glossary"]}'"
       end
 
