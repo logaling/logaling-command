@@ -182,6 +182,7 @@ module Logaling::Command
           source_string = extract_source_string_and_coloring(term)
           target_string = term[:target_term].bright
           note = term[:note].to_s unless term[:note].empty?
+          glossary_name = ""
           if @repository.glossary_counts > 1
             glossary_name = term[:glossary_name]
             if term[:glossary_name] == @config["glossary"]
