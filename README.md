@@ -5,21 +5,21 @@ You can add/update/delete terms to your glossary, and search glossaries at once.
 
 ### To install:
 
-  % gem install logaling-command
+    % gem install logaling-command
 
 ### Usage:
 
 Create new glossary:
 
-  % loga new my_glossary en ja
+    % loga new my_glossary en ja
 
 Add term to glossary:
 
-  % loga add developer 開発者
+    % loga add developer 開発者
 
 Lookup glossary:
 
-  % loga lookup develop<br/>
+    % loga lookup develop
     developer           ソフトウェア開発者 (my_glossary)
 
 ### License
