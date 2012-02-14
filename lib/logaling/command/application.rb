@@ -178,7 +178,7 @@ module Logaling::Command
                                 @config["glossary"])
       unless terms.empty?
         max_str_size = terms.map{|term| term[:source_term].size}.sort.last
-        run_pager unless options["no-pager"]
+        run_pager
         terms.each_with_index do |term, i|
           source_string = extract_source_string_and_coloring(term)
           target_string = term[:target_term].bright
@@ -217,7 +217,7 @@ module Logaling::Command
       @repository.index
       terms = @repository.show_glossary(@config["glossary"], @config["source-language"], @config["target-language"])
       unless terms.empty?
-        run_pager unless options["no-pager"]
+        run_pager
         max_str_size = terms.map{|term| term[:source_term].size}.sort.last
         terms.each do |term|
           target_string = "#{term[:target_term]}"
@@ -238,7 +238,7 @@ module Logaling::Command
       @repository.index
       glossaries = @repository.list
       unless glossaries.empty?
-        run_pager unless options["no-pager"]
+        run_pager
         glossaries.each do |glossary|
           printf("  %s\n", glossary)
         end
@@ -353,6 +353,7 @@ module Logaling::Command
 
     # http://nex-3.com/posts/73-git-style-automatic-paging-in-ruby
     def run_pager
+      return if options["no-pager"]
       return if ::RUBY_PLATFORM =~ /win32/
       return unless STDOUT.tty?
 
