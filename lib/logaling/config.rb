@@ -25,10 +25,8 @@ module Logaling
       end
 
       def load_config_and_merge_options(project_config_path, global_config_path, options)
-        config_list ||= {}
-        find_config(project_config_path, global_config_path).each{|type, path| config_list[type] = load_config(path)}
-        global_config = config_list["global_config"] ? config_list["global_config"] : {}
-        project_config = config_list["project_config"] ? config_list["project_config"] : {}
+        project_config = project_config_path ? load_config(project_config_path) : load_config(global_config_path)
+        global_config = load_config(global_config_path)
 
         config = merge_options(project_config, global_config)
         config = merge_options(options, config)
@@ -47,17 +45,6 @@ module Logaling
         config["glossary"] = options["glossary"] ? options["glossary"] : secondary_options["glossary"]
         config["source-language"] = options["source-language"] ? options["source-language"] : secondary_options["source-language"]
         config["target-language"] = options["target-language"] ? options["target-language"] : secondary_options["target-language"]
-        config
-      end
-
-      def find_config(project_config_path, global_config_path)
-        config ||= {}
-        if project_config_path
-          config["project_config"] = project_config_path
-        else
-          config["project_config"] = global_config_path
-        end
-        config["global_config"] = global_config_path if global_config_path
         config
       end
 
