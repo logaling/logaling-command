@@ -59,7 +59,7 @@ module Logaling::Command
         FileUtils.mkdir_p(File.join(LOGALING_CONFIG, "glossary"))
 
         config = Logaling::Config.setup(project_name, source_language, target_language)
-        config.write_config(File.join(LOGALING_CONFIG, "config"))
+        config.save(File.join(LOGALING_CONFIG, "config"))
 
         register unless options["no-register"]
         say "Successfully created #{LOGALING_CONFIG}"

@@ -19,7 +19,7 @@ module Logaling
       def setup(project_name, source_language, target_language)
         config = {"glossary" => project_name, "source-language" => source_language}
         config["target-language"] = target_language if target_language
-        Logaling::Config.new(config)
+        self.new(config)
       end
 
       def add(config_path, key, value)
@@ -27,7 +27,7 @@ module Logaling
 
         config = load_config(config_path)
         config = merge_options({key => value}, config)
-        Config.new(config).write_config(config_path)
+        Config.new(config).save(config_path)
       end
 
       def load_config_and_merge_options(project_config_path, global_config_path, options)
@@ -81,7 +81,7 @@ module Logaling
       end
     end
 
-    def write_config(config_path)
+    def save(config_path)
       File.open(config_path, 'w') do |fp|
         fp.puts "--glossary #{@glossary}" if @glossary
         fp.puts "--source-language #{@source_language}" if @source_language
