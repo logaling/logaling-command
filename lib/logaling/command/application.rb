@@ -33,9 +33,6 @@ module Logaling::Command
       @config = Logaling::Config.load_config_and_merge_options(project_config_path, @repository.config_path, options)
     rescue Logaling::CommandFailed
       @config = Logaling::Config.load_config_and_merge_options(nil, @repository.config_path, options)
-    ensure
-      @source_language = @config.source_language
-      @target_language = @config.target_language
     end
 
     map '-a' => :add,
@@ -173,8 +170,9 @@ module Logaling::Command
     method_option "no-pager", type: :boolean, default: false
     def lookup(source_term)
       @repository.index
-      terms = @repository.lookup(source_term, @source_language, @target_language,
-                                @config.glossary)
+      terms = @repository.lookup(source_term,
+                                 @config.source_language, @config.target_language,
+                                 @config.glossary)
       unless terms.empty?
         max_str_size = terms.map{|term| term[:source_term].size}.sort.last
         run_pager
@@ -336,15 +334,15 @@ module Logaling::Command
         printf("  %-#{max_str_size+10}s %s\n", source_string, format)
       when "csv"
         items = [source_string, target_string, note,
-                 @source_language, @target_language]
+                 @config.source_language, @config.target_language]
         print(CSV.generate {|csv| csv << items})
       when "json"
         puts("[") if i == 0
         puts(",") if i > 0
         record = {
           :source => source_string, :target => target_string, :note => note,
-          :source_language => @source_language,
-          :target_language => @target_language
+          :source_language => @config.source_language,
+          :target_language => @config.target_language
         }
         print JSON.pretty_generate(record)
         puts("\n]") if i == last-1
