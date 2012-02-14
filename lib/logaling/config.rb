@@ -27,7 +27,7 @@ module Logaling
 
         config = load_config(config_path)
         config = merge_options({key => value}, config)
-        Config.new(config).save(config_path)
+        self.new(config).save(config_path)
       end
 
       def load_config_and_merge_options(project_config_path, global_config_path, options)
@@ -37,7 +37,7 @@ module Logaling
         config = merge_options(project_config, global_config)
         config = merge_options(options, config)
 
-        Config.new(config)
+        self.new(config)
       end
 
       private
