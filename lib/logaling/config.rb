@@ -16,6 +16,12 @@
 module Logaling
   class Config
     class << self
+      def setup(project_name, source_language, target_language)
+        config = {"glossary" => project_name, "source-language" => source_language}
+        config["target-language"] = target_language if target_language
+        Logaling::Config.new(config)
+      end
+
       def add(config_path, key, value)
         raise Logaling::CommandFailed, "#{key} is unsupported option" unless support?(key)
 

@@ -57,9 +57,9 @@ module Logaling::Command
     def new(project_name, source_language, target_language=nil)
       unless File.exist?(LOGALING_CONFIG)
         FileUtils.mkdir_p(File.join(LOGALING_CONFIG, "glossary"))
-        config = {"glossary" => project_name, "source-language" => source_language}
-        config["target-language"] = target_language if target_language
-        Logaling::Config.new(config).write_config(File.join(LOGALING_CONFIG, "config"))
+
+        config = Logaling::Config.setup(project_name, source_language, target_language)
+        config.write_config(File.join(LOGALING_CONFIG, "config"))
 
         register unless options["no-register"]
         say "Successfully created #{LOGALING_CONFIG}"
