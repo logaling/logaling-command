@@ -25,9 +25,8 @@ module Logaling
       def add(config_path, key, value)
         raise Logaling::CommandFailed, "#{key} is unsupported option" unless support?(key)
 
-        config = load_config(config_path)
-        config = merge_options({key => value}, config)
-        self.new(config).save(config_path)
+        config = load_config_and_merge_options(nil, config_path, {key => value})
+        config.save(config_path)
       end
 
       def load_config_and_merge_options(project_config_path, global_config_path, options)
