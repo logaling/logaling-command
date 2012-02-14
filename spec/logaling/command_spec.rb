@@ -23,7 +23,6 @@ describe Logaling::Command::Application do
   let(:glossary_path) { Logaling::Glossary.build_path('spec', 'en', 'ja') }
   let(:target_project_path) { File.join(LOGALING_HOME, "projects", "spec") }
   let(:repository) { Logaling::Repository.new(LOGALING_HOME) }
-  let(:stop_pager) { STDOUT.stub!(:tty?).and_return(false) }
 
   before do
     FileUtils.remove_entry_secure(Logaling::Command::LOGALING_CONFIG, true)
@@ -273,7 +272,7 @@ describe Logaling::Command::Application do
       context 'but global config have it' do
         before do
           command.add('test-logaling', '設定ファイルのテスト')
-          stop_pager
+          command.options = base_options.merge("no-pager" => true)
           @stdout = capture(:stdout) {command.lookup("test-logaling")}
         end
 
@@ -330,8 +329,7 @@ describe Logaling::Command::Application do
 
   describe '#lookup' do
     before do
-      stop_pager
-      command.options = base_options.merge("output" => "terminal")
+      command.options = base_options.merge("output" => "terminal", "no-pager" => true)
       command.new('spec', 'en', 'ja')
       command.add("spec", "スペック", "備考")
     end
@@ -360,7 +358,7 @@ describe Logaling::Command::Application do
     context 'with arguments exist term' do
       before do
         command.delete('spec', 'スペックろがりん')
-        stop_pager
+        command.options = base_options.merge("no-pager" => true)
         @stdout = capture(:stdout) {command.lookup("spec")}
       end
 
@@ -373,7 +371,7 @@ describe Logaling::Command::Application do
       context 'only 1 bilingual pair exist' do
         before do
           command.delete('spec')
-          stop_pager
+          command.options = base_options.merge("no-pager" => true)
           @stdout = capture(:stdout) {command.lookup("spec")}
         end
 
@@ -404,7 +402,7 @@ describe Logaling::Command::Application do
             command.add('term', '用語1', '備考')
             command.add('term', '用語2', '備考')
             command.delete("term")
-            stop_pager
+            command.options = base_options.merge("no-pager" => true)
             @stdout = capture(:stdout) {command.lookup("term")}
           end
 
@@ -430,7 +428,7 @@ describe Logaling::Command::Application do
 
     context 'when .logaling exists' do
       before do
-        stop_pager
+        command.options = base_options.merge("no-pager" => true)
         @stdout = capture(:stdout) {command.show}
       end
 
@@ -453,7 +451,7 @@ describe Logaling::Command::Application do
 
     context 'when some glossaries are registered' do
       before do
-        stop_pager
+        command.options = base_options.merge("no-pager" => true)
         @stdout = capture(:stdout) {command.list}
       end
 
@@ -465,7 +463,7 @@ describe Logaling::Command::Application do
     context 'when a glossary is unregistered' do
       before do
         repository.unregister('spec')
-        stop_pager
+        command.options = base_options.merge("no-pager" => true)
         @stdout = capture(:stdout) {command.list}
       end
 

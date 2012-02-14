@@ -171,13 +171,14 @@ module Logaling::Command
 
     desc 'lookup [TERM]', 'Lookup terms.'
     method_option "output", type: :string, default: "terminal"
+    method_option "no-pager", type: :boolean, default: false
     def lookup(source_term)
       @repository.index
       terms = @repository.lookup(source_term, @source_language, @target_language,
                                 @config["glossary"])
       unless terms.empty?
         max_str_size = terms.map{|term| term[:source_term].size}.sort.last
-        run_pager
+        run_pager unless options["no-pager"]
         terms.each_with_index do |term, i|
           source_string = extract_source_string_and_coloring(term)
           target_string = term[:target_term].bright
@@ -205,6 +206,7 @@ module Logaling::Command
     end
 
     desc 'show', 'Show terms in glossary.'
+    method_option "no-pager", type: :boolean, default: false
     def show
       required_options = {
         "glossary" => "input glossary name '-g <glossary name>'",
@@ -215,7 +217,7 @@ module Logaling::Command
       @repository.index
       terms = @repository.show_glossary(@config["glossary"], @config["source-language"], @config["target-language"])
       unless terms.empty?
-        run_pager
+        run_pager unless options["no-pager"]
         max_str_size = terms.map{|term| term[:source_term].size}.sort.last
         terms.each do |term|
           target_string = "#{term[:target_term]}"
@@ -231,11 +233,12 @@ module Logaling::Command
     end
 
     desc 'list', 'Show glossary list.'
+    method_option "no-pager", type: :boolean, default: false
     def list
       @repository.index
       glossaries = @repository.list
       unless glossaries.empty?
-        run_pager
+        run_pager unless options["no-pager"]
         glossaries.each do |glossary|
           printf("  %s\n", glossary)
         end
