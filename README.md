@@ -20,7 +20,7 @@ Add term to glossary:
 Lookup glossary:
 
     % loga lookup develop
-    developer           ソフトウェア開発者 (my_glossary)
+    developer           開発者 (my_glossary)
 
 ### License
 
