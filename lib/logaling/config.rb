@@ -19,7 +19,7 @@ module Logaling
       def setup(project_name, source_language, target_language)
         config = {"glossary" => project_name, "source-language" => source_language}
         config["target-language"] = target_language if target_language
-        self.new(config)
+        new(config)
       end
 
       def add(config_path, key, value)
@@ -36,7 +36,7 @@ module Logaling
         config = merge_options(project_config, global_config)
         config = merge_options(options, config)
 
-        self.new(config)
+        new(config)
       end
 
       private
