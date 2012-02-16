@@ -21,7 +21,7 @@ require "fileutils"
 module Logaling
   describe Repository do
     let(:project) { "spec" }
-    let(:logaling_home) { LOGALING_HOME }
+    let(:logaling_home) { @logaling_home }
     let(:glossary) { Glossary.new(project, 'en', 'ja', logaling_home) }
     let(:glossary_path) { Glossary.build_path(project, 'en', 'ja', logaling_home) }
     let(:repository) { Logaling::Repository.new(logaling_home) }

@@ -17,9 +17,8 @@ $LOAD_PATH.unshift(File.dirname(__FILE__) + '/../lib')
 require 'logaling'
 
 require "fileutils"
+require 'tmpdir'
 require 'stringio'
-
-LOGALING_HOME = File.expand_path("~/.logaling.d")
 
 RSpec.configure do |config|
   def capture(stream)
@@ -35,6 +34,17 @@ RSpec.configure do |config|
     result
   end
 
+  config.before(:suite) do
+    LOGALING_HOME = Dir.mktmpdir
+  end
+
+  config.before(:all) do
+    @logaling_home = LOGALING_HOME
+  end
+
+  config.after(:suite) do
+    FileUtils.remove_entry_secure(LOGALING_HOME, true)
+  end
+
   alias :silence :capture
 end
-
