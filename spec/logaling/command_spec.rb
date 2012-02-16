@@ -32,7 +32,7 @@ describe Logaling::Command::Application do
 
   describe '#new' do
     before do
-      @project_counts = Dir[File.join(logaling_home, "projects", "*")].size
+      @n_projects = Dir[File.join(logaling_home, "projects", "*")].size
     end
 
     context 'when .logaling already exists' do
@@ -58,7 +58,7 @@ describe Logaling::Command::Application do
 
         it 'should register .logaling as project' do
           File.should be_exist(target_project_path)
-          Dir[File.join(logaling_home, "projects", "*")].size.should == @project_counts + 1
+          Dir[File.join(logaling_home, "projects", "*")].size.should == @n_projects + 1
         end
       end
 
@@ -74,7 +74,7 @@ describe Logaling::Command::Application do
 
         it 'should not register .logaling as project' do
           File.should_not be_exist(target_project_path)
-          Dir[File.join(logaling_home, "projects", "*")].size.should == @project_counts
+          Dir[File.join(logaling_home, "projects", "*")].size.should == @n_projects
         end
       end
     end
@@ -83,7 +83,7 @@ describe Logaling::Command::Application do
   describe '#register' do
     before do
       sleep(1)
-      @project_counts = Dir[File.join(logaling_home, "projects", "*")].size
+      @n_projects = Dir[File.join(logaling_home, "projects", "*")].size
     end
 
     context "when can not find .logaling" do
@@ -93,7 +93,7 @@ describe Logaling::Command::Application do
       end
 
       it 'register nothing' do
-        Dir[File.join(logaling_home, "projects", "*")].size.should == @project_counts
+        Dir[File.join(logaling_home, "projects", "*")].size.should == @n_projects
       end
 
       it "print message \"Try 'loga new' first.\"" do
@@ -109,14 +109,14 @@ describe Logaling::Command::Application do
 
       it 'register .logaling as project' do
         File.should be_exist(target_project_path)
-        Dir[File.join(logaling_home, "projects", "*")].size.should == @project_counts + 1
+        Dir[File.join(logaling_home, "projects", "*")].size.should == @n_projects + 1
       end
     end
   end
 
   describe '#unregister' do
     before do
-      @project_counts = Dir[File.join(logaling_home, "projects", "*")].size
+      @n_projects = Dir[File.join(logaling_home, "projects", "*")].size
     end
 
     context "when can not find .logaling" do
@@ -141,7 +141,7 @@ describe Logaling::Command::Application do
           @stdout = capture(:stdout) {command.unregister}
         end
         it 'should unregister symlink' do
-          Dir[File.join(logaling_home, "projects", "*")].size.should == @project_counts
+          Dir[File.join(logaling_home, "projects", "*")].size.should == @n_projects
         end
       end
     end
@@ -156,7 +156,7 @@ describe Logaling::Command::Application do
 
         it 'unregister .logaling' do
           File.should_not be_exist(target_project_path)
-          Dir[File.join(logaling_home, "projects", "*")].size.should == @project_counts
+          Dir[File.join(logaling_home, "projects", "*")].size.should == @n_projects
         end
       end
 
