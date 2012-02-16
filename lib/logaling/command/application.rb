@@ -78,6 +78,7 @@ module Logaling::Command
         Logaling::ExternalGlossary.list.each {|glossary| say "#{glossary.name.bright} : #{glossary.description}" }
       else
         @repository.import(Logaling::ExternalGlossary.get(external_glossary))
+        @repository.index
       end
     rescue Logaling::ExternalGlossaryNotFound
       say "'#{external_glossary}' can't find in import list."
