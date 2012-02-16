@@ -30,8 +30,9 @@ module Logaling::Command
       super
       @logaling_home = options["logaling-home"] ? options["logaling-home"] : LOGALING_HOME
       @repository = Logaling::Repository.new(@logaling_home)
-      project_config_path = File.join(find_dotfile, 'config')
-      @config = Logaling::Config.load_config_and_merge_options(project_config_path, @repository.config_path, options)
+      @dotfile_path = options["logaling-config"] ? options["logaling-config"] : find_dotfile
+      @project_config_path = File.join(@dotfile_path, 'config')
+      @config = Logaling::Config.load_config_and_merge_options(@project_config_path, @repository.config_path, options)
     rescue Logaling::CommandFailed
       @config = Logaling::Config.load_config_and_merge_options(nil, @repository.config_path, options)
     end
@@ -52,20 +53,21 @@ module Logaling::Command
     class_option "source-language", type: :string, aliases: "-S"
     class_option "target-language", type: :string, aliases: "-T"
     class_option "logaling-home",   type: :string, aliases: "-h"
+    class_option "logaling-config", type: :string, aliases: "-c"
 
     desc 'new [PROJECT NAME] [SOURCE LANGUAGE] [TARGET LANGUAGE(optional)]', 'Create .logaling'
     method_option "no-register", type: :boolean, default: false
     def new(project_name, source_language, target_language=nil)
-      unless File.exist?(LOGALING_CONFIG)
-        FileUtils.mkdir_p(File.join(LOGALING_CONFIG, "glossary"))
+      unless File.exist?(logaling_config_path)
+        FileUtils.mkdir_p(File.join(logaling_config_path, "glossary"))
 
         config = Logaling::Config.setup(project_name, source_language, target_language)
-        config.save(File.join(LOGALING_CONFIG, "config"))
+        config.save(File.join(logaling_config_path, "config"))
 
         register unless options["no-register"]
-        say "Successfully created #{LOGALING_CONFIG}"
+        say "Successfully created #{logaling_config_path}"
       else
-        say "#{LOGALING_CONFIG} already exists."
+        say "#{logaling_config_path} already exists."
       end
     end
 
@@ -87,16 +89,14 @@ module Logaling::Command
 
     desc 'register', 'Register .logaling'
     def register
-      logaling_path = find_dotfile
-
       @config.check_required_option("glossary" => "input glossary name '-g <glossary name>'")
+      raise Logaling::CommandFailed, "Try 'loga new' first." unless File.exist?(@dotfile_path)
 
-      @repository.register(logaling_path, @config.glossary)
+      @repository.register(@dotfile_path, @config.glossary)
       @repository.index
       say "#{@config.glossary} is now registered to logaling."
     rescue Logaling::CommandFailed => e
       say e.message
-      say "Try 'loga new' first."
     rescue Logaling::GlossaryAlreadyRegistered => e
       say "#{@config.glossary} is already registered."
     end
@@ -117,7 +117,7 @@ module Logaling::Command
     desc 'config [KEY] [VALUE] [--global(optional)]', 'Set config.'
     method_option "global", type: :boolean, default: false
     def config(key, value)
-      config_path = options["global"] ? File.join(@logaling_home, "config") : File.join(find_dotfile, "config")
+      config_path = options["global"] ? File.join(@logaling_home, "config") : @project_config_path
       FileUtils.touch(config_path) unless File.exist?(config_path)
       Logaling::Config.add(config_path, key, value)
       say "Successfully set config."
@@ -284,6 +284,14 @@ module Logaling::Command
             raise(Logaling::CommandFailed, "Can't found .logaling in #{searched_path}")
           end
         end
+      end
+    end
+
+    def logaling_config_path
+      if options["logaling-config"]
+        options["logaling-config"]
+      else
+        File.join(Dir.pwd, LOGALING_CONFIG)
       end
     end
 
