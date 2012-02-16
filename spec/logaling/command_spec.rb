@@ -21,7 +21,7 @@ describe Logaling::Command::Application do
   let(:logaling_home) { LOGALING_HOME }
   let(:base_options) { {"glossary"=>"spec", "source-language"=>"en", "target-language"=>"ja"} }
   let(:command) { Logaling::Command::Application.new([], base_options) }
-  let(:glossary_path) { Logaling::Glossary.build_path('spec', 'en', 'ja') }
+  let(:glossary_path) { Logaling::Glossary.build_path('spec', 'en', 'ja', logaling_home) }
   let(:target_project_path) { File.join(logaling_home, "projects", "spec") }
   let(:repository) { Logaling::Repository.new(logaling_home) }
 

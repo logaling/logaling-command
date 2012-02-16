@@ -61,13 +61,13 @@ module Logaling
         glossary
       end
 
-      def build_path(glossary, source_language, target_language, logaling_home=LOGALING_HOME)
+      def build_path(glossary, source_language, target_language, logaling_home)
         fname = [glossary, source_language, target_language].join(".")
         File.join(logaling_home, "projects", glossary, "glossary", "#{fname}.yml")
       end
     end
 
-    def initialize(glossary, source_language, target_language, logaling_home=LOGALING_HOME)
+    def initialize(glossary, source_language, target_language, logaling_home)
       @path = Glossary.build_path(glossary, source_language, target_language, logaling_home)
       @glossary = glossary
       @source_language = source_language
