@@ -19,14 +19,19 @@ require File.join(File.dirname(__FILE__), "..", "spec_helper")
 
 describe Logaling::Command::Application do
   let(:logaling_home) { @logaling_home }
-  let(:base_options) { {"glossary"=>"spec", "source-language"=>"en", "target-language"=>"ja"} }
+  let(:logaling_config) { 
+   # p dot_logaling = Dir.mktmpdir
+   # FileUtils.touch(File.join(dot_logaling, 'config'))
+   # dot_logaling
+ # }
+  File.join(File.dirname(__FILE__), "..", "tmp", ".logaling") }
+  let(:base_options) { {"glossary"=>"spec", "source-language"=>"en", "target-language"=>"ja", "logaling-config" => logaling_config} }
   let(:command) { Logaling::Command::Application.new([], base_options) }
   let(:glossary_path) { Logaling::Glossary.build_path('spec', 'en', 'ja', logaling_home) }
   let(:target_project_path) { File.join(logaling_home, "projects", "spec") }
   let(:repository) { Logaling::Repository.new(logaling_home) }
 
   before do
-    FileUtils.remove_entry_secure(Logaling::Command::LOGALING_CONFIG, true)
     FileUtils.remove_entry_secure(File.join(logaling_home, 'projects', 'spec'), true)
   end
 
@@ -42,7 +47,7 @@ describe Logaling::Command::Application do
       end
 
       it 'print message \"<.logaling path> already exists.\"' do
-        @stdout.should include "#{Logaling::Command::LOGALING_CONFIG} already exists.\n"
+        @stdout.should include "#{logaling_config} already exists.\n"
       end
     end
 
@@ -53,7 +58,7 @@ describe Logaling::Command::Application do
         end
 
         it 'should create .logaling' do
-          File.exist?(Logaling::Command::LOGALING_CONFIG).should be_true
+          File.exist?(logaling_config).should be_true
         end
 
         it 'should register .logaling as project' do
@@ -69,7 +74,7 @@ describe Logaling::Command::Application do
         end
 
         it 'should create .logaling' do
-          File.exist?(Logaling::Command::LOGALING_CONFIG).should be_true
+          File.exist?(logaling_config).should be_true
         end
 
         it 'should not register .logaling as project' do
@@ -88,7 +93,7 @@ describe Logaling::Command::Application do
 
     context "when can not find .logaling" do
       before(:all) do
-        FileUtils.remove_entry_secure(Logaling::Command::LOGALING_CONFIG, true)
+        FileUtils.remove_entry_secure(logaling_config, true)
         @stdout = capture(:stdout) {command.register}
       end
 
@@ -111,10 +116,6 @@ describe Logaling::Command::Application do
         File.exist?(target_project_path).should be_true
         Dir[File.join(logaling_home, "projects", "*")].size.should == @project_counts + 1
       end
-
-      after do
-        FileUtils.remove_entry_secure(Logaling::Command::LOGALING_CONFIG, true)
-      end
     end
   end
 
@@ -125,7 +126,7 @@ describe Logaling::Command::Application do
 
     context "when can not find .logaling" do
       before do
-        #FileUtils.remove_entry_secure(Logaling::Command::LOGALING_CONFIG, true)
+        #FileUtils.remove_entry_secure(logaling_config, true)
       end
 
       context "and call without option" do
@@ -179,7 +180,7 @@ describe Logaling::Command::Application do
   end
 
   describe '#config' do
-    let(:project_config) { File.join(Logaling::Command::LOGALING_CONFIG, 'config') }
+    let(:project_config) { File.join(logaling_config, 'config') }
     let(:global_config) { File.join(logaling_home, 'config') }
 
     subject { File.read(project_config) }
@@ -262,7 +263,7 @@ describe Logaling::Command::Application do
 
     context 'project config does not have TARGET-LANGUAGE' do
       let(:global_config) { File.join(logaling_home, 'config') }
-      let(:base_options) { {"glossary"=>"spec", "source-language"=>"en", "output" => "terminal"} }
+      let(:base_options) { {"glossary"=>"spec", "source-language"=>"en", "output" => "terminal", "logaling-config" => logaling_config} }
       before do
         # create global config file
         FileUtils.touch(global_config)
@@ -396,7 +397,7 @@ describe Logaling::Command::Application do
 
         context "and called with '--force=true'" do
           before do
-            FileUtils.remove_entry_secure(Logaling::Command::LOGALING_CONFIG, true)
+            FileUtils.remove_entry_secure(logaling_config, true)
             FileUtils.remove_entry_secure(File.join(logaling_home, 'projects', 'spec'), true)
             command.options = base_options.merge("force" => true)
             command.new('spec', 'en', 'ja')
@@ -475,7 +476,7 @@ describe Logaling::Command::Application do
   end
 
   after do
-    FileUtils.remove_entry_secure(Logaling::Command::LOGALING_CONFIG, true)
+    FileUtils.remove_entry_secure(logaling_config, true)
     FileUtils.remove_entry_secure(File.join(logaling_home, 'projects', 'spec'), true)
   end
 end

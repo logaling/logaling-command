@@ -55,7 +55,7 @@ module Logaling
 
       def load_config(config_path=nil)
         config ||= {}
-        if config_path
+        if config_path && File.exist?(config_path)
           File.readlines(config_path).map{|l| l.chomp.split " "}.each do |option|
             key = option[0].sub(/^[\-]{2}/, "")
             value = option[1]
