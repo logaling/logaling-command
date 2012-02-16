@@ -21,12 +21,13 @@ require "fileutils"
 module Logaling
   describe Glossary do
     let(:project) { "spec" }
-    let(:glossary) { Glossary.new(project, 'en', 'ja') }
-    let(:glossary_path) { Glossary.build_path(project, 'en', 'ja') }
-    let(:repository) { Logaling::Repository.new(LOGALING_HOME) }
+    let(:logaling_home) { LOGALING_HOME }
+    let(:glossary) { Glossary.new(project, 'en', 'ja', logaling_home) }
+    let(:glossary_path) { Glossary.build_path(project, 'en', 'ja', logaling_home) }
+    let(:repository) { Logaling::Repository.new(logaling_home) }
 
     before do
-      FileUtils.remove_entry_secure(File.join(LOGALING_HOME, 'projects', 'spec'), true)
+      FileUtils.remove_entry_secure(File.join(logaling_home, 'projects', 'spec'), true)
       FileUtils.mkdir_p(File.dirname(glossary_path))
     end
 
@@ -170,7 +171,7 @@ module Logaling
     end
 
     after do
-      FileUtils.remove_entry_secure(File.join(LOGALING_HOME, 'projects', 'spec'), true)
+      FileUtils.remove_entry_secure(File.join(logaling_home, 'projects', 'spec'), true)
     end
   end
 end

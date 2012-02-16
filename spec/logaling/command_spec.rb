@@ -18,20 +18,21 @@
 require File.join(File.dirname(__FILE__), "..", "spec_helper")
 
 describe Logaling::Command::Application do
+  let(:logaling_home) { LOGALING_HOME }
   let(:base_options) { {"glossary"=>"spec", "source-language"=>"en", "target-language"=>"ja"} }
   let(:command) { Logaling::Command::Application.new([], base_options) }
-  let(:glossary_path) { Logaling::Glossary.build_path('spec', 'en', 'ja') }
-  let(:target_project_path) { File.join(LOGALING_HOME, "projects", "spec") }
-  let(:repository) { Logaling::Repository.new(LOGALING_HOME) }
+  let(:glossary_path) { Logaling::Glossary.build_path('spec', 'en', 'ja', logaling_home) }
+  let(:target_project_path) { File.join(logaling_home, "projects", "spec") }
+  let(:repository) { Logaling::Repository.new(logaling_home) }
 
   before do
     FileUtils.remove_entry_secure(Logaling::Command::LOGALING_CONFIG, true)
-    FileUtils.remove_entry_secure(File.join(LOGALING_HOME, 'projects', 'spec'), true)
+    FileUtils.remove_entry_secure(File.join(logaling_home, 'projects', 'spec'), true)
   end
 
   describe '#new' do
     before do
-      @project_counts = Dir[File.join(LOGALING_HOME, "projects", "*")].size
+      @project_counts = Dir[File.join(logaling_home, "projects", "*")].size
     end
 
     context 'when .logaling already exists' do
@@ -57,7 +58,7 @@ describe Logaling::Command::Application do
 
         it 'should register .logaling as project' do
           File.exist?(target_project_path).should be_true
-          Dir[File.join(LOGALING_HOME, "projects", "*")].size.should == @project_counts + 1
+          Dir[File.join(logaling_home, "projects", "*")].size.should == @project_counts + 1
         end
       end
 
@@ -73,7 +74,7 @@ describe Logaling::Command::Application do
 
         it 'should not register .logaling as project' do
           File.exist?(target_project_path).should be_false
-          Dir[File.join(LOGALING_HOME, "projects", "*")].size.should == @project_counts
+          Dir[File.join(logaling_home, "projects", "*")].size.should == @project_counts
         end
       end
     end
@@ -82,7 +83,7 @@ describe Logaling::Command::Application do
   describe '#register' do
     before do
       sleep(1)
-      @project_counts = Dir[File.join(LOGALING_HOME, "projects", "*")].size
+      @project_counts = Dir[File.join(logaling_home, "projects", "*")].size
     end
 
     context "when can not find .logaling" do
@@ -92,7 +93,7 @@ describe Logaling::Command::Application do
       end
 
       it 'register nothing' do
-        Dir[File.join(LOGALING_HOME, "projects", "*")].size.should == @project_counts
+        Dir[File.join(logaling_home, "projects", "*")].size.should == @project_counts
       end
 
       it "print message \"Try 'loga new' first.\"" do
@@ -108,7 +109,7 @@ describe Logaling::Command::Application do
 
       it 'register .logaling as project' do
         File.exist?(target_project_path).should be_true
-        Dir[File.join(LOGALING_HOME, "projects", "*")].size.should == @project_counts + 1
+        Dir[File.join(logaling_home, "projects", "*")].size.should == @project_counts + 1
       end
 
       after do
@@ -119,7 +120,7 @@ describe Logaling::Command::Application do
 
   describe '#unregister' do
     before do
-      @project_counts = Dir[File.join(LOGALING_HOME, "projects", "*")].size
+      @project_counts = Dir[File.join(logaling_home, "projects", "*")].size
     end
 
     context "when can not find .logaling" do
@@ -144,7 +145,7 @@ describe Logaling::Command::Application do
           @stdout = capture(:stdout) {command.unregister}
         end
         it 'should unregister symlink' do
-          Dir[File.join(LOGALING_HOME, "projects", "*")].size.should == @project_counts
+          Dir[File.join(logaling_home, "projects", "*")].size.should == @project_counts
         end
       end
     end
@@ -159,7 +160,7 @@ describe Logaling::Command::Application do
 
         it 'unregister .logaling' do
           File.exist?(target_project_path).should be_false
-          Dir[File.join(LOGALING_HOME, "projects", "*")].size.should == @project_counts
+          Dir[File.join(logaling_home, "projects", "*")].size.should == @project_counts
         end
       end
 
@@ -179,7 +180,7 @@ describe Logaling::Command::Application do
 
   describe '#config' do
     let(:project_config) { File.join(Logaling::Command::LOGALING_CONFIG, 'config') }
-    let(:global_config) { File.join(LOGALING_HOME, 'config') }
+    let(:global_config) { File.join(logaling_home, 'config') }
 
     subject { File.read(project_config) }
 
@@ -214,7 +215,7 @@ describe Logaling::Command::Application do
 
       subject { File.read(global_config) }
 
-      it 'should create LOGALING_HOME/config and write target-language' do
+      it 'should create {logaling_home}/config and write target-language' do
         should include "--target-language ja"
       end
 
@@ -260,7 +261,7 @@ describe Logaling::Command::Application do
     end
 
     context 'project config does not have TARGET-LANGUAGE' do
-      let(:global_config) { File.join(LOGALING_HOME, 'config') }
+      let(:global_config) { File.join(logaling_home, 'config') }
       let(:base_options) { {"glossary"=>"spec", "source-language"=>"en", "output" => "terminal"} }
       before do
         # create global config file
@@ -396,7 +397,7 @@ describe Logaling::Command::Application do
         context "and called with '--force=true'" do
           before do
             FileUtils.remove_entry_secure(Logaling::Command::LOGALING_CONFIG, true)
-            FileUtils.remove_entry_secure(File.join(LOGALING_HOME, 'projects', 'spec'), true)
+            FileUtils.remove_entry_secure(File.join(logaling_home, 'projects', 'spec'), true)
             command.options = base_options.merge("force" => true)
             command.new('spec', 'en', 'ja')
             command.add('term', '用語1', '備考')
@@ -475,6 +476,6 @@ describe Logaling::Command::Application do
 
   after do
     FileUtils.remove_entry_secure(Logaling::Command::LOGALING_CONFIG, true)
-    FileUtils.remove_entry_secure(File.join(LOGALING_HOME, 'projects', 'spec'), true)
+    FileUtils.remove_entry_secure(File.join(logaling_home, 'projects', 'spec'), true)
   end
 end

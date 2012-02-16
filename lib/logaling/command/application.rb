@@ -28,7 +28,8 @@ module Logaling::Command
 
     def initialize(*args)
       super
-      @repository = Logaling::Repository.new(LOGALING_HOME)
+      @logaling_home = options["logaling-home"] ? options["logaling-home"] : LOGALING_HOME
+      @repository = Logaling::Repository.new(@logaling_home)
       project_config_path = File.join(find_dotfile, 'config')
       @config = Logaling::Config.load_config_and_merge_options(project_config_path, @repository.config_path, options)
     rescue Logaling::CommandFailed
@@ -115,7 +116,7 @@ module Logaling::Command
     desc 'config [KEY] [VALUE] [--global(optional)]', 'Set config.'
     method_option "global", type: :boolean, default: false
     def config(key, value)
-      config_path = options["global"] ? File.join(LOGALING_HOME, "config") : File.join(find_dotfile, "config")
+      config_path = options["global"] ? File.join(@logaling_home, "config") : File.join(find_dotfile, "config")
       FileUtils.touch(config_path) unless File.exist?(config_path)
       Logaling::Config.add(config_path, key, value)
       say "Successfully set config."
@@ -258,7 +259,7 @@ module Logaling::Command
           "target-language" => "input target-language code '-T <target-language code>'"
         }
         @config.check_required_option(required_options)
-        @glossary = Logaling::Glossary.new(@config.glossary, @config.source_language, @config.target_language)
+        @glossary = Logaling::Glossary.new(@config.glossary, @config.source_language, @config.target_language, @logaling_home)
       end
     end
 
