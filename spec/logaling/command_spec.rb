@@ -19,12 +19,7 @@ require File.join(File.dirname(__FILE__), "..", "spec_helper")
 
 describe Logaling::Command::Application do
   let(:logaling_home) { @logaling_home }
-  let(:logaling_config) { 
-   # p dot_logaling = Dir.mktmpdir
-   # FileUtils.touch(File.join(dot_logaling, 'config'))
-   # dot_logaling
- # }
-  File.join(File.dirname(__FILE__), "..", "tmp", ".logaling") }
+  let(:logaling_config) { File.join(File.dirname(__FILE__), "..", "tmp", ".logaling") }
   let(:base_options) { {"glossary"=>"spec", "source-language"=>"en", "target-language"=>"ja", "logaling-config" => logaling_config} }
   let(:command) { Logaling::Command::Application.new([], base_options) }
   let(:glossary_path) { Logaling::Glossary.build_path('spec', 'en', 'ja', logaling_home) }
