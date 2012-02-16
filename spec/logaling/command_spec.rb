@@ -53,11 +53,11 @@ describe Logaling::Command::Application do
         end
 
         it 'should create .logaling' do
-          File.exist?(logaling_config).should be_true
+          File.should be_exist(logaling_config)
         end
 
         it 'should register .logaling as project' do
-          File.exist?(target_project_path).should be_true
+          File.should be_exist(target_project_path)
           Dir[File.join(logaling_home, "projects", "*")].size.should == @project_counts + 1
         end
       end
@@ -69,11 +69,11 @@ describe Logaling::Command::Application do
         end
 
         it 'should create .logaling' do
-          File.exist?(logaling_config).should be_true
+          File.should be_exist(logaling_config)
         end
 
         it 'should not register .logaling as project' do
-          File.exist?(target_project_path).should be_false
+          File.should_not be_exist(target_project_path)
           Dir[File.join(logaling_home, "projects", "*")].size.should == @project_counts
         end
       end
@@ -108,7 +108,7 @@ describe Logaling::Command::Application do
       end
 
       it 'register .logaling as project' do
-        File.exist?(target_project_path).should be_true
+        File.should be_exist(target_project_path)
         Dir[File.join(logaling_home, "projects", "*")].size.should == @project_counts + 1
       end
     end
@@ -155,7 +155,7 @@ describe Logaling::Command::Application do
         end
 
         it 'unregister .logaling' do
-          File.exist?(target_project_path).should be_false
+          File.should_not be_exist(target_project_path)
           Dir[File.join(logaling_home, "projects", "*")].size.should == @project_counts
         end
       end
