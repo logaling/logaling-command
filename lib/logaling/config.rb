@@ -65,12 +65,8 @@ module Logaling
         config
       end
     end
-    attr_reader :glossary, :source_language, :target_language
 
-    def initialize(config)
-      @glossary = config["glossary"]
-      @source_language = config["source-language"]
-      @target_language = config["target-language"]
+    def initialize(config={})
       @config = config
     end
 
@@ -82,10 +78,22 @@ module Logaling
 
     def save(config_path)
       File.open(config_path, 'w') do |fp|
-        fp.puts "--glossary #{@glossary}" if @glossary
-        fp.puts "--source-language #{@source_language}" if @source_language
-        fp.puts "--target-language #{@target_language}" if @target_language
+        fp.puts "--glossary #{@config["glossary"]}" if @config["glossary"]
+        fp.puts "--source-language #{@config["source-language"]}" if @config["source-language"]
+        fp.puts "--target-language #{@config["target-language"]}" if @config["target-language"]
       end
+    end
+
+    def glossary
+      @config["glossary"]
+    end
+
+    def source_language
+      @config["source-language"]
+    end
+
+    def target_language
+      @config["target-language"]
     end
   end
 end
