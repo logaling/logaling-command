@@ -78,9 +78,9 @@ module Logaling
 
     def save(config_path)
       File.open(config_path, 'w') do |fp|
-        fp.puts "--glossary #{@config["glossary"]}" if @config["glossary"]
-        fp.puts "--source-language #{@config["source-language"]}" if @config["source-language"]
-        fp.puts "--target-language #{@config["target-language"]}" if @config["target-language"]
+        keys.each do |key|
+          fp.puts "--#{key} #{@config[key]}" if @config[key]
+        end
       end
     end
 
@@ -94,6 +94,11 @@ module Logaling
 
     def target_language
       @config["target-language"]
+    end
+
+    private
+    def keys
+      %w(glossary source-language target-language)
     end
   end
 end
