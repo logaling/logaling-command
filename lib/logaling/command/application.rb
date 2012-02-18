@@ -30,11 +30,13 @@ module Logaling::Command
       super
       @logaling_home = options["logaling-home"] ? options["logaling-home"] : LOGALING_HOME
       @repository = Logaling::Repository.new(@logaling_home)
+      @config = Logaling::Config.load(@repository.config_path)
+
       @dotfile_path = options["logaling-config"] ? options["logaling-config"] : find_dotfile
       @project_config_path = File.join(@dotfile_path, 'config')
-      @config = Logaling::Config.load_config_and_merge_options(@project_config_path, @repository.config_path, options)
-    rescue Logaling::CommandFailed
-      @config = Logaling::Config.load_config_and_merge_options(nil, @repository.config_path, options)
+      @config.load(@project_config_path)
+    ensure
+      @config.merge(options)
     end
 
     map '-a' => :add,
@@ -61,7 +63,8 @@ module Logaling::Command
       unless File.exist?(logaling_config_path)
         FileUtils.mkdir_p(File.join(logaling_config_path, "glossary"))
 
-        config = Logaling::Config.setup(project_name, source_language, target_language)
+        config = Logaling::Config.new("glossary" => project_name, "source-language" => source_language)
+        config.merge("target-language" => target_language) if target_language
         config.save(File.join(logaling_config_path, "config"))
 
         register unless options["no-register"]
@@ -118,8 +121,9 @@ module Logaling::Command
     method_option "global", type: :boolean, default: false
     def config(key, value)
       config_path = options["global"] ? File.join(@logaling_home, "config") : @project_config_path
-      FileUtils.touch(config_path) unless File.exist?(config_path)
-      Logaling::Config.add(config_path, key, value)
+      config = Logaling::Config.load(config_path)
+      config.add(key, value)
+      config.save(config_path)
       say "Successfully set config."
     rescue Logaling::CommandFailed => e
       say e.message
