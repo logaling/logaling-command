@@ -127,6 +127,12 @@ module Logaling::Command
 
     desc 'add [SOURCE TERM] [TARGET TERM] [NOTE(optional)]', 'Add term to glossary.'
     def add(source_term, target_term, note='')
+      required_options = {
+        "glossary" => "input glossary name '-g <glossary name>'",
+        "source-language" => "input source-language code '-S <source-language code>'",
+        "target-language" => "input target-language code '-T <target-language code>'"
+      }
+      @config.check_required_option(required_options)
       @repository.index
 
       if @repository.bilingual_pair_exists?(source_term, target_term, @config.glossary)
@@ -141,6 +147,13 @@ module Logaling::Command
     desc 'delete [SOURCE TERM] [TARGET TERM(optional)] [--force(optional)]', 'Delete term.'
     method_option "force", type: :boolean, default: false
     def delete(source_term, target_term=nil)
+      required_options = {
+        "glossary" => "input glossary name '-g <glossary name>'",
+        "source-language" => "input source-language code '-S <source-language code>'",
+        "target-language" => "input target-language code '-T <target-language code>'"
+      }
+      @config.check_required_option(required_options)
+
       if target_term
         glossary.delete(source_term, target_term)
       else
@@ -154,6 +167,12 @@ module Logaling::Command
 
     desc 'update [SOURCE TERM] [TARGET TERM] [NEW TARGET TERM] [NOTE(optional)]', 'Update term.'
     def update(source_term, target_term, new_target_term, note='')
+      required_options = {
+        "glossary" => "input glossary name '-g <glossary name>'",
+        "source-language" => "input source-language code '-S <source-language code>'",
+        "target-language" => "input target-language code '-T <target-language code>'"
+      }
+      @config.check_required_option(required_options)
       @repository.index
 
       if @repository.bilingual_pair_exists_and_has_same_note?(source_term, new_target_term, note, @config.glossary)
@@ -251,17 +270,7 @@ module Logaling::Command
 
     private
     def glossary
-      if @glossary
-        @glossary
-      else
-        required_options = {
-          "glossary" => "input glossary name '-g <glossary name>'",
-          "source-language" => "input source-language code '-S <source-language code>'",
-          "target-language" => "input target-language code '-T <target-language code>'"
-        }
-        @config.check_required_option(required_options)
-        @glossary = Logaling::Glossary.new(@config.glossary, @config.source_language, @config.target_language, @logaling_home)
-      end
+      @glossary ||= Logaling::Glossary.new(@config.glossary, @config.source_language, @config.target_language, @logaling_home)
     end
 
     def error(msg)
