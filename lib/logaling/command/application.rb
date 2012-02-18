@@ -214,7 +214,7 @@ module Logaling::Command
       }
       @config.check_required_option(required_options)
       @repository.index
-      terms = @repository.show_glossary(@config.glossary, @config.source_language, @config.target_language)
+      terms = @repository.show_glossary(@glossary)
       unless terms.empty?
         run_pager
         max_str_size = terms.map{|term| term[:source_term].size}.sort.last

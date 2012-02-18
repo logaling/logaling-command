@@ -123,12 +123,12 @@ module Logaling
       specified_glossary.expression.close
     end
 
-    def translation_list(glossary, source_language, target_language)
+    def translation_list(glossary_source)
       records_raw = Groonga["translations"].select do |record|
         [
-          record.glossary == glossary,
-          record.source_language == source_language,
-          record.target_language == target_language
+          record.glossary == glossary_source.glossary,
+          record.source_language == glossary_source.source_language,
+          record.target_language == glossary_source.target_language
         ]
       end
 
