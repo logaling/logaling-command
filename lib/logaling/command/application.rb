@@ -36,7 +36,7 @@ module Logaling::Command
       @project_config_path = File.join(@dotfile_path, 'config')
       @config.load(@project_config_path)
     ensure
-      @config.merge(options)
+      @config.merge!(options)
     end
 
     map '-a' => :add,
@@ -64,7 +64,7 @@ module Logaling::Command
         FileUtils.mkdir_p(File.join(logaling_config_path, "glossary"))
 
         config = Logaling::Config.new("glossary" => project_name, "source-language" => source_language)
-        config.merge("target-language" => target_language) if target_language
+        config.merge!("target-language" => target_language) if target_language
         config.save(File.join(logaling_config_path, "config"))
 
         register unless options["no-register"]

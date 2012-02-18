@@ -33,7 +33,7 @@ module Logaling
       end
     end
 
-    def merge(config)
+    def merge!(config)
       keys.each do |key|
         @config[key] = config[key] if config[key]
       end
@@ -51,7 +51,7 @@ module Logaling
 
     def add(key, value)
       raise Logaling::CommandFailed, "#{key} is unsupported option" unless support?(key)
-      merge(key => value)
+      merge!(key => value)
     end
 
     def save(config_path)
