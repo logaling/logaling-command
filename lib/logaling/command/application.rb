@@ -191,9 +191,7 @@ module Logaling::Command
     method_option "no-pager", type: :boolean, default: false
     def lookup(source_term)
       @repository.index
-      terms = @repository.lookup(source_term,
-                                 @config.source_language, @config.target_language,
-                                 @config.glossary)
+      terms = @repository.lookup(source_term, glossary)
       unless terms.empty?
         max_str_size = terms.map{|term| term[:source_term].size}.sort.last
         run_pager

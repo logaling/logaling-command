@@ -101,7 +101,7 @@ module Logaling
           glossary.add("delete_logaling", "てすと2", "備考")
           glossary.delete("delete_logaling", "てすと1")
           repository.index
-          @result = repository.lookup("delete_logaling", "en", "ja", project)
+          @result = repository.lookup("delete_logaling", glossary)
         end
 
         it 'should delete the bilingual pair' do
@@ -138,7 +138,7 @@ module Logaling
             glossary.add("user_logaling", "ユーザ", "備考")
             glossary.delete_all("user_logaling")
             repository.index
-            @result = repository.lookup("user_logaling", "en", "ja", project)
+            @result = repository.lookup("user_logaling", glossary)
           end
 
           it 'should delete the term' do

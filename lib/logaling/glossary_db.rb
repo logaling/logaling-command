@@ -81,15 +81,15 @@ module Logaling
       end
     end
 
-    def lookup(source_term, source_language, target_language, glossary)
+    def lookup(source_term, glossary_source)
       records_selected = Groonga["translations"].select do |record|
         conditions = [record.source_term =~ source_term]
-        conditions << (record.source_language =~ source_language) if source_language
-        conditions << (record.target_language =~ target_language) if target_language
+        conditions << (record.source_language =~ glossary_source.source_language) if glossary_source.source_language
+        conditions << (record.target_language =~ glossary_source.target_language) if glossary_source.target_language
         conditions
       end
       specified_glossary = records_selected.select do |record|
-        record.glossary == glossary
+        record.glossary == glossary_source.glossary
       end
       specified_glossary.each do |record|
         record.key._score += 10
