@@ -39,7 +39,7 @@ module Logaling
           glossary.add("user-logaling", "ユーザー", "")
           File.stub!(:mtime).and_return(Time.now - 1)
           repository.index
-          @terms = repository.lookup("user-logaling", "en", "ja", project)
+          @terms = repository.lookup("user-logaling", glossary)
         end
 
         it 'succeed at find by term' do
@@ -55,7 +55,7 @@ module Logaling
           FileUtils.touch(tsv_path)
           File.open(tsv_path, "w"){|f| f.puts "test-logaling\tユーザー\ntest-logaling\tユーザ"}
           repository.index
-          @terms = repository.lookup("test-logaling", "en", "ja", project)
+          @terms = repository.lookup("test-logaling", glossary)
         end
 
         it 'succeed at find by term' do
@@ -79,7 +79,7 @@ module Logaling
           FileUtils.touch(glossary_path)
           glossary.add("spec_logaling", "スペック", "備考")
           repository.index
-          @terms = repository.lookup("spec_logaling", "en", "ja", "spec")
+          @terms = repository.lookup("spec_logaling", glossary)
         end
 
         it 'glossaries should be indexed' do
@@ -97,7 +97,7 @@ module Logaling
           FileUtils.touch(tsv_path)
           File.open(tsv_path, "w"){|f| f.puts "user-logaling\tユーザ"}
           repository.index
-          @terms = repository.lookup("user-logaling", "en", "ja", "spec")
+          @terms = repository.lookup("user-logaling", glossary)
         end
 
 
@@ -116,7 +116,7 @@ module Logaling
           FileUtils.touch(csv_path)
           File.open(csv_path, "w"){|f| f.puts "test_logaling,テスト"}
           repository.index
-          @terms = repository.lookup("test_logaling", "en", "ja", "spec")
+          @terms = repository.lookup("test_logaling", glossary)
         end
 
         it 'glossaries should be indexed' do

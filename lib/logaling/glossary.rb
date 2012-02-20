@@ -66,6 +66,7 @@ module Logaling
         File.join(logaling_home, "projects", glossary, "glossary", "#{fname}.yml")
       end
     end
+    attr_reader :glossary, :source_language, :target_language
 
     def initialize(glossary, source_language, target_language, logaling_home)
       @path = Glossary.build_path(glossary, source_language, target_language, logaling_home)
