@@ -16,61 +16,14 @@
 module Logaling
   class Config
     class << self
-      def setup(project_name, source_language, target_language)
-        config = {"glossary" => project_name, "source-language" => source_language}
-        config["target-language"] = target_language if target_language
-        new(config)
-      end
-
-      def add(config_path, key, value)
-        raise Logaling::CommandFailed, "#{key} is unsupported option" unless support?(key)
-
-        config = load_config_and_merge_options(nil, config_path, {key => value})
-        config.save(config_path)
-      end
-
-      def load_config_and_merge_options(project_config_path, global_config_path, options)
-        project_config = project_config_path ? load_config(project_config_path) : load_config(global_config_path)
-        global_config = load_config(global_config_path)
-
-        config = merge_options(project_config, global_config)
-        config = merge_options(options, config)
-
-        new(config)
-      end
-
-      private
-      def support?(key)
-        support_keys = %w(glossary source-language target-language)
-        support_keys.include?(key)
-      end
-
-      def merge_options(options, secondary_options)
-        config ||={}
-        config["glossary"] = options["glossary"] ? options["glossary"] : secondary_options["glossary"]
-        config["source-language"] = options["source-language"] ? options["source-language"] : secondary_options["source-language"]
-        config["target-language"] = options["target-language"] ? options["target-language"] : secondary_options["target-language"]
-        config
-      end
-
-      def load_config(config_path=nil)
-        config ||= {}
-        if config_path && File.exist?(config_path)
-          File.readlines(config_path).map{|l| l.chomp.split " "}.each do |option|
-            key = option[0].sub(/^[\-]{2}/, "")
-            value = option[1]
-            config[key] = value
-          end
-        end
+      def load(config_path)
+        config = new
+        config.load(config_path)
         config
       end
     end
-    attr_reader :glossary, :source_language, :target_language
 
-    def initialize(config)
-      @glossary = config["glossary"]
-      @source_language = config["source-language"]
-      @target_language = config["target-language"]
+    def initialize(config={})
       @config = config
     end
 
@@ -80,12 +33,54 @@ module Logaling
       end
     end
 
+    def merge!(config)
+      keys.each do |key|
+        @config[key] = config[key] if config[key]
+      end
+    end
+
+    def load(config_path=nil)
+      if config_path && File.exist?(config_path)
+        File.readlines(config_path).map{|l| l.chomp.split " "}.each do |option|
+          key = option[0].sub(/^[\-]{2}/, "")
+          value = option[1]
+          @config[key] = value
+        end
+      end
+    end
+
+    def add(key, value)
+      raise Logaling::CommandFailed, "#{key} is unsupported option" unless support?(key)
+      merge!(key => value)
+    end
+
     def save(config_path)
       File.open(config_path, 'w') do |fp|
-        fp.puts "--glossary #{@glossary}" if @glossary
-        fp.puts "--source-language #{@source_language}" if @source_language
-        fp.puts "--target-language #{@target_language}" if @target_language
+        keys.each do |key|
+          fp.puts "--#{key} #{@config[key]}" if @config[key]
+        end
       end
+    end
+
+    def glossary
+      @config["glossary"]
+    end
+
+    def source_language
+      @config["source-language"]
+    end
+
+    def target_language
+      @config["target-language"]
+    end
+
+    private
+    def keys
+      %w(glossary source-language target-language)
+    end
+
+    def support?(key)
+      keys.include?(key)
     end
   end
 end
