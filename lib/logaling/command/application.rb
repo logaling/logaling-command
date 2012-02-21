@@ -35,6 +35,8 @@ module Logaling::Command
       @dotfile_path = options["logaling-config"] ? options["logaling-config"] : find_dotfile
       @project_config_path = File.join(@dotfile_path, 'config')
       @config.load(@project_config_path)
+    rescue Logaling::CommandFailed # can't find .logaling
+      @project_config_path = nil
     ensure
       @config.merge!(options)
     end
