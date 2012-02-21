@@ -60,33 +60,28 @@ module Logaling
         end
         glossary
       end
-
-      def build_path(glossary, source_language, target_language, logaling_home)
-        fname = [glossary, source_language, target_language].join(".")
-        File.join(logaling_home, "projects", glossary, "glossary", "#{fname}.yml")
-      end
     end
     attr_reader :glossary, :source_language, :target_language
 
     def initialize(glossary, source_language, target_language, logaling_home)
-      @path = Glossary.build_path(glossary, source_language, target_language, logaling_home)
+      @logaling_home = logaling_home
       @glossary = glossary
       @source_language = source_language
       @target_language = target_language
     end
 
     def add(source_term, target_term, note)
-      FileUtils.touch(@path) unless File.exist?(@path)
+      FileUtils.touch(source_path) unless File.exist?(source_path)
 
-      glossary = Glossary.load_glossary(@path)
+      glossary = Glossary.load_glossary(source_path)
       glossary << build_term(source_term, target_term, note)
       dump_glossary(glossary)
     end
 
     def update(source_term, target_term, new_target_term, note)
-      raise GlossaryNotFound unless File.exist?(@path)
+      raise GlossaryNotFound unless File.exist?(source_path)
 
-      glossary = Glossary.load_glossary(@path)
+      glossary = Glossary.load_glossary(source_path)
 
       target_index = find_term_index(glossary, source_term, target_term)
       if target_index
@@ -98,9 +93,9 @@ module Logaling
     end
 
     def delete(source_term, target_term)
-      raise GlossaryNotFound unless File.exist?(@path)
+      raise GlossaryNotFound unless File.exist?(source_path)
 
-      glossary = Glossary.load_glossary(@path)
+      glossary = Glossary.load_glossary(source_path)
       target_index = find_term_index(glossary, source_term, target_term)
       unless target_index
         raise TermError, "Can't found term '#{source_term} #{target_term}' in '#{@glossary}'" unless target_index
@@ -111,9 +106,9 @@ module Logaling
     end
 
     def delete_all(source_term, force=false)
-      raise GlossaryNotFound unless File.exist?(@path)
+      raise GlossaryNotFound unless File.exist?(source_path)
 
-      glossary = Glossary.load_glossary(@path)
+      glossary = Glossary.load_glossary(source_path)
       delete_candidates = target_terms(glossary, source_term)
       if delete_candidates.empty?
         raise TermError, "Can't found term '#{source_term} in '#{@glossary}'"
@@ -126,6 +121,15 @@ module Logaling
         raise TermError, "There are duplicate terms in glossary.\n" +
           "If you really want to delete, please put `loga delete [SOURCE_TERM] --force`\n" +
           " or `loga delete [SOURCE_TERM] [TARGET_TERM]`"
+      end
+    end
+
+    def source_path
+      if @source_path
+        @source_path
+      else
+        fname = [@glossary, @source_language, @target_language].join(".")
+        @source_path = File.join(@logaling_home, "projects", @glossary, "glossary", "#{fname}.yml")
       end
     end
 
@@ -158,7 +162,7 @@ module Logaling
     end
 
     def dump_glossary(glossary)
-      File.open(@path, "w") do |f|
+      File.open(source_path, "w") do |f|
         f.puts(glossary.to_yaml)
       end
     end

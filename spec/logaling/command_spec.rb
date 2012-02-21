@@ -22,7 +22,8 @@ describe Logaling::Command::Application do
   let(:logaling_config) { File.join(File.dirname(__FILE__), "..", "tmp", ".logaling") }
   let(:base_options) { {"glossary"=>"spec", "source-language"=>"en", "target-language"=>"ja", "logaling-config" => logaling_config} }
   let(:command) { Logaling::Command::Application.new([], base_options) }
-  let(:glossary_path) { Logaling::Glossary.build_path('spec', 'en', 'ja', logaling_home) }
+  let(:glossary) { Logaling::Glossary.new('spec', 'en', 'ja', logaling_home) }
+  let(:glossary_path) { glossary.source_path }
   let(:target_project_path) { File.join(logaling_home, "projects", "spec") }
   let(:repository) { Logaling::Repository.new(logaling_home) }
 
