@@ -122,9 +122,9 @@ module Logaling
          :note => term.note || ''}
       end
     ensure
-      snippet.close
-      records_selected.expression.close
-      specified_glossary.expression.close
+      snippet.close if snippet
+      records_selected.expression.close if records_selected
+      specified_glossary.expression.close if specified_glossary
     end
 
     def translation_list(glossary_source)
