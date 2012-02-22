@@ -23,7 +23,7 @@ module Logaling
     let(:project) { "spec" }
     let(:logaling_home) { @logaling_home }
     let(:glossary) { Glossary.new(project, 'en', 'ja', logaling_home) }
-    let(:glossary_path) { Glossary.build_path(project, 'en', 'ja', logaling_home) }
+    let(:glossary_path) { glossary.source_path }
     let(:repository) { Logaling::Repository.new(logaling_home) }
     let(:db_home) { File.join(logaling_home, "db") }
 
