@@ -108,25 +108,13 @@ module Logaling
                  :html_escape => true,
                  :normalize => true}
       snippet = records_selected.expression.snippet(["<snippet>", "</snippet>"], options)
-
-      snipped_source_term = []
-      records.map do |record|
-        term = record.key
-        snipped_text = snippet.execute(term.source_term).join
-        {:glossary_name => term.glossary.key,
-         :source_language => term.source_language,
-         :target_language => term.target_language,
-         :source_term => term.source_term,
-         :snipped_source_term => struct_snipped_text(snipped_text),
-         :target_term => term.target_term,
-         :snipped_target_term => [],
-         :note => term.note || ''}
-      end
+      struct_result(records, snippet)
     ensure
       snippet.close if snippet
       records_selected.expression.close if records_selected
       specified_glossary.expression.close if specified_glossary
     end
+
 
     def lookup_dictionary(search_word)
       records_selected_source = Groonga["translations"].select do |record|
@@ -157,20 +145,7 @@ module Logaling
                  :normalize => true}
       snippet = records_selected.expression.snippet(["<snippet>", "</snippet>"], options)
 
-      snipped_source_term = []
-      records.map do |record|
-        term = record.key
-        snipped_source_term = snippet.execute(term.source_term).join
-        snipped_target_term = snippet.execute(term.target_term).join
-        {:glossary_name => term.glossary.key,
-         :source_language => term.source_language,
-         :target_language => term.target_language,
-         :source_term => term.source_term,
-         :snipped_source_term => struct_snipped_text(snipped_source_term),
-         :target_term => term.target_term,
-         :snipped_target_term => struct_snipped_text(snipped_target_term),
-         :note => term.note || ''}
-      end
+      struct_result(records, snippet)
     ensure
       snippet.close if snippet
       records_selected.expression.close if records_selected
@@ -189,16 +164,7 @@ module Logaling
         {:key=>"source_term", :order=>'ascending'},
         {:key=>"target_term", :order=>'ascending'}])
 
-      records.map do |record|
-        term = record.key
-
-        {:glossary_name => term.glossary.key,
-         :source_language => term.source_language,
-         :target_language => term.target_language,
-         :source_term => term.source_term,
-         :target_term => term.target_term,
-         :note => term.note || ''}
-      end
+      struct_result(records)
     ensure
       records_raw.expression.close
     end
@@ -212,16 +178,7 @@ module Logaling
         ]
       end
 
-      records.map do |record|
-        term = record.key
-
-        {:glossary_name => term.glossary,
-         :source_language => term.source_language,
-         :target_language => term.target_language,
-         :source_term => term.source_term,
-         :target_term => term.target_term,
-         :note => term.note || ''}
-      end
+      struct_result(records)
     ensure
       records.expression.close
     end
@@ -236,16 +193,7 @@ module Logaling
         ]
       end
 
-      records.map do |record|
-        term = record.key
-
-        {:glossary_name => term.glossary,
-         :source_language => term.source_language,
-         :target_language => term.target_language,
-         :source_term => term.source_term,
-         :target_term => term.target_term,
-         :note => term.note || ''}
-      end
+      struct_result(records)
     ensure
       records.expression.close
     end
@@ -392,7 +340,24 @@ module Logaling
       @database.nil? or @database.closed?
     end
 
+    def struct_result(records, snippet=nil)
+      records.map do |record|
+        term = record.key
+        snipped_source_term = snippet ? snip_source_term(term, snippet) : []
+        snipped_target_term = snippet ? snip_target_term(term, snippet) : []
+        {:glossary_name => term.glossary.key,
+         :source_language => term.source_language,
+         :target_language => term.target_language,
+         :source_term => term.source_term,
+         :snipped_source_term => snipped_source_term,
+         :target_term => term.target_term,
+         :snipped_target_term => snipped_target_term,
+         :note => term.note || ''}
+      end
+    end
+
     def struct_snipped_text(snipped_text)
+      return [] if snipped_text.empty?
       word_list = snipped_text.split(/(<snippet>[^<]*<\/snippet>)/)
       structed_source_term = word_list.map{|word|
         replaced_word = word.sub(/<snippet>([^<]*)<\/snippet>/){|match| $1}
@@ -403,6 +368,16 @@ module Logaling
         end
       }
       structed_source_term
+    end
+
+    def snip_source_term(term, snippet)
+        snipped_text = snippet.execute(term.source_term).join
+        struct_snipped_text(snipped_text)
+    end
+
+    def snip_target_term(term, snippet)
+        snipped_text = snippet.execute(term.target_term).join
+        struct_snipped_text(snipped_text)
     end
 
     def get_config(conf_key)
