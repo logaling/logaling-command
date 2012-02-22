@@ -47,6 +47,50 @@ module Logaling
         end
       end
 
+      context 'with dictionary option' do
+        before do
+          glossary.add("user", "ユーザ", "ユーザーではない")
+          glossary.add("user-logaling", "ユーザ", "ユーザーではない")
+          glossary.add("user-logaling test", "ユーザーてすと", "")
+          glossary.add("ゆーざ", "test user-logaling test text", "")
+          File.stub!(:mtime).and_return(Time.now - 1)
+          repository.index
+          @terms = repository.lookup("user-logaling", glossary, true)
+          @result = [{
+            :glossary_name=>"spec",
+            :source_language=>"en",
+            :target_language=>"ja",
+            :source_term=>"user-logaling",
+            :snipped_source_term=>["", {:keyword=>"user-logaling"}],
+            :target_term=>"ユーザ",
+            :snipped_target_term=>[],
+            :note=>"ユーザーではない"},
+            {
+            :glossary_name=>"spec",
+            :source_language=>"en",
+            :target_language=>"ja",
+            :source_term=>"user-logaling test",
+            :snipped_source_term=>["", {:keyword=>"user-logaling"}, " test"],
+            :target_term=>"ユーザーてすと",
+            :snipped_target_term=>[],
+            :note=>""},
+            {
+            :glossary_name=>"spec",
+            :source_language=>"en",
+            :target_language=>"ja",
+            :source_term=>"ゆーざ",
+            :snipped_source_term=>[],
+            :target_term=>"test user-logaling test text",
+            :snipped_target_term=>["test", {:keyword=>" user-logaling"}, " test text"],
+            :note=>""}]
+        end
+
+        it 'succeed at find by term' do
+          @terms.size.should == 3
+          @terms.should == @result
+        end
+      end
+
       context 'when tsv file as glossary exists' do
         let(:tsv_path) { glossary_path.sub(/yml$/, 'tsv') }
 
