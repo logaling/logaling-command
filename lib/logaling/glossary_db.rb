@@ -119,12 +119,61 @@ module Logaling
          :source_term => term.source_term,
          :snipped_source_term => struct_snipped_text(snipped_text),
          :target_term => term.target_term,
+         :snipped_target_term => [],
          :note => term.note || ''}
       end
     ensure
       snippet.close if snippet
       records_selected.expression.close if records_selected
       specified_glossary.expression.close if specified_glossary
+    end
+
+    def lookup_dictionary(search_word)
+      records_selected_source = Groonga["translations"].select do |record|
+        target = record.match_target do |match_record|
+          match_record.source_term * 2
+        end
+        target =~ search_word
+      end
+      completely_match = records_selected_source.select do |record|
+        record.source_term == search_word
+      end
+      completely_match.each do |record|
+        record.key._score += 10
+      end
+
+      records_selected_target = Groonga["translations"].select do |record|
+        record.target_term =~ search_word
+      end
+
+      records_selected = records_selected_target.union!(records_selected_source)
+      records = records_selected.sort([
+        {:key=>"_score", :order=>'descending'},
+        {:key=>"source_term", :order=>'ascending'},
+        {:key=>"target_term", :order=>'ascending'}])
+
+      options = {:width => 100,
+                 :html_escape => true,
+                 :normalize => true}
+      snippet = records_selected.expression.snippet(["<snippet>", "</snippet>"], options)
+
+      snipped_source_term = []
+      records.map do |record|
+        term = record.key
+        snipped_source_term = snippet.execute(term.source_term).join
+        snipped_target_term = snippet.execute(term.target_term).join
+        {:glossary_name => term.glossary.key,
+         :source_language => term.source_language,
+         :target_language => term.target_language,
+         :source_term => term.source_term,
+         :snipped_source_term => struct_snipped_text(snipped_source_term),
+         :target_term => term.target_term,
+         :snipped_target_term => struct_snipped_text(snipped_target_term),
+         :note => term.note || ''}
+      end
+    ensure
+      snippet.close if snippet
+      records_selected.expression.close if records_selected
     end
 
     def translation_list(glossary_source)
@@ -324,6 +373,7 @@ module Logaling
                             :key_normalize => true,
                             :default_tokenizer => "TokenBigram") do |table|
           table.index("translations.source_term")
+          table.index("translations.target_term")
         end
       end
     end

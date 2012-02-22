@@ -50,12 +50,16 @@ module Logaling
       end
     end
 
-    def lookup(source_term, glossary_source)
+    def lookup(source_term, glossary_source, dictionary=false)
       raise GlossaryDBNotFound unless File.exist?(logaling_db_home)
 
       terms = []
       Logaling::GlossaryDB.open(logaling_db_home, "utf8") do |db|
-        terms = db.lookup(source_term, glossary_source)
+        if dictionary
+          terms = db.lookup_dictionary(source_term)
+        else
+          terms = db.lookup(source_term, glossary_source)
+        end
       end
       terms
     end

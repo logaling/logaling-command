@@ -195,15 +195,16 @@ module Logaling::Command
     desc 'lookup [TERM]', 'Lookup terms.'
     method_option "output", type: :string, default: "terminal"
     method_option "no-pager", type: :boolean, default: false
+    method_option "dictionary", type: :boolean, default: false, aliases: "--dict"
     def lookup(source_term)
       @repository.index
-      terms = @repository.lookup(source_term, glossary)
+      terms = @repository.lookup(source_term, glossary, options["dictionary"])
       unless terms.empty?
         max_str_size = terms.map{|term| term[:source_term].size}.sort.last
         run_pager
         terms.each_with_index do |term, i|
-          source_string = extract_source_string_and_coloring(term)
-          target_string = term[:target_term].bright
+          source_string = extract_keyword_and_coloring(term[:snipped_source_term], term[:source_term])
+          target_string = extract_keyword_and_coloring(term[:snipped_target_term], term[:target_term])
           note = term[:note].to_s unless term[:note].empty?
           glossary_name = ""
           if @repository.glossary_counts > 1
@@ -337,12 +338,13 @@ module Logaling::Command
       exec pager rescue exec "/bin/sh", "-c", pager
     end
 
-    def extract_source_string_and_coloring(term)
-      source_string = term[:snipped_source_term].map do |word|
+    def extract_keyword_and_coloring(snipped_term, term)
+      return term if snipped_term.empty?
+      display_string = snipped_term.map do |word|
         word.is_a?(Hash) ? word[:keyword].bright : word
       end
-      source_string = source_string.join
-      source_string
+      display_string = display_string.join
+      display_string
     end
 
     def printer(source_string, target_string, note=nil,
