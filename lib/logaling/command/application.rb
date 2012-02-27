@@ -69,7 +69,12 @@ module Logaling::Command
         config.merge!("target-language" => target_language) if target_language
         config.save(File.join(logaling_config_path, "config"))
 
-        register unless options["no-register"]
+        unless options["no-register"]
+          @dotfile_path = options["logaling-config"] ? options["logaling-config"] : find_dotfile
+          @project_config_path = File.join(@dotfile_path, 'config')
+          @config.load(@project_config_path)
+          register
+        end
         say "Successfully created #{logaling_config_path}"
       else
         say "#{logaling_config_path} already exists."
