@@ -119,17 +119,23 @@ module Logaling::Command
       say "#{@config.glossary} is not yet registered."
     end
 
-    desc 'config [KEY] [VALUE] [--global(optional)]', 'Set config.'
-    method_option "global", type: :boolean, default: false
-    def config(key, value)
-      config_path = options["global"] ? File.join(@logaling_home, "config") : @project_config_path
-      config = Logaling::Config.load(config_path)
-      config.add(key, value)
-      config.save(config_path)
-      say "Successfully set config."
-    rescue Logaling::CommandFailed => e
-      say e.message
-    end
+   desc 'config [KEY] [VALUE] [--global(optional)]', 'Set config.'
+   method_option "global", type: :boolean, default: false
+   def config(key, value)
+     if options["global"]
+       FileUtils.mkdir_p(@logaling_home) unless File.exist?(@logaling_home)
+       config_path = File.join(@logaling_home, "config")
+     else
+       raise Logaling::CommandFailed, "Can't found .logaling" unless @project_config_path
+       config_path = @project_config_path
+     end
+     config = Logaling::Config.load(config_path)
+     config.add(key, value)
+     config.save(config_path)
+     say "Successfully set config."
+   rescue Logaling::CommandFailed => e
+     say e.message
+   end
 
     desc 'add [SOURCE TERM] [TARGET TERM] [NOTE(optional)]', 'Add term to glossary.'
     def add(source_term, target_term, note='')

@@ -220,6 +220,39 @@ describe Logaling::Command::Application do
         FileUtils.remove_entry_secure(global_config, true)
       end
     end
+
+    context 'when logaling_home not exists' do
+      context 'with argument "target-language"' do
+        before do
+          command.new('spec', 'en')
+          FileUtils.remove_entry_secure(@logaling_home, true)
+          command.config("target-language", "fr")
+        end
+
+        it 'should overwrite target-language' do
+          should include "--target-language fr"
+        end
+      end
+
+      context 'with argument "--global" and "target-language"' do
+        before do
+          command.options = base_options.merge("global" => true)
+          command.new('spec', 'en')
+          FileUtils.remove_entry_secure(@logaling_home, true)
+          command.config("target-language", "ja")
+        end
+
+        subject { File.read(global_config) }
+
+        it 'should create {logaling_home}/config and write target-language' do
+          should include "--target-language ja"
+        end
+
+        after do
+          FileUtils.remove_entry_secure(global_config, true)
+        end
+      end
+    end
   end
 
   describe '#add' do
