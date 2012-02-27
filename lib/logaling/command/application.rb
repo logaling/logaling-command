@@ -84,6 +84,7 @@ module Logaling::Command
     desc 'import', 'Import external glossary'
     method_option "list", type: :boolean, default: false
     def import(external_glossary=nil)
+      check_logaling_home_exists
       require "logaling/external_glossary"
       Logaling::ExternalGlossary.load
       if options["list"]
@@ -103,6 +104,7 @@ module Logaling::Command
     def register
       @config.check_required_option("glossary" => "input glossary name '-g <glossary name>'")
       raise Logaling::CommandFailed, "Try 'loga new' first." unless File.exist?(@dotfile_path)
+      check_logaling_home_exists
 
       @repository.register(@dotfile_path, @config.glossary)
       @repository.index
