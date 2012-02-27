@@ -86,7 +86,6 @@ module Logaling
         end
 
         it 'succeed at find by term' do
-          @terms.size.should == 3
           @terms.should == @result
         end
       end
