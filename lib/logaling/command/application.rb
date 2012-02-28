@@ -200,6 +200,7 @@ module Logaling::Command
     desc 'lookup [TERM]', 'Lookup terms.'
     method_option "output", type: :string, default: "terminal"
     method_option "no-pager", type: :boolean, default: false
+    method_option "no-color", type: :boolean, default: false
     method_option "dictionary", type: :boolean, default: false, aliases: "--dict"
     def lookup(source_term)
       @repository.index
@@ -344,7 +345,7 @@ module Logaling::Command
     end
 
     def extract_keyword_and_coloring(snipped_term, term)
-      return term if snipped_term.empty?
+      return term if snipped_term.empty? || options["no-color"]
       display_string = snipped_term.map do |word|
         word.is_a?(Hash) ? word[:keyword].bright : word
       end
