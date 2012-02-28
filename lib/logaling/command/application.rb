@@ -259,7 +259,7 @@ module Logaling::Command
       @config.check_required_option(required_options)
       check_logaling_home_exists
       @repository.index
-      terms = @repository.show_glossary(@glossary)
+      terms = @repository.show_glossary(glossary)
       unless terms.empty?
         run_pager
         max_str_size = terms.map{|term| term[:source_term].size}.sort.last
