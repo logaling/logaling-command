@@ -28,7 +28,7 @@ describe Logaling::Command::Application do
   let(:repository) { Logaling::Repository.new(logaling_home) }
 
   before do
-    FileUtils.remove_entry_secure(File.join(logaling_home, 'projects', 'spec'), true)
+    FileUtils.rm_rf(File.join(logaling_home, 'projects', 'spec'))
   end
 
   describe '#new' do
@@ -89,7 +89,7 @@ describe Logaling::Command::Application do
 
     context "when can not find .logaling" do
       before(:all) do
-        FileUtils.remove_entry_secure(logaling_config, true)
+        FileUtils.rm_rf(logaling_config)
         @stdout = capture(:stdout) {command.register}
       end
 
@@ -122,7 +122,7 @@ describe Logaling::Command::Application do
 
     context "when can not find .logaling" do
       before do
-        #FileUtils.remove_entry_secure(logaling_config, true)
+        #FileUtils.rm_rf(logaling_config)
       end
 
       context "and call without option" do
@@ -217,7 +217,40 @@ describe Logaling::Command::Application do
       end
 
       after do
-        FileUtils.remove_entry_secure(global_config, true)
+        FileUtils.rm_rf(global_config)
+      end
+    end
+
+    context 'when logaling_home not exists' do
+      context 'with argument "target-language"' do
+        before do
+          command.new('spec', 'en')
+          FileUtils.rm_rf(@logaling_home)
+          command.config("target-language", "fr")
+        end
+
+        it 'should overwrite target-language' do
+          should include "--target-language fr"
+        end
+      end
+
+      context 'with argument "--global" and "target-language"' do
+        before do
+          command.options = base_options.merge("global" => true)
+          command.new('spec', 'en')
+          FileUtils.rm_rf(@logaling_home)
+          command.config("target-language", "ja")
+        end
+
+        subject { File.read(global_config) }
+
+        it 'should create {logaling_home}/config and write target-language' do
+          should include "--target-language ja"
+        end
+
+        after do
+          FileUtils.rm_rf(global_config)
+        end
       end
     end
   end
@@ -281,7 +314,7 @@ describe Logaling::Command::Application do
       end
 
       after do
-        FileUtils.remove_entry_secure(global_config, true)
+        FileUtils.rm_rf(global_config)
       end
     end
   end
@@ -393,8 +426,8 @@ describe Logaling::Command::Application do
 
         context "and called with '--force=true'" do
           before do
-            FileUtils.remove_entry_secure(logaling_config, true)
-            FileUtils.remove_entry_secure(File.join(logaling_home, 'projects', 'spec'), true)
+            FileUtils.rm_rf(logaling_config)
+            FileUtils.rm_rf(File.join(logaling_home, 'projects', 'spec'))
             command.options = base_options.merge("force" => true)
             command.new('spec', 'en', 'ja')
             command.add('term', '用語1', '備考')
@@ -437,7 +470,7 @@ describe Logaling::Command::Application do
     end
 
     after do
-      FileUtils.remove_entry_secure(csv_path, true)
+      FileUtils.rm_rf(csv_path)
     end
   end
 
@@ -472,7 +505,7 @@ describe Logaling::Command::Application do
   end
 
   after do
-    FileUtils.remove_entry_secure(logaling_config, true)
-    FileUtils.remove_entry_secure(File.join(logaling_home, 'projects', 'spec'), true)
+    FileUtils.rm_rf(logaling_config)
+    FileUtils.rm_rf(File.join(logaling_home, 'projects', 'spec'))
   end
 end

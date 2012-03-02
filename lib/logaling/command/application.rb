@@ -84,6 +84,7 @@ module Logaling::Command
     desc 'import', 'Import external glossary'
     method_option "list", type: :boolean, default: false
     def import(external_glossary=nil)
+      check_logaling_home_exists
       require "logaling/external_glossary"
       Logaling::ExternalGlossary.load
       if options["list"]
@@ -92,6 +93,8 @@ module Logaling::Command
         @repository.import(Logaling::ExternalGlossary.get(external_glossary))
         @repository.index
       end
+    rescue Logaling::CommandFailed => e
+      say e.message
     rescue Logaling::ExternalGlossaryNotFound
       say "'#{external_glossary}' can't find in import list."
       say "Try 'loga import --list' and confirm import list."
@@ -101,6 +104,7 @@ module Logaling::Command
     def register
       @config.check_required_option("glossary" => "input glossary name '-g <glossary name>'")
       raise Logaling::CommandFailed, "Try 'loga new' first." unless File.exist?(@dotfile_path)
+      check_logaling_home_exists
 
       @repository.register(@dotfile_path, @config.glossary)
       @repository.index
@@ -124,17 +128,25 @@ module Logaling::Command
       say "#{@config.glossary} is not yet registered."
     end
 
-    desc 'config [KEY] [VALUE] [--global(optional)]', 'Set config.'
-    method_option "global", type: :boolean, default: false
-    def config(key, value)
-      config_path = options["global"] ? File.join(@logaling_home, "config") : @project_config_path
-      config = Logaling::Config.load(config_path)
-      config.add(key, value)
-      config.save(config_path)
-      say "Successfully set config."
-    rescue Logaling::CommandFailed => e
-      say e.message
-    end
+   desc 'config [KEY] [VALUE] [--global(optional)]', 'Set config.'
+   method_option "global", type: :boolean, default: false
+   def config(key, value)
+     if options["global"]
+       unless File.exist?(@logaling_home)
+         FileUtils.mkdir_p(@logaling_home) rescue raise Logaling::CommandFailed, "Imput existing directory as logaling-home."
+       end
+       config_path = File.join(@logaling_home, "config")
+     else
+       raise Logaling::CommandFailed, "Can't found .logaling" unless @project_config_path
+       config_path = @project_config_path
+     end
+     config = Logaling::Config.load(config_path)
+     config.add(key, value)
+     config.save(config_path)
+     say "Successfully set config."
+   rescue Logaling::CommandFailed => e
+     say e.message
+   end
 
     desc 'add [SOURCE TERM] [TARGET TERM] [NOTE(optional)]', 'Add term to glossary.'
     def add(source_term, target_term, note='')
@@ -144,6 +156,7 @@ module Logaling::Command
         "target-language" => "input target-language code '-T <target-language code>'"
       }
       @config.check_required_option(required_options)
+      check_logaling_home_exists
       @repository.index
 
       if @repository.bilingual_pair_exists?(source_term, target_term, @config.glossary)
@@ -153,6 +166,8 @@ module Logaling::Command
       glossary.add(source_term, target_term, note)
     rescue Logaling::CommandFailed, Logaling::TermError => e
       say e.message
+    rescue Logaling::GlossaryNotFound => e
+      say "Try 'loga new or register' first."
     end
 
     desc 'delete [SOURCE TERM] [TARGET TERM(optional)] [--force(optional)]', 'Delete term.'
@@ -164,6 +179,7 @@ module Logaling::Command
         "target-language" => "input target-language code '-T <target-language code>'"
       }
       @config.check_required_option(required_options)
+      check_logaling_home_exists
 
       if target_term
         glossary.delete(source_term, target_term)
@@ -184,6 +200,7 @@ module Logaling::Command
         "target-language" => "input target-language code '-T <target-language code>'"
       }
       @config.check_required_option(required_options)
+      check_logaling_home_exists
       @repository.index
 
       if @repository.bilingual_pair_exists_and_has_same_note?(source_term, new_target_term, note, @config.glossary)
@@ -203,6 +220,7 @@ module Logaling::Command
     method_option "no-color", type: :boolean, default: false
     method_option "dictionary", type: :boolean, default: false, aliases: "--dict"
     def lookup(source_term)
+      check_logaling_home_exists
       @repository.index
       terms = @repository.lookup(source_term, glossary, options["dictionary"])
       unless terms.empty?
@@ -243,6 +261,7 @@ module Logaling::Command
         "target-language" => "input target-language code '-T <target-language code>'"
       }
       @config.check_required_option(required_options)
+      check_logaling_home_exists
       @repository.index
       terms = @repository.show_glossary(glossary)
       unless terms.empty?
@@ -264,6 +283,7 @@ module Logaling::Command
     desc 'list', 'Show glossary list.'
     method_option "no-pager", type: :boolean, default: false
     def list
+      check_logaling_home_exists
       @repository.index
       glossaries = @repository.list
       unless glossaries.empty?
@@ -351,6 +371,12 @@ module Logaling::Command
       end
       display_string = display_string.join
       display_string
+    end
+
+    def check_logaling_home_exists
+      unless File.exist?(@logaling_home)
+        raise Logaling::CommandFailed, "Imput existing directory as logaling-home."
+      end
     end
 
     def printer(source_string, target_string, note=nil,
