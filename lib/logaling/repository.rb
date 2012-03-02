@@ -33,7 +33,7 @@ module Logaling
         raise GlossaryAlreadyRegistered, register_name
       end
     rescue
-      raise Logaling::CommandFailed, "Register failed."
+      raise Logaling::CommandFailed, "Failed register #{register_name} to #{logaling_projects_path}."
     end
 
     def unregister(register_name)
@@ -51,7 +51,7 @@ module Logaling
         glossary.import
       end
     rescue
-      raise Logaling::CommandFailed, "Import failed."
+      raise Logaling::CommandFailed, "Failed import #{glossary.class.name} to #{cache_path}."
     end
 
     def lookup(source_term, glossary_source, dictionary=false)
