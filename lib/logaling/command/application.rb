@@ -166,6 +166,8 @@ module Logaling::Command
       glossary.add(source_term, target_term, note)
     rescue Logaling::CommandFailed, Logaling::TermError => e
       say e.message
+    rescue Logaling::GlossaryNotFound => e
+      say "Try 'loga new or register' first."
     end
 
     desc 'delete [SOURCE TERM] [TARGET TERM(optional)] [--force(optional)]', 'Delete term.'

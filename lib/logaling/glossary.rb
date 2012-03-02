@@ -76,6 +76,8 @@ module Logaling
       glossary = Glossary.load_glossary(source_path)
       glossary << build_term(source_term, target_term, note)
       dump_glossary(glossary)
+    rescue
+      raise GlossaryNotFound
     end
 
     def update(source_term, target_term, new_target_term, note)
