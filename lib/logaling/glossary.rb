@@ -53,7 +53,7 @@ module Logaling
 
       def load_glossary_csv(path, sep=",")
         glossary = []
-        CSV.open(path, "r",  {:col_sep => sep}) do |csv|
+        CSV.open(path, "r:utf-8",  {:col_sep => sep}) do |csv|
           csv.each do |row|
             glossary << {"source_term" => row[0], "target_term" => row[1], "note" => ""} if row.size >= 2
           end
