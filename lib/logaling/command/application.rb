@@ -299,6 +299,10 @@ module Logaling::Command
     end
 
     private
+    def windows?
+      RUBY_PLATFORM =~ /win32|mingw32/i
+    end
+
     def glossary
       @glossary ||= Logaling::Glossary.new(@config.glossary, @config.source_language, @config.target_language, @logaling_home)
     end
@@ -337,7 +341,7 @@ module Logaling::Command
     # http://nex-3.com/posts/73-git-style-automatic-paging-in-ruby
     def run_pager
       return if options["no-pager"]
-      return if ::RUBY_PLATFORM =~ /win32/
+      return if windows?
       return unless STDOUT.tty?
 
       read, write = IO.pipe
