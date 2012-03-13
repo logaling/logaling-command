@@ -17,6 +17,7 @@
 
 require 'thor'
 require 'rainbow'
+require 'pathname'
 require "logaling/repository"
 require "logaling/glossary"
 require "logaling/config"
@@ -308,38 +309,20 @@ module Logaling::Command
     end
 
     def find_dotfile
-      onset_dir = Dir.pwd
+      dir = Dir.pwd
       searched_path = []
-      until root_path?
-        working_dir = Dir.pwd
-        path = File.join(working_dir, '.logaling')
+      while true
+        path = File.join(dir, '.logaling')
         if File.exist?(path)
           return path
         else
-          searched_path << working_dir
-          Dir.chdir(File.dirname(working_dir))
+          unless Pathname.new(dir).root?
+            searched_path << dir
+            dir = File.dirname(dir)
+          else
+            raise(Logaling::CommandFailed, "Can't found .logaling in #{searched_path}")
+          end
         end
-      end
-      raise(Logaling::CommandFailed, "Can't found .logaling in #{searched_path}")
-    ensure
-      Dir.chdir(onset_dir)
-    end
-
-    def windows?
-      RUBY_PLATFORM =~ /win32|mingw32/i
-    end
-
-    def root_path?
-      if windows?
-        require 'Win32API'
-        cmd = Win32API.new('kernel32', 'GetCurrentDirectory', ['i', 'p'], 'i')
-        size = 256
-        current_dir = " " * size
-        cmd.call(size, current_dir)
-        cmd = Win32API.new('shlwapi', 'PathIsRoot', 'p', 'i')
-        cmd.call(current_dir) == 1 ? true : false
-      else
-        Dir.pwd == '/'
       end
     end
 
