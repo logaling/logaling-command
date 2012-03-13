@@ -311,7 +311,7 @@ module Logaling::Command
     def find_dotfile
       dir = Dir.pwd
       searched_path = []
-      while true
+      loop do
         path = File.join(dir, '.logaling')
         if File.exist?(path)
           return path
