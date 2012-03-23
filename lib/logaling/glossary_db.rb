@@ -69,6 +69,8 @@ module Logaling
     end
 
     def index_glossary(glossary, glossary_name, glossary_source, source_language, target_language, indexed_at)
+      delete_terms if ENV["LOGALING_OFFLINE_INDEX"] != "no"
+
       deindex_glossary(glossary_name, glossary_source)
 
       add_glossary_source(glossary_source, indexed_at)
@@ -79,6 +81,8 @@ module Logaling
         note = term['note']
         add_translation(glossary_name, glossary_source, source_language, target_language, source_term, target_term, note)
       end
+
+      create_terms if ENV["LOGALING_OFFLINE_INDEX"] != "no"
     end
 
     def lookup(source_term, glossary_source=nil)
@@ -267,6 +271,25 @@ module Logaling
       records.expression.close
     end
 
+    def delete_terms
+      Groonga::Schema.define do |schema|
+        schema.remove_table("terms") if Groonga["terms"]
+      end
+    end
+
+    def create_terms
+      Groonga::Schema.define do |schema|
+        schema.create_table("terms",
+                            :type => :patricia_trie,
+                            :key_type => "ShortText",
+                            :key_normalize => true,
+                            :default_tokenizer => "TokenBigram") do |table|
+          table.index("translations.source_term")
+          table.index("translations.target_term")
+        end
+      end
+    end
+
     def add_translation(glossary_name, glossary_source, source_language, target_language, source_term, target_term, note)
       Groonga["translations"].add(:glossary => glossary_name,
                                   :glossary_source => glossary_source,
@@ -314,16 +337,8 @@ module Logaling
           table.text("target_term")
           table.text("note")
         end
-
-        schema.create_table("terms",
-                            :type => :patricia_trie,
-                            :key_type => "ShortText",
-                            :key_normalize => true,
-                            :default_tokenizer => "TokenBigram") do |table|
-          table.index("translations.source_term")
-          table.index("translations.target_term")
-        end
       end
+      create_terms
     end
 
     def remove_schema
