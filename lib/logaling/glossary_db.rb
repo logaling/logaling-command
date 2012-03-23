@@ -69,7 +69,7 @@ module Logaling
     end
 
     def index_glossary(glossary, glossary_name, glossary_source, source_language, target_language, indexed_at)
-      delete_terms if ENV["LOGALING_OFFLINE_INDEX"] != "no"
+      delete_terms if offline_index?
 
       deindex_glossary(glossary_name, glossary_source)
 
@@ -82,7 +82,7 @@ module Logaling
         add_translation(glossary_name, glossary_source, source_language, target_language, source_term, target_term, note)
       end
 
-      create_terms if ENV["LOGALING_OFFLINE_INDEX"] != "no"
+      create_terms if offline_index?
     end
 
     def lookup(source_term, glossary_source=nil)
@@ -410,6 +410,14 @@ module Logaling
 
     def add_config(conf_key, conf_value)
       Groonga["configurations"].add(:conf_key => conf_key, :conf_value => conf_value)
+    end
+
+    def offline_index?
+      if ENV["LOGALING_OFFLINE_INDEX"] != "no"
+        true
+      else
+        false
+      end
     end
   end
 end
