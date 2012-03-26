@@ -413,6 +413,7 @@ module Logaling
     end
 
     def offline_index?
+      # use online index if LOGALING_OFFLINE_INDEX=no
       ENV["LOGALING_OFFLINE_INDEX"] != "no"
     end
   end
