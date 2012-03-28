@@ -38,7 +38,7 @@ Gem::Specification.new do |s|
 
   s.add_runtime_dependency 'thor', ['>= 0.14.6']
   s.add_runtime_dependency 'bundler', ['>= 1.0']
-  s.add_runtime_dependency 'rroonga', ['>= 2.0.0']
+  s.add_runtime_dependency 'rroonga', ['>= 1.3.0']
   s.add_runtime_dependency 'rainbow'
   s.add_runtime_dependency 'nokogiri'
   s.add_runtime_dependency 'activesupport'
