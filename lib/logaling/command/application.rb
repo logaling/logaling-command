@@ -102,7 +102,8 @@ module Logaling::Command
 
     desc 'register', 'Register .logaling'
     def register
-      @config.check_required_option("glossary" => "input glossary name '-g <glossary name>'")
+      raise Logaling::CommandFailed, "Can't use '-g <glossary>' option." if options["glossary"]
+      @config.check_required_option("glossary" => "Do 'loga register' at project directory.")
       raise Logaling::CommandFailed, "Try 'loga new' first." unless File.exist?(@dotfile_path)
 
       @repository.register(@dotfile_path, @config.glossary)
