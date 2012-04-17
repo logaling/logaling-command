@@ -117,7 +117,8 @@ module Logaling::Command
 
     desc 'unregister', 'Unregister .logaling'
     def unregister
-      @config.check_required_option("glossary" => "input glossary name '-g <glossary name>'")
+      raise Logaling::CommandFailed, "Can't use '-g <glossary>' option." if options["glossary"]
+      @config.check_required_option("glossary" => "Do 'loga unregister' at project directory.")
 
       @repository.unregister(@config.glossary)
       @repository.index
