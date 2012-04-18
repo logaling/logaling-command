@@ -90,6 +90,7 @@ describe Logaling::Command::Application do
     context "when can not find .logaling" do
       before(:all) do
         FileUtils.rm_rf(logaling_config)
+        base_options["glossary"] = nil
         @stdout = capture(:stdout) {command.register}
       end
 
@@ -97,8 +98,8 @@ describe Logaling::Command::Application do
         Dir[File.join(logaling_home, "projects", "*")].size.should == @n_projects
       end
 
-      it "print message \"Try 'loga new' first.\"" do
-        @stdout.should be_include "Try 'loga new' first.\n"
+      it "print message \"Do 'loga register' at project directory.\"" do
+        @stdout.should be_include "Do 'loga register' at project directory."
       end
     end
 
