@@ -74,7 +74,7 @@ module Logaling::Command
           @dotfile_path = options["logaling-config"] ? options["logaling-config"] : find_dotfile
           @project_config_path = File.join(@dotfile_path, 'config')
           @config.load(@project_config_path)
-          register
+          register_and_index
         end
         say "Successfully created #{logaling_config_path}"
       else
@@ -106,8 +106,7 @@ module Logaling::Command
       @config.check_required_option("glossary" => "Do 'loga register' at project directory.")
       raise Logaling::CommandFailed, "Try 'loga new' first." unless File.exist?(@dotfile_path)
 
-      @repository.register(@dotfile_path, @config.glossary)
-      @repository.index
+      register_and_index
       say "#{@config.glossary} is now registered to logaling."
     rescue Logaling::CommandFailed => e
       say e.message
@@ -409,6 +408,11 @@ module Logaling::Command
         print JSON.pretty_generate(record)
         puts("\n]") if i == last-1
       end
+    end
+
+    def register_and_index
+      @repository.register(@dotfile_path, @config.glossary)
+      @repository.index
     end
   end
 end
