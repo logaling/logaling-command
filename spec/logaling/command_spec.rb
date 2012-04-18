@@ -132,8 +132,8 @@ describe Logaling::Command::Application do
           @stdout = capture(:stdout) {command.unregister}
         end
 
-        it "should print message 'input glossary name ...'" do
-          @stdout.should be_include "input glossary name"
+        it "should print message 'Do \'loga unregister\' at ...'" do
+          @stdout.should be_include "Do 'loga unregister' at project directory."
         end
       end
 
