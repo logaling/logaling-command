@@ -139,6 +139,7 @@ describe Logaling::Command::Application do
 
       context "and call with option" do
         before do
+          command.options = base_options.merge("glossary" => nil)
           command.new('spec', 'en', 'ja')
           @stdout = capture(:stdout) {command.unregister}
         end
@@ -151,6 +152,7 @@ describe Logaling::Command::Application do
     context 'when find .logaling' do
       context 'and .logaling registered' do
         before do
+          command.options = base_options.merge("glossary" => nil)
           command.new('spec', 'en', 'ja')
           command.register
           command.unregister
@@ -164,7 +166,7 @@ describe Logaling::Command::Application do
 
       context "and .logaling is not registered" do
         before do
-          command.options = base_options.merge("no-register" => true)
+          command.options = base_options.merge("no-register" => true, "glossary" => nil)
           command.new('spec', 'en', 'ja')
           @stdout = capture(:stdout) {command.unregister}
         end
