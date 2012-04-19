@@ -90,6 +90,7 @@ describe Logaling::Command::Application do
     context "when can not find .logaling" do
       before(:all) do
         FileUtils.rm_rf(logaling_config)
+        base_options["glossary"] = nil
         @stdout = capture(:stdout) {command.register}
       end
 
@@ -97,8 +98,8 @@ describe Logaling::Command::Application do
         Dir[File.join(logaling_home, "projects", "*")].size.should == @n_projects
       end
 
-      it "print message \"Try 'loga new' first.\"" do
-        @stdout.should be_include "Try 'loga new' first.\n"
+      it "print message \"Do 'loga register' at project directory.\"" do
+        @stdout.should be_include "Do 'loga register' at project directory."
       end
     end
 
@@ -131,13 +132,14 @@ describe Logaling::Command::Application do
           @stdout = capture(:stdout) {command.unregister}
         end
 
-        it "should print message 'input glossary name ...'" do
-          @stdout.should be_include "input glossary name"
+        it "should print message 'Do \'loga unregister\' at ...'" do
+          @stdout.should be_include "Do 'loga unregister' at project directory."
         end
       end
 
       context "and call with option" do
         before do
+          command.options = base_options.merge("glossary" => nil)
           command.new('spec', 'en', 'ja')
           @stdout = capture(:stdout) {command.unregister}
         end
@@ -150,6 +152,7 @@ describe Logaling::Command::Application do
     context 'when find .logaling' do
       context 'and .logaling registered' do
         before do
+          command.options = base_options.merge("glossary" => nil)
           command.new('spec', 'en', 'ja')
           command.register
           command.unregister
@@ -163,7 +166,7 @@ describe Logaling::Command::Application do
 
       context "and .logaling is not registered" do
         before do
-          command.options = base_options.merge("no-register" => true)
+          command.options = base_options.merge("no-register" => true, "glossary" => nil)
           command.new('spec', 'en', 'ja')
           @stdout = capture(:stdout) {command.unregister}
         end
