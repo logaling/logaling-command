@@ -84,11 +84,16 @@ module Logaling::Command
 
     desc 'import', 'Import external glossary'
     method_option "list", type: :boolean, default: false
-    def import(external_glossary=nil)
+    def import(external_glossary=nil, *args)
       require "logaling/external_glossary"
       Logaling::ExternalGlossary.load
       if options["list"]
         Logaling::ExternalGlossary.list.each {|glossary| say "#{glossary.name.bright} : #{glossary.description}" }
+      elsif args.size > 0
+        glossary_info = initialize_import_parameter(args)
+        check_import_parameter(glossary_info)
+        @repository.import_tmx(Logaling::ExternalGlossary.get(external_glossary), glossary_info)
+        @repository.index
       else
         @repository.import(Logaling::ExternalGlossary.get(external_glossary))
         @repository.index
@@ -407,6 +412,21 @@ module Logaling::Command
         print JSON.pretty_generate(record)
         puts("\n]") if i == last-1
       end
+    end
+
+    def check_import_parameter(glossary_info)
+      unless glossary_info[:name] && glossary_info[:url]
+        raise Logaling::CommandFailed, "Do loga import tmx <glossary name> <url or path>"
+      end
+    end
+
+    def initialize_import_parameter(arr)
+      glossary_info = {}
+      glossary_info[:name] = arr[0]
+      glossary_info[:url] = arr[1]
+      glossary_info[:source_language] = arr[2]
+      glossary_info[:target_language] = arr[3]
+      glossary_info
     end
   end
 end

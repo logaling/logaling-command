@@ -54,6 +54,15 @@ module Logaling
       raise Logaling::CommandFailed, "Failed import #{glossary.class.name} to #{cache_path}."
     end
 
+    def import_tmx(glossary, glossary_info)
+      FileUtils.mkdir_p(cache_path) unless File.exist?(cache_path)
+      Dir.chdir(cache_path) do
+        glossary.import(glossary_info)
+      end
+    rescue
+      raise Logaling::CommandFailed, "Failed import_tmx #{glossary.class.name} to #{cache_path}."
+    end
+
     def lookup(source_term, glossary_source, dictionary=false)
       raise GlossaryDBNotFound unless File.exist?(logaling_db_home)
 
