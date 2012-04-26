@@ -29,13 +29,17 @@ module Logaling
       tu_nodes.each do |tu|
         original = ""
         translation = ""
-        tu.children.each do |child|
-          if child.name == "tuv"
-            lang = child["lang"].downcase.sub(/\-.*/, "")
+        tu.children.each do |tuv|
+          if tuv.name == "tuv"
+            lang = tuv["lang"].downcase.sub(/\-.*/, "")
             if lang == glossary_info[:source_language]
-              original = child.text.strip
+              tuv.children.each do |child|
+                original = child.text.strip if child.name == "seg"
+              end
             elsif lang == glossary_info[:target_language]
-              translation = child.text.strip
+              tuv.children.each do |child|
+                translation = child.text.strip if child.name == "seg"
+              end
             end
           end
         end
