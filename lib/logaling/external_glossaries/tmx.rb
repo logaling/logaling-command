@@ -31,7 +31,7 @@ module Logaling
         translation = ""
         tu.children.each do |child|
           if child.name == "tuv"
-            lang = child["lang"].downcase.slice(0, 2)
+            lang = child["lang"].downcase.sub(/\-.*/, "")
             if lang == glossary_info[:source_language]
               original = child.text.strip
             elsif lang == glossary_info[:target_language]
