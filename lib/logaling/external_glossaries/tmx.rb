@@ -23,8 +23,8 @@ module Logaling
     output_format   'csv'
 
     private
-    def convert_to_csv(csv, url)
-      doc = ::Nokogiri::XML(open(url, "r"))
+    def convert_to_csv(csv, glossary_info)
+      doc = ::Nokogiri::XML(open(glossary_info[:url], "r"))
       tu_nodes = doc.xpath('//tu')
       tu_nodes.each do |tu|
         original = ""

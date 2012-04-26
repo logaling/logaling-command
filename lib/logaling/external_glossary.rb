@@ -73,7 +73,7 @@ class Logaling::ExternalGlossary
       case output_format
       when "csv"
         if glossary_info
-          convert_to_csv(CSV.new(output), glossary_info[:url])
+          convert_to_csv(CSV.new(output), glossary_info)
         else
           convert_to_csv(CSV.new(output))
         end
