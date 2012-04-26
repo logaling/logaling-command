@@ -32,7 +32,7 @@ module Logaling
         tu.children.each do |child|
           if child.name == "tuv"
             lang = child["lang"].downcase.slice(0, 2)
-            if lang == self.class.source_language
+            if lang == glossary_info[:source_language]
               original = child.text.strip
             elsif lang == self.class.target_language
               translation = child.text.strip
