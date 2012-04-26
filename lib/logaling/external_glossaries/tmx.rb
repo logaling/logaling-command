@@ -34,7 +34,7 @@ module Logaling
             lang = child["lang"].downcase.slice(0, 2)
             if lang == glossary_info[:source_language]
               original = child.text.strip
-            elsif lang == self.class.target_language
+            elsif lang == glossary_info[:target_language]
               translation = child.text.strip
             end
           end
