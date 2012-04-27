@@ -103,6 +103,8 @@ module Logaling::Command
     rescue Logaling::ExternalGlossaryNotFound
       say "'#{external_glossary}' can't find in import list."
       say "Try 'loga import --list' and confirm import list."
+    rescue Logaling::GlossaryNotFound => e
+      say e.message
     end
 
     desc 'register', 'Register .logaling'

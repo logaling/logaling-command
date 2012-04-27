@@ -59,6 +59,8 @@ module Logaling
       Dir.chdir(cache_path) do
         glossary.import(glossary_info)
       end
+    rescue Logaling::GlossaryNotFound => e
+      raise e
     rescue
       raise Logaling::CommandFailed, "Failed import_tmx #{glossary.class.name} to #{cache_path}."
     end
