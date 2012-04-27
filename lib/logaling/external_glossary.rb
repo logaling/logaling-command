@@ -14,6 +14,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 require 'active_support/inflector'
+require 'open-uri'
+require 'net/http'
 
 class Logaling::ExternalGlossary
   class << self
@@ -67,6 +69,11 @@ class Logaling::ExternalGlossary
   end
 
   def import(glossary_info=nil)
+    if glossary_info && glossary_info[:url]
+      unless file_exists?(glossary_info[:url])
+        raise Logaling::GlossaryNotFound, "Failed open url/path <#{glossary_info[:url]}>"
+      end
+    end
     File.open(import_file_name(glossary_info), "w") do |output|
       output_format = self.class.output_format
       output_format = output_format.to_s if output_format.is_a?(Symbol)
@@ -95,6 +102,17 @@ class Logaling::ExternalGlossary
     else
       [self.class.name, self.class.source_language,
        self.class.target_language, self.class.output_format].join('.')
+    end
+  end
+
+  def file_exists?(url_org)
+    url = URI.parse(url_org)
+    if url.host
+      Net::HTTP.start(url.host, url.port) do |http|
+        http.head(url.request_uri).code == "200"
+      end
+    else
+      File.exist?(url_org)
     end
   end
 end

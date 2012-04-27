@@ -48,8 +48,6 @@ module Logaling
         end
         csv << [original, translation, notes.join(" | ")] if original && translation
       end
-    rescue
-      raise Logaling::GlossaryNotFound, "Failed open url / path <#{glossary_info[:url]}>"
     end
   end
 end
