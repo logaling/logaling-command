@@ -423,8 +423,12 @@ module Logaling::Command
 
     def initialize_import_parameter(arr)
       glossary_info = {}
+      url = arr[1]
+      if url && !URI.parse(url).host
+        url = File::expand_path(url)
+      end
       glossary_info[:name] = arr[0]
-      glossary_info[:url] = arr[1]
+      glossary_info[:url] = url
       glossary_info[:source_language] = arr[2]
       glossary_info[:target_language] = arr[3]
       glossary_info
