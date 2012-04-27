@@ -32,7 +32,8 @@ module Logaling
         note = ""
         tu.children.each do |tuv|
           if tuv.name == "tuv"
-            lang = tuv["lang"].downcase.sub(/\-.*/, "")
+            # logaling using ISO 639 codes (two-letter)
+            lang = tuv["lang"].downcase.sub(/-.*\z/, "")
             if lang == glossary_info[:source_language]
               tuv.children.each do |child|
                 original = child.text.strip if child.name == "seg"
