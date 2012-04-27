@@ -74,7 +74,7 @@ module Logaling::Command
           @dotfile_path = options["logaling-config"] ? options["logaling-config"] : find_dotfile
           @project_config_path = File.join(@dotfile_path, 'config')
           @config.load(@project_config_path)
-          register
+          register_and_index
         end
         say "Successfully created #{logaling_config_path}"
       else
@@ -107,11 +107,11 @@ module Logaling::Command
 
     desc 'register', 'Register .logaling'
     def register
-      @config.check_required_option("glossary" => "input glossary name '-g <glossary name>'")
+      raise Logaling::CommandFailed, "Can't use '-g <glossary>' option." if options["glossary"]
+      @config.check_required_option("glossary" => "Do 'loga register' at project directory.")
       raise Logaling::CommandFailed, "Try 'loga new' first." unless File.exist?(@dotfile_path)
 
-      @repository.register(@dotfile_path, @config.glossary)
-      @repository.index
+      register_and_index
       say "#{@config.glossary} is now registered to logaling."
     rescue Logaling::CommandFailed => e
       say e.message
@@ -121,7 +121,8 @@ module Logaling::Command
 
     desc 'unregister', 'Unregister .logaling'
     def unregister
-      @config.check_required_option("glossary" => "input glossary name '-g <glossary name>'")
+      raise Logaling::CommandFailed, "Can't use '-g <glossary>' option." if options["glossary"]
+      @config.check_required_option("glossary" => "Do 'loga unregister' at project directory.")
 
       @repository.unregister(@config.glossary)
       @repository.index
@@ -427,6 +428,11 @@ module Logaling::Command
       glossary_info[:source_language] = arr[2]
       glossary_info[:target_language] = arr[3]
       glossary_info
+    end
+
+    def register_and_index
+      @repository.register(@dotfile_path, @config.glossary)
+      @repository.index
     end
   end
 end
