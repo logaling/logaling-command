@@ -29,7 +29,7 @@ module Logaling
       tu_nodes.each do |tu|
         original = ""
         translation = ""
-        note = ""
+        note = []
         tu.children.each do |tuv|
           if tuv.name == "tuv"
             # logaling using ISO 639 codes (two-letter)
@@ -37,17 +37,17 @@ module Logaling
             if lang == glossary_info[:source_language]
               tuv.children.each do |child|
                 original = child.text.strip if child.name == "seg"
-                note = child.text.strip if child.name == "note"
+                note << child.text.strip if child.name == "note"
               end
             elsif lang == glossary_info[:target_language]
               tuv.children.each do |child|
                 translation = child.text.strip if child.name == "seg"
-                note = child.text.strip if child.name == "note"
+                note << child.text.strip if child.name == "note"
               end
             end
           end
         end
-        csv << [original, translation, note]
+        csv << [original, translation, note.join(" | ")]
       end
     end
   end
