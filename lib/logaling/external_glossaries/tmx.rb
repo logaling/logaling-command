@@ -31,8 +31,7 @@ module Logaling
         notes = []
         tu.children.each do |tuv|
           if tuv.name == "tuv"
-            # logaling using ISO 639 codes (two-letter)
-            lang = tuv["lang"].downcase.sub(/-.*\z/, "")
+            lang = convert_language_code_iso_639(tuv["lang"])
             if lang == glossary_info[:source_language]
               tuv.children.each do |child|
                 original = child.text.strip if child.name == "seg"
@@ -48,6 +47,11 @@ module Logaling
         end
         csv << [original, translation, notes.join(" | ")] if original && translation
       end
+    end
+
+    def convert_language_code_iso_639(code)
+      # use two-letter codes
+      code.downcase.sub(/-.*\z/, "")
     end
   end
 end
