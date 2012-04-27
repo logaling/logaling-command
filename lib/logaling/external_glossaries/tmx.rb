@@ -25,8 +25,7 @@ module Logaling
     private
     def convert_to_csv(csv, glossary_info)
       doc = ::Nokogiri::XML(open(glossary_info[:url], "r"))
-      tu_nodes = doc.xpath('//tu')
-      tu_nodes.each do |tu|
+      doc.search('//tu').each do |tu|
         original = ""
         translation = ""
         note = []
@@ -47,7 +46,7 @@ module Logaling
             end
           end
         end
-        csv << [original, translation, note.join(" | ")]
+        csv << [original, translation, note.join(" | ")] if original && translation
       end
     end
   end
