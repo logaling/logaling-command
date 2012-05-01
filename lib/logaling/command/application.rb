@@ -133,7 +133,7 @@ module Logaling::Command
    def config(key, value)
      if options["global"]
        unless File.exist?(@logaling_home)
-         FileUtils.mkdir_p(@logaling_home) rescue raise Logaling::CommandFailed, "Imput existing directory as logaling-home."
+         FileUtils.mkdir_p(@logaling_home) rescue raise Logaling::CommandFailed, "Input existing directory as logaling-home."
        end
        config_path = File.join(@logaling_home, "config")
      else
@@ -379,7 +379,7 @@ module Logaling::Command
 
     def check_logaling_home_exists
       unless File.exist?(@logaling_home)
-        raise Logaling::CommandFailed, "Imput existing directory as logaling-home."
+        raise Logaling::CommandFailed, "Input existing directory as logaling-home."
       end
     end
 
