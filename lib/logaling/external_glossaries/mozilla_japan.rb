@@ -32,7 +32,7 @@ module Logaling
       doc.css("dl[@class='terminology en-ja']").each do |dl|
         dl.children.each_slice(2) do |dt, dd|
           dd.text.split("|").each do |ddt|
-            ddt = ddt.gsub(/\s/, '')
+            ddt = ddt.gsub(/\s|\u{a0}/, '')
             unless ddt.empty?
               csv << [dust_to_tilda(dt.text), dust_to_tilda(ddt)]
             end
