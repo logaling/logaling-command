@@ -419,7 +419,7 @@ module Logaling::Command
 
     def check_import_parameter(glossary_info)
       unless glossary_info[:name] && glossary_info[:url]
-        raise Logaling::CommandFailed, "Do loga import tmx <glossary name> <url or path>"
+        raise Logaling::CommandFailed, "Do 'loga import tmx <glossary name> <url or path>'"
       end
     end
 
