@@ -108,7 +108,7 @@ module Logaling
         {:key=>"source_term", :order=>'ascending'},
         {:key=>"target_term", :order=>'ascending'}])
 
-      options = {:width => 100,
+      options = {:width => 5000,
                  :html_escape => true,
                  :normalize => true}
       snippet = records_selected.expression.snippet(["<snippet>", "</snippet>"], options)
@@ -144,7 +144,7 @@ module Logaling
         {:key=>"source_term", :order=>'ascending'},
         {:key=>"target_term", :order=>'ascending'}])
 
-      options = {:width => 100,
+      options = {:width => 5000,
                  :html_escape => true,
                  :normalize => true}
       snippet = records_selected.expression.snippet(["<snippet>", "</snippet>"], options)

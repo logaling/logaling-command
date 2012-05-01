@@ -84,20 +84,30 @@ module Logaling::Command
 
     desc 'import', 'Import external glossary'
     method_option "list", type: :boolean, default: false
-    def import(external_glossary=nil)
+    def import(external_glossary=nil, *args)
       require "logaling/external_glossary"
       Logaling::ExternalGlossary.load
       if options["list"]
         Logaling::ExternalGlossary.list.each {|glossary| say "#{glossary.name.bright} : #{glossary.description}" }
       else
-        @repository.import(Logaling::ExternalGlossary.get(external_glossary))
-        @repository.index
+        case external_glossary
+        when 'tmx'
+          glossary_info = initialize_import_parameter(args)
+          check_import_parameter(glossary_info)
+          @repository.import_tmx(Logaling::ExternalGlossary.get(external_glossary), glossary_info)
+          @repository.index
+        else
+          @repository.import(Logaling::ExternalGlossary.get(external_glossary))
+          @repository.index
+        end
       end
     rescue Logaling::CommandFailed => e
       say e.message
     rescue Logaling::ExternalGlossaryNotFound
       say "'#{external_glossary}' can't find in import list."
       say "Try 'loga import --list' and confirm import list."
+    rescue Logaling::GlossaryNotFound => e
+      say e.message
     end
 
     desc 'register', 'Register .logaling'
@@ -408,6 +418,25 @@ module Logaling::Command
         print JSON.pretty_generate(record)
         puts("\n]") if i == last-1
       end
+    end
+
+    def check_import_parameter(glossary_info)
+      unless glossary_info[:name] && glossary_info[:url]
+        raise Logaling::CommandFailed, "Do 'loga import tmx <glossary name> <url or path>'"
+      end
+    end
+
+    def initialize_import_parameter(arr)
+      glossary_info = {}
+      url = arr[1]
+      if url && !URI.parse(url).host
+        url = File::expand_path(url)
+      end
+      glossary_info[:name] = arr[0]
+      glossary_info[:url] = url
+      glossary_info[:source_language] = arr[2]
+      glossary_info[:target_language] = arr[3]
+      glossary_info
     end
 
     def register_and_index

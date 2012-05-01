@@ -14,6 +14,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 require 'active_support/inflector'
+require 'open-uri'
+require 'net/http'
 
 class Logaling::ExternalGlossary
   class << self
@@ -66,13 +68,22 @@ class Logaling::ExternalGlossary
     end
   end
 
-  def import
-    File.open(import_file_name, "w") do |output|
+  def import(glossary_info=nil)
+    if glossary_info && glossary_info[:url]
+      unless file_exists?(glossary_info[:url])
+        raise Logaling::GlossaryNotFound, "Failed open url/path <#{glossary_info[:url]}>"
+      end
+    end
+    File.open(import_file_name(glossary_info), "w") do |output|
       output_format = self.class.output_format
       output_format = output_format.to_s if output_format.is_a?(Symbol)
       case output_format
       when "csv"
-        convert_to_csv(CSV.new(output))
+        if glossary_info
+          convert_to_csv(CSV.new(output), glossary_info)
+        else
+          convert_to_csv(CSV.new(output))
+        end
       else
         raise UnsupportedFormat, "unsupported format: <#{output_format}>"
       end
@@ -80,8 +91,28 @@ class Logaling::ExternalGlossary
   end
 
   private
-  def import_file_name
-    [self.class.name, self.class.source_language,
-     self.class.target_language, self.class.output_format].join('.')
+  def import_file_name(glossary_info=nil)
+    if glossary_info
+      glossary_info[:name] ||= self.class.name
+      glossary_info[:source_language] ||= self.class.source_language
+      glossary_info[:target_language] ||= self.class.target_language
+
+      [glossary_info[:name], glossary_info[:source_language],
+       glossary_info[:target_language], self.class.output_format].join('.')
+    else
+      [self.class.name, self.class.source_language,
+       self.class.target_language, self.class.output_format].join('.')
+    end
+  end
+
+  def file_exists?(url_org)
+    url = URI.parse(url_org)
+    if url.host
+      Net::HTTP.start(url.host, url.port) do |http|
+        http.head(url.request_uri).code == "200"
+      end
+    else
+      File.exist?(url_org)
+    end
   end
 end
