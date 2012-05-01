@@ -89,14 +89,17 @@ module Logaling::Command
       Logaling::ExternalGlossary.load
       if options["list"]
         Logaling::ExternalGlossary.list.each {|glossary| say "#{glossary.name.bright} : #{glossary.description}" }
-      elsif args.size > 0
-        glossary_info = initialize_import_parameter(args)
-        check_import_parameter(glossary_info)
-        @repository.import_tmx(Logaling::ExternalGlossary.get(external_glossary), glossary_info)
-        @repository.index
       else
-        @repository.import(Logaling::ExternalGlossary.get(external_glossary))
-        @repository.index
+        case external_glossary
+        when 'tmx'
+          glossary_info = initialize_import_parameter(args)
+          check_import_parameter(glossary_info)
+          @repository.import_tmx(Logaling::ExternalGlossary.get(external_glossary), glossary_info)
+          @repository.index
+        else
+          @repository.import(Logaling::ExternalGlossary.get(external_glossary))
+          @repository.index
+        end
       end
     rescue Logaling::CommandFailed => e
       say e.message
