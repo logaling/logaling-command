@@ -30,7 +30,7 @@ module Logaling
       unless File.exist?(symlink_path)
         FileUtils.ln_s(dot_logaling_path, symlink_path)
       else
-        raise GlossaryAlreadyRegistered, register_name
+        raise Logaling::GlossaryAlreadyRegistered, register_name
       end
     rescue
       raise Logaling::CommandFailed, "Failed register #{register_name} to #{logaling_projects_path}."
@@ -41,7 +41,7 @@ module Logaling
       if File.exist?(symlink_path)
         FileUtils.remove_entry_secure(symlink_path, true)
       else
-        raise GlossaryNotFound, register_name
+        raise Logaling::GlossaryNotFound, register_name
       end
     end
 
@@ -66,7 +66,7 @@ module Logaling
     end
 
     def lookup(source_term, glossary_source, dictionary=false)
-      raise GlossaryDBNotFound unless File.exist?(logaling_db_home)
+      raise Logaling::GlossaryDBNotFound unless File.exist?(logaling_db_home)
 
       terms = []
       Logaling::GlossaryDB.open(logaling_db_home, "utf8") do |db|
@@ -80,7 +80,7 @@ module Logaling
     end
 
     def show_glossary(glossary_source)
-      raise GlossaryDBNotFound unless File.exist?(logaling_db_home)
+      raise Logaling::GlossaryDBNotFound unless File.exist?(logaling_db_home)
 
       terms = []
       Logaling::GlossaryDB.open(logaling_db_home, "utf8") do |db|
@@ -90,7 +90,7 @@ module Logaling
     end
 
     def list
-      raise GlossaryDBNotFound unless File.exist?(logaling_db_home)
+      raise Logaling::GlossaryDBNotFound unless File.exist?(logaling_db_home)
 
       glossaries = []
       Logaling::GlossaryDB.open(logaling_db_home, "utf8") do |db|
@@ -134,7 +134,7 @@ module Logaling
     end
 
     def bilingual_pair_exists?(source_term, target_term, glossary)
-      raise GlossaryDBNotFound unless File.exist?(logaling_db_home)
+      raise Logaling::GlossaryDBNotFound unless File.exist?(logaling_db_home)
 
       terms = []
       Logaling::GlossaryDB.open(logaling_db_home, "utf8") do |db|
@@ -149,7 +149,7 @@ module Logaling
     end
 
     def bilingual_pair_exists_and_has_same_note?(source_term, target_term, note, glossary)
-      raise GlossaryDBNotFound unless File.exist?(logaling_db_home)
+      raise Logaling::GlossaryDBNotFound unless File.exist?(logaling_db_home)
 
       terms = []
       Logaling::GlossaryDB.open(logaling_db_home, "utf8") do |db|
