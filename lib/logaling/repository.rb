@@ -32,6 +32,8 @@ module Logaling
       else
         raise Logaling::GlossaryAlreadyRegistered, register_name
       end
+    rescue Logaling::GlossaryAlreadyRegistered => e
+      raise e
     rescue
       raise Logaling::CommandFailed, "Failed register #{register_name} to #{logaling_projects_path}."
     end
