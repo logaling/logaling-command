@@ -22,8 +22,8 @@ describe Logaling::Command::Application do
   let(:logaling_config) { File.join(File.dirname(__FILE__), "..", "tmp", ".logaling") }
   let(:base_options) { {"glossary"=>"spec", "source-language"=>"en", "target-language"=>"ja", "logaling-config" => logaling_config} }
   let(:command) { Logaling::Command::Application.new([], base_options) }
-  let(:glossary) { Logaling::Glossary.new('spec', 'en', 'ja', logaling_home) }
-  let(:glossary_path) { glossary.source_path }
+  let(:glossary_source) { Logaling::GlossarySource.new('spec', 'en', 'ja', logaling_home) }
+  let(:glossary_source_path) { glossary_source.source_path }
   let(:target_project_path) { File.join(logaling_home, "projects", "spec") }
   let(:repository) { Logaling::Repository.new(logaling_home) }
 
@@ -265,7 +265,7 @@ describe Logaling::Command::Application do
         command.add("spec", "テスト")
       end
 
-      subject { YAML::load_file(glossary_path).find{|h| h["source_term"] == "spec" }}
+      subject { YAML::load_file(glossary_source_path).find{|h| h["source_term"] == "spec" }}
 
       it "glossary yaml should contain that term" do
         subject["target_term"].should == "テスト"
@@ -282,7 +282,7 @@ describe Logaling::Command::Application do
         command.add("spec", "テスト", "備考")
       end
 
-      subject { YAML::load_file(glossary_path).find{|h| h["source_term"] == "spec" }}
+      subject { YAML::load_file(glossary_source_path).find{|h| h["source_term"] == "spec" }}
 
       it "glossary yaml should contain that term" do
         subject["target_term"].should == "テスト"
@@ -331,7 +331,7 @@ describe Logaling::Command::Application do
     context "with arguments except note" do
       before do
         command.update("spec", "テスト", "スペック")
-        @yaml = YAML::load_file(glossary_path).find{|h| h["source_term"] == "spec" }
+        @yaml = YAML::load_file(glossary_source_path).find{|h| h["source_term"] == "spec" }
       end
 
       it "term's target_term should be updated" do
@@ -352,7 +352,7 @@ describe Logaling::Command::Application do
     context 'with existing bilingual pair and different note' do
       before do
         command.update("spec", "テスト", "テスト", "備考だけ書き換え")
-        @yaml = YAML::load_file(glossary_path).find{|h| h["source_term"] == "spec" }
+        @yaml = YAML::load_file(glossary_source_path).find{|h| h["source_term"] == "spec" }
       end
 
       it "should update note" do
@@ -450,12 +450,12 @@ describe Logaling::Command::Application do
   end
 
   describe "#show" do
-    let(:csv_path) { File.join(File.dirname(glossary_path), "spec.ja.en.csv") }
+    let(:csv_path) { File.join(File.dirname(glossary_source_path), "spec.ja.en.csv") }
     before do
       command.new('spec', 'en', 'ja')
       command.add("spec-test", "スペックてすと", "備考")
 
-      FileUtils.mkdir_p(File.dirname(glossary_path))
+      FileUtils.mkdir_p(File.dirname(glossary_source_path))
       FileUtils.touch(csv_path)
       File.open(csv_path, "w"){|f| f.puts "test_logaling,テストろがりん"}
     end

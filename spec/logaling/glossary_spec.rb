@@ -19,26 +19,26 @@ require File.join(File.dirname(__FILE__), "..", "spec_helper")
 require "fileutils"
 
 module Logaling
-  describe Glossary do
+  describe GlossarySource do
     let(:project) { "spec" }
     let(:logaling_home) { @logaling_home }
-    let(:glossary) { Glossary.new(project, 'en', 'ja', logaling_home) }
-    let(:glossary_path) { glossary.source_path }
+    let(:glossary_source) { GlossarySource.new(project, 'en', 'ja', logaling_home) }
+    let(:glossary_source_path) { glossary_source.source_path }
     let(:repository) { Logaling::Repository.new(logaling_home) }
 
     before do
       FileUtils.remove_entry_secure(File.join(logaling_home, 'projects', 'spec'), true)
-      FileUtils.mkdir_p(File.dirname(glossary_path))
+      FileUtils.mkdir_p(File.dirname(glossary_source_path))
     end
 
     describe '#add' do
       context 'with arguments show new bilingual pair' do
         before do
-          glossary.add("spec", "スペック", "テストスペック")
+          glossary_source.add("spec", "スペック", "テストスペック")
         end
 
         it 'glossary yaml should have that bilingual pair' do
-          yaml = YAML::load_file(glossary_path)
+          yaml = YAML::load_file(glossary_source_path)
           term = yaml.index({"source_term"=>"spec", "target_term"=>"スペック", "note"=>"テストスペック"})
           term.should_not be_nil
         end
@@ -46,11 +46,11 @@ module Logaling
 
       context "when the glossary not found" do
         before do
-          glossary.add("test", "テスト", "テスト")
+          glossary_source.add("test", "テスト", "テスト")
         end
 
         it "should create the glossary and add term" do
-          yaml = YAML::load_file(glossary_path)
+          yaml = YAML::load_file(glossary_source_path)
           term = yaml.index({"source_term"=>"test", "target_term"=>"テスト", "note"=>"テスト"})
           term.should_not be_nil
         end
@@ -59,34 +59,34 @@ module Logaling
 
     describe '#update' do
       before do
-        glossary.add("user", "ユーザ", "ユーザーではない")
+        glossary_source.add("user", "ユーザ", "ユーザーではない")
       end
 
       context 'with new-terget-term show existing bilingual pair' do
         it {
-          -> { glossary.update("user", "ユーザー", "ユーザ", "やっぱりユーザー") }.should raise_error(Logaling::TermError)
+          -> { glossary_source.update("user", "ユーザー", "ユーザ", "やっぱりユーザー") }.should raise_error(Logaling::TermError)
         }
       end
 
       context 'with source-term show not existing bilingual pair' do
         it {
-          -> { glossary.update("use", "ユーザ", "ユーザー", "やっぱりユーザー") }.should raise_error(Logaling::TermError)
+          -> { glossary_source.update("use", "ユーザ", "ユーザー", "やっぱりユーザー") }.should raise_error(Logaling::TermError)
         }
       end
 
       context 'with target-term show not existing bilingual pair' do
         it {
-          -> { glossary.update("user", "ユー", "ユーザー", "やっぱりユーザー") }.should raise_error(Logaling::TermError)
+          -> { glossary_source.update("user", "ユー", "ユーザー", "やっぱりユーザー") }.should raise_error(Logaling::TermError)
         }
       end
 
       context 'with same target-term and empty note' do
         before do
-          glossary.update("user", "ユーザ", "ユーザ", "")
+          glossary_source.update("user", "ユーザ", "ユーザ", "")
         end
 
         it 'should clear note' do
-          yaml = YAML::load_file(glossary_path)
+          yaml = YAML::load_file(glossary_source_path)
           term = yaml.index({"source_term"=>"user", "target_term"=>"ユーザ", "note"=>""})
           term.should_not be_nil
         end
@@ -97,11 +97,11 @@ module Logaling
     describe '#delete' do
       context 'bilingual pair exists' do
         before do
-          glossary.add("delete_logaling", "てすと1", "備考")
-          glossary.add("delete_logaling", "てすと2", "備考")
-          glossary.delete("delete_logaling", "てすと1")
+          glossary_source.add("delete_logaling", "てすと1", "備考")
+          glossary_source.add("delete_logaling", "てすと2", "備考")
+          glossary_source.delete("delete_logaling", "てすと1")
           repository.index
-          @result = repository.lookup("delete_logaling", glossary)
+          @result = repository.lookup("delete_logaling", glossary_source)
         end
 
         it 'should delete the bilingual pair' do
@@ -112,11 +112,11 @@ module Logaling
 
       context 'bilingual pair does not exist' do
         before do
-          glossary.add("user_logaling", "ユーザ", "ユーザーではない")
+          glossary_source.add("user_logaling", "ユーザ", "ユーザーではない")
         end
 
         it {
-          -> { glossary.delete("user_logaling", "ユーザー") }.should raise_error(Logaling::TermError)
+          -> { glossary_source.delete("user_logaling", "ユーザー") }.should raise_error(Logaling::TermError)
         }
       end
     end
@@ -124,21 +124,21 @@ module Logaling
     describe '#delete_all' do
       context 'source_term not found' do
         before do
-          glossary.add("user_logaling", "ユーザ", "備考")
+          glossary_source.add("user_logaling", "ユーザ", "備考")
         end
 
         it {
-          -> { glossary.delete_all("usr_logaling") }.should raise_error(Logaling::TermError)
+          -> { glossary_source.delete_all("usr_logaling") }.should raise_error(Logaling::TermError)
         }
       end
 
       context 'source_term found' do
         context 'there is only 1 bilingual pair' do
           before do
-            glossary.add("user_logaling", "ユーザ", "備考")
-            glossary.delete_all("user_logaling")
+            glossary_source.add("user_logaling", "ユーザ", "備考")
+            glossary_source.delete_all("user_logaling")
             repository.index
-            @result = repository.lookup("user_logaling", glossary)
+            @result = repository.lookup("user_logaling", glossary_source)
           end
 
           it 'should delete the term' do
@@ -148,16 +148,16 @@ module Logaling
 
         context 'there are more than 1 bilingual pair' do
           before do
-            glossary.add("user_logaling", "ユーザ1", "備考")
-            glossary.add("user_logaling", "ユーザ2", "備考")
-            glossary.add("delete_logaling", "てすと1", "備考")
-            glossary.add("delete_logaling", "てすと2", "備考")
-            glossary.delete_all("delete_logaling", true)
-            @result = Logaling::Glossary.load_glossary_yml(glossary_path)
+            glossary_source.add("user_logaling", "ユーザ1", "備考")
+            glossary_source.add("user_logaling", "ユーザ2", "備考")
+            glossary_source.add("delete_logaling", "てすと1", "備考")
+            glossary_source.add("delete_logaling", "てすと2", "備考")
+            glossary_source.delete_all("delete_logaling", true)
+            @result = Logaling::GlossarySource.load_glossary_source_yml(glossary_source_path)
           end
 
           it {
-            -> { glossary.delete_all("user_logaling") }.should raise_error(Logaling::TermError)
+            -> { glossary_source.delete_all("user_logaling") }.should raise_error(Logaling::TermError)
           }
 
           it "should delete terms when force option is true" do

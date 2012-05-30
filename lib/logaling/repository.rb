@@ -47,24 +47,24 @@ module Logaling
       end
     end
 
-    def import(glossary)
+    def import(glossary_source)
       FileUtils.mkdir_p(cache_path) unless File.exist?(cache_path)
       Dir.chdir(cache_path) do
-        glossary.import
+        glossary_source.import
       end
     rescue
-      raise Logaling::CommandFailed, "Failed import #{glossary.class.name} to #{cache_path}."
+      raise Logaling::CommandFailed, "Failed import #{glossary_source.class.name} to #{cache_path}."
     end
 
-    def import_tmx(glossary, glossary_info)
+    def import_tmx(glossary_source, glossary_info)
       FileUtils.mkdir_p(cache_path) unless File.exist?(cache_path)
       Dir.chdir(cache_path) do
-        glossary.import(glossary_info)
+        glossary_source.import(glossary_info)
       end
     rescue Logaling::GlossaryNotFound => e
       raise e
     rescue
-      raise Logaling::CommandFailed, "Failed import_tmx #{glossary.class.name} to #{cache_path}."
+      raise Logaling::CommandFailed, "Failed import_tmx #{glossary_source.class.name} to #{cache_path}."
     end
 
     def lookup(source_term, glossary_source, dictionary=false)
@@ -115,7 +115,7 @@ module Logaling
           unless db.glossary_source_exist?(glossary_source, indexed_at)
             glossary_name, source_language, target_language = get_glossary(glossary_source)
             puts "now index #{glossary_name}..."
-            db.index_glossary(Glossary.load(glossary_source), glossary_name, glossary_source, source_language, target_language, indexed_at)
+            db.index_glossary(GlossarySource.load(glossary_source), glossary_name, glossary_source, source_language, target_language, indexed_at)
           end
         end
         (db.get_all_glossary_source - all_glossaries).each do |glossary_source|

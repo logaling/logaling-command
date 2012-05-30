@@ -19,7 +19,7 @@ require 'thor'
 require 'rainbow'
 require 'pathname'
 require "logaling/repository"
-require "logaling/glossary"
+require "logaling/glossary_source"
 require "logaling/config"
 
 module Logaling::Command
@@ -88,7 +88,7 @@ module Logaling::Command
       require "logaling/external_glossary"
       Logaling::ExternalGlossary.load
       if options["list"]
-        Logaling::ExternalGlossary.list.each {|glossary| say "#{glossary.name.bright} : #{glossary.description}" }
+        Logaling::ExternalGlossary.list.each {|glossary| say "#{glossary_source.name.bright} : #{glossary_source.description}" }
       else
         case external_glossary
         when 'tmx'
@@ -173,7 +173,7 @@ module Logaling::Command
         raise Logaling::TermError, "term '#{source_term}: #{target_term}' already exists in '#{@config.glossary}'"
       end
 
-      glossary.add(source_term, target_term, note)
+      glossary_source.add(source_term, target_term, note)
     rescue Logaling::CommandFailed, Logaling::TermError => e
       say e.message
     rescue Logaling::GlossaryNotFound => e
@@ -192,9 +192,9 @@ module Logaling::Command
       check_logaling_home_exists
 
       if target_term
-        glossary.delete(source_term, target_term)
+        glossary_source.delete(source_term, target_term)
       else
-        glossary.delete_all(source_term, options["force"])
+        glossary_source.delete_all(source_term, options["force"])
       end
     rescue Logaling::CommandFailed, Logaling::TermError => e
       say e.message
@@ -217,7 +217,7 @@ module Logaling::Command
         raise Logaling::TermError, "term '#{source_term}: #{new_target_term}' already exists in '#{@config.glossary}'"
       end
 
-      glossary.update(source_term, target_term, new_target_term, note)
+      glossary_source.update(source_term, target_term, new_target_term, note)
     rescue Logaling::CommandFailed, Logaling::TermError => e
       say e.message
     rescue Logaling::GlossaryNotFound => e
@@ -232,7 +232,7 @@ module Logaling::Command
     def lookup(source_term)
       check_logaling_home_exists
       @repository.index
-      terms = @repository.lookup(source_term, glossary, options["dictionary"])
+      terms = @repository.lookup(source_term, glossary_source, options["dictionary"])
       unless terms.empty?
         max_str_size = terms.map{|term| term[:source_term].size}.sort.last
         run_pager
@@ -273,7 +273,7 @@ module Logaling::Command
       @config.check_required_option(required_options)
       check_logaling_home_exists
       @repository.index
-      terms = @repository.show_glossary(glossary)
+      terms = @repository.show_glossary(glossary_source)
       unless terms.empty?
         run_pager
         max_str_size = terms.map{|term| term[:source_term].size}.sort.last
@@ -314,8 +314,8 @@ module Logaling::Command
       RUBY_PLATFORM =~ /win32|mingw32/i
     end
 
-    def glossary
-      @glossary ||= Logaling::Glossary.new(@config.glossary, @config.source_language, @config.target_language, @logaling_home)
+    def glossary_source
+      @glossary_source ||= Logaling::GlossarySource.new(@config.glossary, @config.source_language, @config.target_language, @logaling_home)
     end
 
     def error(msg)

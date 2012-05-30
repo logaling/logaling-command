@@ -26,46 +26,46 @@ require "csv"
 require "fileutils"
 
 module Logaling
-  class Glossary
+  class GlossarySource
     class << self
       def load(file)
-        load_glossary(file)
+        load_glossary_source(file)
       end
 
-      def load_glossary(file)
+      def load_glossary_source(file)
         case File.extname(file)
         when ".csv"
-          load_glossary_csv(file)
+          load_glossary_source_csv(file)
         when ".tsv"
-          load_glossary_tsv(file)
+          load_glossary_source_tsv(file)
         when ".yml"
-          load_glossary_yml(file)
+          load_glossary_source_yml(file)
         end
       end
 
-      def load_glossary_yml(path)
+      def load_glossary_source_yml(path)
         YAML::load_file(path) || []
       end
 
-      def load_glossary_tsv(path)
-        load_glossary_csv(path, "\t")
+      def load_glossary_source_tsv(path)
+        load_glossary_source_csv(path, "\t")
       end
 
-      def load_glossary_csv(path, sep=",")
-        glossary = []
+      def load_glossary_source_csv(path, sep=",")
+        glossary_source = []
         CSV.open(path, "r:utf-8",  {:col_sep => sep}) do |csv|
           csv.each do |row|
-            glossary << {"source_term" => row[0], "target_term" => row[1], "note" => ""} if row.size >= 2
+            glossary_source << {"source_term" => row[0], "target_term" => row[1], "note" => ""} if row.size >= 2
           end
         end
-        glossary
+        glossary_source
       end
     end
     attr_reader :glossary, :source_language, :target_language
 
-    def initialize(glossary, source_language, target_language, logaling_home)
+    def initialize(glossary_name, source_language, target_language, logaling_home)
       @logaling_home = logaling_home
-      @glossary = glossary
+      @glossary = glossary_name
       @source_language = source_language
       @target_language = target_language
     end
@@ -73,9 +73,9 @@ module Logaling
     def add(source_term, target_term, note)
       FileUtils.touch(source_path) unless File.exist?(source_path)
 
-      glossary = Glossary.load_glossary(source_path)
-      glossary << build_term(source_term, target_term, note)
-      dump_glossary(glossary)
+      glossary_source = GlossarySource.load_glossary_source(source_path)
+      glossary_source << build_term(source_term, target_term, note)
+      dump_glossary_source(glossary_source)
     rescue
       raise GlossaryNotFound
     end
@@ -83,12 +83,12 @@ module Logaling
     def update(source_term, target_term, new_target_term, note)
       raise GlossaryNotFound unless File.exist?(source_path)
 
-      glossary = Glossary.load_glossary(source_path)
+      glossary_source = GlossarySource.load_glossary_source(source_path)
 
-      target_index = find_term_index(glossary, source_term, target_term)
+      target_index = find_term_index(glossary_source, source_term, target_term)
       if target_index
-        glossary[target_index] = rebuild_term(glossary[target_index], source_term, new_target_term, note)
-        dump_glossary(glossary)
+        glossary_source[target_index] = rebuild_term(glossary_source[target_index], source_term, new_target_term, note)
+        dump_glossary_source(glossary_source)
       else
         raise TermError, "Can't found term '#{source_term}: #{target_term}' in '#{@glossary}'"
       end
@@ -97,28 +97,28 @@ module Logaling
     def delete(source_term, target_term)
       raise GlossaryNotFound unless File.exist?(source_path)
 
-      glossary = Glossary.load_glossary(source_path)
-      target_index = find_term_index(glossary, source_term, target_term)
+      glossary_source = GlossarySource.load_glossary_source(source_path)
+      target_index = find_term_index(glossary_source, source_term, target_term)
       unless target_index
         raise TermError, "Can't found term '#{source_term} #{target_term}' in '#{@glossary}'" unless target_index
       end
 
-      glossary.delete_at(target_index)
-      dump_glossary(glossary)
+      glossary_source.delete_at(target_index)
+      dump_glossary_source(glossary_source)
     end
 
     def delete_all(source_term, force=false)
       raise GlossaryNotFound unless File.exist?(source_path)
 
-      glossary = Glossary.load_glossary(source_path)
-      delete_candidates = target_terms(glossary, source_term)
+      glossary_source = GlossarySource.load_glossary_source(source_path)
+      delete_candidates = target_terms(glossary_source, source_term)
       if delete_candidates.empty?
         raise TermError, "Can't found term '#{source_term} in '#{@glossary}'"
       end
 
       if delete_candidates.size == 1 || force
-        glossary.delete_if{|term| term['source_term'] == source_term }
-        dump_glossary(glossary)
+        glossary_source.delete_if{|term| term['source_term'] == source_term }
+        dump_glossary_source(glossary_source)
       else
         raise TermError, "There are duplicate terms in glossary.\n" +
           "If you really want to delete, please put `loga delete [SOURCE_TERM] --force`\n" +
@@ -149,8 +149,8 @@ module Logaling
       build_term(source_term, target_term, note)
     end
 
-    def find_term_index(glossary, source_term, target_term='')
-      glossary.find_index do |term|
+    def find_term_index(glossary_source, source_term, target_term='')
+      glossary_source.find_index do |term|
         if target_term.empty?
           term['source_term'] == source_term
         else
@@ -159,13 +159,13 @@ module Logaling
       end
     end
 
-    def target_terms(glossary, source_term)
-      glossary.select {|term| term['source_term'] == source_term }
+    def target_terms(glossary_source, source_term)
+      glossary_source.select {|term| term['source_term'] == source_term }
     end
 
-    def dump_glossary(glossary)
+    def dump_glossary_source(glossary_source)
       File.open(source_path, "w") do |f|
-        f.puts(glossary.to_yaml)
+        f.puts(glossary_source.to_yaml)
       end
     end
   end

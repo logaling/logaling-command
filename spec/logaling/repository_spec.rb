@@ -22,24 +22,24 @@ module Logaling
   describe Repository do
     let(:project) { "spec" }
     let(:logaling_home) { @logaling_home }
-    let(:glossary) { Glossary.new(project, 'en', 'ja', logaling_home) }
-    let(:glossary_path) { glossary.source_path }
+    let(:glossary_source) { GlossarySource.new(project, 'en', 'ja', logaling_home) }
+    let(:glossary_source_path) { glossary_source.source_path }
     let(:repository) { Logaling::Repository.new(logaling_home) }
     let(:db_home) { File.join(logaling_home, "db") }
 
     before do
       FileUtils.remove_entry_secure(File.join(logaling_home, 'projects', 'spec'), true)
-      FileUtils.mkdir_p(File.dirname(glossary_path))
+      FileUtils.mkdir_p(File.dirname(glossary_source_path))
     end
 
     describe '#lookup' do
       context 'with arguments show existing bilingual pair' do
         before do
-          glossary.add("user-logaling", "ユーザ", "ユーザーではない")
-          glossary.add("user-logaling", "ユーザー", "")
+          glossary_source.add("user-logaling", "ユーザ", "ユーザーではない")
+          glossary_source.add("user-logaling", "ユーザー", "")
           File.stub!(:mtime).and_return(Time.now - 1)
           repository.index
-          @terms = repository.lookup("user-logaling", glossary)
+          @terms = repository.lookup("user-logaling", glossary_source)
         end
 
         it 'succeed at find by term' do
@@ -49,13 +49,13 @@ module Logaling
 
       context 'with dictionary option' do
         before do
-          glossary.add("user", "ユーザ", "ユーザーではない")
-          glossary.add("user-logaling", "ユーザ", "ユーザーではない")
-          glossary.add("user-logaling test", "ユーザーてすと", "")
-          glossary.add("ゆーざ", "test user-logaling test text", "")
+          glossary_source.add("user", "ユーザ", "ユーザーではない")
+          glossary_source.add("user-logaling", "ユーザ", "ユーザーではない")
+          glossary_source.add("user-logaling test", "ユーザーてすと", "")
+          glossary_source.add("ゆーざ", "test user-logaling test text", "")
           File.stub!(:mtime).and_return(Time.now - 1)
           repository.index
-          @terms = repository.lookup("user-logaling", glossary, true)
+          @terms = repository.lookup("user-logaling", glossary_source, true)
           @result = [{
             :glossary_name=>"spec",
             :source_language=>"en",
@@ -91,14 +91,14 @@ module Logaling
       end
 
       context 'when tsv file as glossary exists' do
-        let(:tsv_path) { glossary_path.sub(/yml$/, 'tsv') }
+        let(:tsv_path) { glossary_source_path.sub(/yml$/, 'tsv') }
 
         before do
           FileUtils.mkdir_p(File.dirname(tsv_path))
           FileUtils.touch(tsv_path)
           File.open(tsv_path, "w"){|f| f.puts "test-logaling\tユーザー\ntest-logaling\tユーザ"}
           repository.index
-          @terms = repository.lookup("test-logaling", glossary)
+          @terms = repository.lookup("test-logaling", glossary_source)
         end
 
         it 'succeed at find by term' do
@@ -113,16 +113,16 @@ module Logaling
 
     describe '#index' do
       let(:logaling_db) { Logaling::GlossaryDB.new }
-      let(:tsv_path) { File.join(File.dirname(glossary_path), "spec.en.ja.tsv") }
-      let(:csv_path) { File.join(File.dirname(glossary_path), "spec.en.ja.csv") }
+      let(:tsv_path) { File.join(File.dirname(glossary_source_path), "spec.en.ja.tsv") }
+      let(:csv_path) { File.join(File.dirname(glossary_source_path), "spec.en.ja.csv") }
 
       context 'when yml file as glossary exists' do
         before do
-          FileUtils.mkdir_p(File.dirname(glossary_path))
-          FileUtils.touch(glossary_path)
-          glossary.add("spec_logaling", "スペック", "備考")
+          FileUtils.mkdir_p(File.dirname(glossary_source_path))
+          FileUtils.touch(glossary_source_path)
+          glossary_source.add("spec_logaling", "スペック", "備考")
           repository.index
-          @terms = repository.lookup("spec_logaling", glossary)
+          @terms = repository.lookup("spec_logaling", glossary_source)
         end
 
         it 'glossaries should be indexed' do
@@ -130,17 +130,17 @@ module Logaling
         end
 
         after do
-          FileUtils.remove_entry_secure(glossary_path, true)
+          FileUtils.remove_entry_secure(glossary_source_path, true)
         end
       end
 
       context 'when tsv file as glossary exists' do
         before do
-          FileUtils.mkdir_p(File.dirname(glossary_path))
+          FileUtils.mkdir_p(File.dirname(glossary_source_path))
           FileUtils.touch(tsv_path)
           File.open(tsv_path, "w"){|f| f.puts "user-logaling\tユーザ"}
           repository.index
-          @terms = repository.lookup("user-logaling", glossary)
+          @terms = repository.lookup("user-logaling", glossary_source)
         end
 
 
@@ -155,11 +155,11 @@ module Logaling
 
       context 'when csv file as glosary exists' do
         before do
-          FileUtils.mkdir_p(File.dirname(glossary_path))
+          FileUtils.mkdir_p(File.dirname(glossary_source_path))
           FileUtils.touch(csv_path)
           File.open(csv_path, "w"){|f| f.puts "test_logaling,テスト"}
           repository.index
-          @terms = repository.lookup("test_logaling", glossary)
+          @terms = repository.lookup("test_logaling", glossary_source)
         end
 
         it 'glossaries should be indexed' do
