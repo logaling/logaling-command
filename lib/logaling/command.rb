@@ -17,3 +17,4 @@
 
 require "logaling/command/version"
 require "logaling/command/application"
+require "logaling/command/pager"

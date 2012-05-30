@@ -310,10 +310,6 @@ module Logaling::Command
     end
 
     private
-    def windows?
-      RUBY_PLATFORM =~ /win32|mingw32/i
-    end
-
     def glossary_source
       @glossary_source ||= Logaling::GlossarySource.new(@config.glossary, @config.source_language, @config.target_language, @logaling_home)
     end
@@ -349,33 +345,8 @@ module Logaling::Command
       end
     end
 
-    # http://nex-3.com/posts/73-git-style-automatic-paging-in-ruby
     def run_pager
-      return if options["no-pager"]
-      return if windows?
-      return unless STDOUT.tty?
-
-      read, write = IO.pipe
-
-      unless Kernel.fork # Child process
-        STDOUT.reopen(write)
-        STDERR.reopen(write) if STDERR.tty?
-        read.close
-        write.close
-        return
-      end
-
-      # Parent process, become pager
-      STDIN.reopen(read)
-      read.close
-      write.close
-
-      ENV['LESS'] = 'FSRX' # Don't page if the input is short enough
-
-      # wait until we have input before we start the pager
-      Kernel.select [STDIN]
-      pager = ENV['PAGER'] || 'less'
-      exec pager rescue exec "/bin/sh", "-c", pager
+      Pager.run unless options["no-pager"]
     end
 
     def extract_keyword_and_coloring(snipped_term, term)
