@@ -354,8 +354,7 @@ module Logaling::Command
       display_string = snipped_term.map do |word|
         word.is_a?(Hash) ? word[:keyword].bright : word
       end
-      display_string = display_string.join
-      display_string
+      display_string.join
     end
 
     def check_logaling_home_exists
