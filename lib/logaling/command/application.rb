@@ -239,9 +239,9 @@ module Logaling::Command
         terms.each_with_index do |term, i|
           source_string = extract_keyword_and_coloring(term[:snipped_source_term], term[:source_term])
           target_string = extract_keyword_and_coloring(term[:snipped_target_term], term[:target_term])
-          note = term[:note].to_s unless term[:note].empty?
+          note_string = build_note_string(term[:note])
           glossary_name_string = build_glossary_name_string(term[:glossary_name], @repository, @config)
-          printer(source_string, target_string, note,
+          printer(source_string, target_string, note_string,
                   glossary_name_string, max_str_size, i, terms.length)
         end
       else
@@ -355,6 +355,10 @@ module Logaling::Command
         end
       end
       glossary_name_string
+    end
+
+    def build_note_string(note)
+      note.to_s unless note.empty?
     end
 
     def extract_keyword_and_coloring(snipped_term, term)
