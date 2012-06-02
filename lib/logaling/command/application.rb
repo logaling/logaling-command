@@ -237,12 +237,20 @@ module Logaling::Command
         max_str_size = terms.map{|term| term[:source_term].size}.sort.last
         run_pager
         terms.each_with_index do |term, i|
-          source_string = extract_keyword_and_coloring(term[:snipped_source_term], term[:source_term])
-          target_string = extract_keyword_and_coloring(term[:snipped_target_term], term[:target_term])
-          note_string = build_note_string(term[:note])
-          glossary_name_string = build_glossary_name_string(term[:glossary_name], @repository, @config)
-          printer(source_string, target_string, note_string,
-                  glossary_name_string, max_str_size, i, terms.length)
+          case options["output"]
+          when "terminal"
+            term_renderer = Logaling::Command::Renderers::TermRenderer.new(term, @repository, @config, options)
+            term_renderer.max_str_size = max_str_size
+            term_renderer.render
+          when "csv"
+            term_renderer = Logaling::Command::Renderers::TermCsvRenderer.new(term, @repository, @config, options)
+            term_renderer.render
+          when "json"
+            term_renderer = Logaling::Command::Renderers::TermJsonRenderer.new(term, @repository, @config, options)
+            term_renderer.index = i
+            term_renderer.last_index = terms.length
+            term_renderer.render
+          end
         end
       else
         "source-term <#{source_term}> not found"
@@ -343,62 +351,9 @@ module Logaling::Command
       Pager.run unless options["no-pager"]
     end
 
-    def decorate_glossary_name(glossary_name)
-      glossary_name.foreground(:white).background(:green)
-    end
-
-    def build_glossary_name_string(glossary_name, repository, config)
-      glossary_name_string = ""
-      if repository.glossary_counts > 1
-        if glossary_name == config.glossary
-          glossary_name_string = decorate_glossary_name(glossary_name)
-        end
-      end
-      glossary_name_string
-    end
-
-    def build_note_string(note)
-      note.to_s unless note.empty?
-    end
-
-    def extract_keyword_and_coloring(snipped_term, term)
-      return term if snipped_term.empty? || options["no-color"]
-      display_string = snipped_term.map do |word|
-        word.is_a?(Hash) ? word[:keyword].bright : word
-      end
-      display_string.join
-    end
-
     def check_logaling_home_exists
       unless File.exist?(@logaling_home)
         raise Logaling::CommandFailed, "Input existing directory as logaling-home."
-      end
-    end
-
-    def printer(source_string, target_string, note=nil,
-                glossary_name, max_str_size, i, last)
-      case options["output"]
-      when "terminal"
-        unless note
-          format = target_string + "\t" + glossary_name
-        else
-          format = target_string + "\t# " + note + "\t" + glossary_name
-        end
-        printf("  %-#{max_str_size+10}s %s\n", source_string, format)
-      when "csv"
-        items = [source_string, target_string, note,
-                 @config.source_language, @config.target_language]
-        print(CSV.generate {|csv| csv << items})
-      when "json"
-        puts("[") if i == 0
-        puts(",") if i > 0
-        record = {
-          :source => source_string, :target => target_string, :note => note,
-          :source_language => @config.source_language,
-          :target_language => @config.target_language
-        }
-        print JSON.pretty_generate(record)
-        puts("\n]") if i == last-1
       end
     end
 
