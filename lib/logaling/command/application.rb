@@ -240,15 +240,9 @@ module Logaling::Command
           source_string = extract_keyword_and_coloring(term[:snipped_source_term], term[:source_term])
           target_string = extract_keyword_and_coloring(term[:snipped_target_term], term[:target_term])
           note = term[:note].to_s unless term[:note].empty?
-          glossary_name = ""
-          if @repository.glossary_counts > 1
-            glossary_name = term[:glossary_name]
-            if term[:glossary_name] == @config.glossary
-              glossary_name = decorate_glossary_name(glossary_name)
-            end
-          end
+          glossary_name_string = build_glossary_name_string(term[:glossary_name], @repository, @config)
           printer(source_string, target_string, note,
-                  glossary_name, max_str_size, i, terms.length)
+                  glossary_name_string, max_str_size, i, terms.length)
         end
       else
         "source-term <#{source_term}> not found"
@@ -351,6 +345,16 @@ module Logaling::Command
 
     def decorate_glossary_name(glossary_name)
       glossary_name.foreground(:white).background(:green)
+    end
+
+    def build_glossary_name_string(glossary_name, repository, config)
+      glossary_name_string = ""
+      if repository.glossary_counts > 1
+        if glossary_name == config.glossary
+          glossary_name_string = decorate_glossary_name(glossary_name)
+        end
+      end
+      glossary_name_string
     end
 
     def extract_keyword_and_coloring(snipped_term, term)
