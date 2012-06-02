@@ -244,7 +244,7 @@ module Logaling::Command
           if @repository.glossary_counts > 1
             glossary_name = term[:glossary_name]
             if term[:glossary_name] == @config.glossary
-              glossary_name = glossary_name.foreground(:white).background(:green)
+              glossary_name = decorate_glossary_name(glossary_name)
             end
           end
           printer(source_string, target_string, note,
@@ -347,6 +347,10 @@ module Logaling::Command
 
     def run_pager
       Pager.run unless options["no-pager"]
+    end
+
+    def decorate_glossary_name(glossary_name)
+      glossary_name.foreground(:white).background(:green)
     end
 
     def extract_keyword_and_coloring(snipped_term, term)
