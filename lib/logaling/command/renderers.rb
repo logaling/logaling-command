@@ -72,15 +72,22 @@ module Logaling::Command
       end
 
       def render
-        puts("[") if @index == 0
-        puts(",") if @index > 0
+        first_line? ? puts("[") : puts(",")
         record = {
           :source => source_term, :target => target_term, :note => note,
           :source_language => @config.source_language,
           :target_language => @config.target_language
         }
         print JSON.pretty_generate(record)
-        puts("\n]") if @index == @last_index-1
+        puts("\n]") if last_line?
+      end
+
+      private
+      def first_line?
+        @index == 0
+      end
+      def last_line?
+        @index == @last_index-1
       end
     end
   end
