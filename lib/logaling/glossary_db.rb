@@ -119,7 +119,6 @@ module Logaling
       specified_glossary.expression.close if specified_glossary
     end
 
-
     def lookup_dictionary(search_word)
       records_selected_source = Groonga["translations"].select do |record|
         target = record.match_target do |match_record|
