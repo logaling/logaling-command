@@ -388,13 +388,13 @@ module Logaling
     end
 
     def snip_source_term(term, snippet)
-        snipped_text = snippet.execute(term.source_term).join
-        struct_snipped_text(snipped_text)
+      snipped_text = snippet.execute(term.source_term).join
+      struct_snipped_text(snipped_text)
     end
 
     def snip_target_term(term, snippet)
-        snipped_text = snippet.execute(term.target_term).join
-        struct_snipped_text(snipped_text)
+      snipped_text = snippet.execute(term.target_term).join
+      struct_snipped_text(snipped_text)
     end
 
     def get_config(conf_key)
