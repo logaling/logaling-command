@@ -1,24 +1,14 @@
 module Logaling::Command
   module Renderers
     class TermRenderer
-      attr_accessor :max_str_size
-
       def initialize(term, repository, config, options)
         @term = term
         @repository = repository
         @config = config
         @options = options
-        @max_str_size = 0
       end
 
-      def render
-        unless note
-          format = target_term + "\t" + glossary_name
-        else
-          format = target_term + "\t# " + note + "\t" + glossary_name
-        end
-        printf("  %-#{@max_str_size+10}s %s\n", source_term, format)
-      end
+      def render; end
 
       def glossary_name
         if @repository.glossary_counts > 1
@@ -60,6 +50,24 @@ module Logaling::Command
 
       def keyword?(snippet)
         snippet.is_a?(Hash)
+      end
+    end
+
+    class TermDefaultRenderer < TermRenderer
+      attr_accessor :max_str_size
+
+      def initialize(term, repository, config, options)
+        super
+        @max_str_size = 0
+      end
+
+      def render
+        unless note
+          format = target_term + "\t" + glossary_name
+        else
+          format = target_term + "\t# " + note + "\t" + glossary_name
+        end
+        printf("  %-#{@max_str_size+10}s %s\n", source_term, format)
       end
     end
 

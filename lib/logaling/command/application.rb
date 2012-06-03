@@ -239,7 +239,7 @@ module Logaling::Command
         terms.each_with_index do |term, i|
           case options["output"]
           when "terminal"
-            term_renderer = Logaling::Command::Renderers::TermRenderer.new(term, @repository, @config, options)
+            term_renderer = Logaling::Command::Renderers::TermDefaultRenderer.new(term, @repository, @config, options)
             term_renderer.max_str_size = max_str_size
             term_renderer.render
           when "csv"
