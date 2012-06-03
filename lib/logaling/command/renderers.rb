@@ -47,10 +47,19 @@ module Logaling::Command
       private
       def extract_keyword_and_coloring(snipped_term, term)
         return term if snipped_term.empty? || @options["no-color"]
-        display_string = snipped_term.map do |word|
-          word.is_a?(Hash) ? word[:keyword].bright : word
-        end
-        display_string.join
+        build_term_string_from_snippets(snipped_term)
+      end
+
+      def build_term_string_from_snippets(snippets)
+        snippets.map{|snippet| decorate_snippet(snippet) }.join
+      end
+
+      def decorate_snippet(snippet)
+        keyword?(snippet) ? snippet[:keyword].bright : snippet
+      end
+
+      def keyword?(snippet)
+        snippet.is_a?(Hash)
       end
     end
 
