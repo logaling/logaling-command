@@ -65,9 +65,14 @@ module Logaling::Command
         unless note
           format = target_term + "\t" + glossary_name
         else
-          format = target_term + "\t# " + note + "\t" + glossary_name
+          format = target_term + "\t" + note + "\t" + glossary_name
         end
         printf("  %-#{@max_str_size+10}s %s\n", source_term, format)
+      end
+
+      def note
+        note_string = super
+        "# #{note_string}" if note_string
       end
     end
 
