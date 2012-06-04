@@ -297,16 +297,15 @@ module Logaling::Command
     def list
       check_logaling_home_exists
       @repository.index
-      glossaries = @repository.list
-      unless glossaries.empty?
+      projects = @repository.projects
+      unless projects.empty?
         run_pager
-        glossaries.each do |glossary|
-          printf("  %s\n", glossary)
+        projects.each do |project|
+          printf("  %s\n", project.name)
         end
       else
         "There is no registered glossary."
       end
-
     rescue Logaling::CommandFailed, Logaling::GlossaryDBNotFound => e
       say e.message
     end

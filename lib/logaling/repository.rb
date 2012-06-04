@@ -17,6 +17,7 @@
 
 require "fileutils"
 require "logaling/glossary_db"
+require "logaling/project"
 
 module Logaling
   class Repository
@@ -91,14 +92,10 @@ module Logaling
       terms
     end
 
-    def list
-      raise Logaling::GlossaryDBNotFound unless File.exist?(logaling_db_home)
-
-      glossaries = []
-      Logaling::GlossaryDB.open(logaling_db_home, "utf8") do |db|
-        glossaries = db.get_all_glossary
+    def projects
+      registered_projects.map do |project_name|
+        Logaling::Project.new(project_name)
       end
-      glossaries
     end
 
     def index
