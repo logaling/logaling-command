@@ -359,8 +359,8 @@ module Logaling
     def struct_result(records, snippet=nil)
       records.map do |record|
         term = record.key
-        snipped_source_term = snippet ? snip_source_term(term, snippet) : []
-        snipped_target_term = snippet ? snip_target_term(term, snippet) : []
+        snipped_source_term = snippet ? struct_snipped_term(term.source_term, snippet) : []
+        snipped_target_term = snippet ? struct_snipped_term(term.target_term, snippet) : []
         {:glossary_name => term.glossary.key,
          :source_language => term.source_language,
          :target_language => term.target_language,
@@ -386,13 +386,8 @@ module Logaling
       structed_source_term
     end
 
-    def snip_source_term(term, snippet)
-      snipped_text = snippet.execute(term.source_term).join
-      struct_snipped_text(snipped_text)
-    end
-
-    def snip_target_term(term, snippet)
-      snipped_text = snippet.execute(term.target_term).join
+    def struct_snipped_term(term, snippet)
+      snipped_text = snippet.execute(term).join
       struct_snipped_text(snipped_text)
     end
 
