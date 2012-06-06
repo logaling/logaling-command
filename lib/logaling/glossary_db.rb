@@ -49,11 +49,10 @@ module Logaling
     end
 
     def recreate_table
-      version = Groonga["configurations"] ? get_config("version") : 0
-      if version.to_i != VERSION
+      unless latest_version?
         remove_schema
         populate_schema
-        add_config("version", VERSION.to_s)
+        update_version_to_latest
       end
     end
 
@@ -387,6 +386,18 @@ module Logaling
     def struct_snipped_term(term, snippet)
       snipped_text = snippet.execute(term).join
       struct_snipped_text(snipped_text)
+    end
+
+    def latest_version?
+      current_version == VERSION
+    end
+
+    def current_version
+      Groonga["configurations"] ? get_config("version").to_i : 0
+    end
+
+    def update_version_to_latest
+      add_config("version", VERSION.to_s)
     end
 
     def get_config(conf_key)
