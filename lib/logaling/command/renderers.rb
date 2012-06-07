@@ -8,7 +8,7 @@ module Logaling::Command
         @options = options
       end
 
-      def render; end
+      def render(out); end
 
       def glossary_name
         if @repository.glossary_counts > 1
@@ -61,9 +61,9 @@ module Logaling::Command
         @max_str_size = 0
       end
 
-      def render
+      def render(out)
         format = [target_term, note, glossary_name].compact.join("\t")
-        printf("  %-#{@max_str_size+10}s %s\n", source_term, format)
+        out.printf("  %-#{@max_str_size+10}s %s\n", source_term, format)
       end
 
       def note
@@ -73,10 +73,10 @@ module Logaling::Command
     end
 
     class TermCsvRenderer < TermRenderer
-      def render
+      def render(out)
         items = [source_term, target_term, note,
                  @config.source_language, @config.target_language]
-        print(CSV.generate {|csv| csv << items})
+        out.print(CSV.generate {|csv| csv << items})
       end
     end
 
@@ -89,15 +89,15 @@ module Logaling::Command
         @last_index = 0
       end
 
-      def render
-        first_line? ? puts("[") : puts(",")
+      def render(out)
+        first_line? ? out.puts("[") : out.puts(",")
         record = {
           :source => source_term, :target => target_term, :note => note,
           :source_language => @config.source_language,
           :target_language => @config.target_language
         }
-        print JSON.pretty_generate(record)
-        puts("\n]") if last_line?
+        out.print JSON.pretty_generate(record)
+        out.puts("\n]") if last_line?
       end
 
       private

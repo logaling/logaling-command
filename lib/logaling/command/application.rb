@@ -241,15 +241,15 @@ module Logaling::Command
           when "terminal"
             term_renderer = Logaling::Command::Renderers::TermDefaultRenderer.new(term, @repository, @config, options)
             term_renderer.max_str_size = max_str_size
-            term_renderer.render
+            term_renderer.render($stdout)
           when "csv"
             term_renderer = Logaling::Command::Renderers::TermCsvRenderer.new(term, @repository, @config, options)
-            term_renderer.render
+            term_renderer.render($stdout)
           when "json"
             term_renderer = Logaling::Command::Renderers::TermJsonRenderer.new(term, @repository, @config, options)
             term_renderer.index = i
             term_renderer.last_index = terms.length
-            term_renderer.render
+            term_renderer.render($stdout)
           end
         end
       else
