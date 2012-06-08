@@ -171,30 +171,23 @@ module Logaling
       records_raw.expression.close
     end
 
-    def get_bilingual_pair(source_term, target_term, glossary)
+    def get_bilingual_pair(source_term, target_term, glossary, note=nil)
       records = Groonga["translations"].select do |record|
-        [
-          record.glossary == glossary,
-          record.source_term == source_term,
-          record.target_term == target_term
-        ]
+        if note
+          [
+            record.glossary == glossary,
+            record.source_term == source_term,
+            record.target_term == target_term,
+            record.note == note
+          ]
+        else
+          [
+            record.glossary == glossary,
+            record.source_term == source_term,
+            record.target_term == target_term
+          ]
+        end
       end
-
-      struct_result(records)
-    ensure
-      records.expression.close
-    end
-
-    def get_bilingual_pair_with_note(source_term, target_term, note, glossary)
-      records = Groonga["translations"].select do |record|
-        [
-          record.glossary == glossary,
-          record.source_term == source_term,
-          record.target_term == target_term,
-          record.note == note
-        ]
-      end
-
       struct_result(records)
     ensure
       records.expression.close

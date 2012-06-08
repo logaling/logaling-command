@@ -153,7 +153,7 @@ module Logaling
 
       terms = []
       Logaling::GlossaryDB.open(logaling_db_home, "utf8") do |db|
-        terms = db.get_bilingual_pair_with_note(source_term, target_term, note, glossary)
+        terms = db.get_bilingual_pair(source_term, target_term, glossary, note)
       end
 
       if terms.size > 0
