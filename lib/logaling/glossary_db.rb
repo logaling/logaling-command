@@ -163,8 +163,9 @@ module Logaling
       end
 
       records = records_raw.sort([
-        {:key=>"source_term", :order=>order},
-        {:key=>"target_term", :order=>order}])
+        {:key => "source_term", :order => order},
+        {:key => "target_term", :order => order}
+      ])
 
       struct_result(records)
     ensure
