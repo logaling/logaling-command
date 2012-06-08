@@ -153,7 +153,7 @@ module Logaling
       records_selected.expression.close if records_selected
     end
 
-    def translation_list(glossary_source)
+    def translation_list(glossary_source, order='ascending')
       records_raw = Groonga["translations"].select do |record|
         [
           record.glossary == glossary_source.glossary,
@@ -163,8 +163,8 @@ module Logaling
       end
 
       records = records_raw.sort([
-        {:key=>"source_term", :order=>'ascending'},
-        {:key=>"target_term", :order=>'ascending'}])
+        {:key=>"source_term", :order=>order},
+        {:key=>"target_term", :order=>order}])
 
       struct_result(records)
     ensure
