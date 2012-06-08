@@ -93,7 +93,8 @@ module Logaling
     end
 
     def projects
-      registered_projects.map do |project_name|
+      imported_projects = imported_glossaries.map {|path| get_glossary(path).shift}
+      (imported_projects | registered_projects).sort.map do |project_name|
         Logaling::Project.new(project_name)
       end
     end
