@@ -63,7 +63,7 @@ module Logaling
             :source_term=>"user-logaling",
             :snipped_source_term=>["", {:keyword=>"user-logaling"}],
             :target_term=>"ユーザ",
-            :snipped_target_term=>[],
+            :snipped_target_term=>["ユーザ"],
             :note=>"ユーザーではない"},
             {
             :glossary_name=>"spec",
@@ -72,14 +72,14 @@ module Logaling
             :source_term=>"user-logaling test",
             :snipped_source_term=>["", {:keyword=>"user-logaling"}, " test"],
             :target_term=>"ユーザーてすと",
-            :snipped_target_term=>[],
+            :snipped_target_term=>["ユーザーてすと"],
             :note=>""},
             {
             :glossary_name=>"spec",
             :source_language=>"en",
             :target_language=>"ja",
             :source_term=>"ゆーざ",
-            :snipped_source_term=>[],
+            :snipped_source_term=>["ゆーざ"],
             :target_term=>"test user-logaling test text",
             :snipped_target_term=>["test", {:keyword=>" user-logaling"}, " test text"],
             :note=>""}]

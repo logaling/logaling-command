@@ -36,7 +36,7 @@ module Logaling::Command
 
       private
       def extract_keyword_and_coloring(snipped_term, term)
-        return term if snipped_term.empty? || @options["no-color"]
+        return term if @options["no-color"]
         build_term_string_from_snippets(snipped_term)
       end
 

@@ -385,7 +385,7 @@ module Logaling
 
     def struct_snipped_term(term, snippet)
       snipped_text = snippet.execute(term).join
-      struct_snipped_text(snipped_text)
+      snipped_text.empty? ? [term] : struct_snipped_text(snipped_text)
     end
 
     def latest_version?
