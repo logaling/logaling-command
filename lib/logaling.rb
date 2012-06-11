@@ -27,4 +27,5 @@ module Logaling
   class GlossaryDBNotFound < LogalingError; end
   class ExternalGlossaryNotFound < LogalingError; end
   class UnsupportedFormat < LogalingError; end
+  class ProjectNotFound < LogalingError; end
 end

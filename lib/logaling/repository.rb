@@ -39,13 +39,9 @@ module Logaling
       raise Logaling::CommandFailed, "Failed register #{register_name} to #{logaling_projects_path}."
     end
 
-    def unregister(register_name)
-      symlink_path = File.join(logaling_projects_path, register_name)
-      if File.exist?(symlink_path)
-        FileUtils.remove_entry_secure(symlink_path, true)
-      else
-        raise Logaling::GlossaryNotFound, register_name
-      end
+    def unregister(project)
+      raise Logaling::ProjectNotFound unless project
+      FileUtils.remove_entry_secure(project.path, true)
     end
 
     def import(glossary_source)
@@ -160,6 +156,10 @@ module Logaling
       else
         false
       end
+    end
+
+    def find_project(project_name)
+      project = projects.detect{|project| project.name == project_name}
     end
 
     private

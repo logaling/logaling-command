@@ -129,12 +129,13 @@ module Logaling::Command
       raise Logaling::CommandFailed, "Can't use '-g <glossary>' option." if options["glossary"]
       @config.check_required_option("glossary" => "Do 'loga unregister' at project directory.")
 
-      @repository.unregister(@config.glossary)
+      project = @repository.find_project(@config.glossary)
+      @repository.unregister(project)
       @repository.index
       say "#{@config.glossary} is now unregistered."
     rescue Logaling::CommandFailed => e
       say e.message
-    rescue Logaling::GlossaryNotFound => e
+    rescue Logaling::ProjectNotFound => e
       say "#{@config.glossary} is not yet registered."
     end
 

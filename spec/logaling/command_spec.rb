@@ -496,7 +496,8 @@ describe Logaling::Command::Application do
 
     context 'when a glossary is unregistered' do
       before do
-        repository.unregister('spec')
+        project = repository.find_project('spec')
+        repository.unregister(project)
         command.options = base_options.merge("no-pager" => true)
         @stdout = capture(:stdout) {command.list}
       end
