@@ -15,11 +15,12 @@
 
 module Logaling
   class Project
-    attr_reader :name, :dir
-
     def initialize(path)
-      @name = File.basename(path)
-      @dir = File.dirname(path)
+      @path = path
+    end
+
+    def name
+      File.basename(@path)
     end
   end
 end
