@@ -26,7 +26,7 @@ module Logaling
     end
 
     def register(dot_logaling_path, register_name)
-      FileUtils.mkdir_p(logaling_projects_path) unless File.exist?(logaling_projects_path)
+      FileUtils.mkdir_p(logaling_projects_path)
       symlink_path = File.join(logaling_projects_path, register_name)
       unless File.exist?(symlink_path)
         FileUtils.ln_s(dot_logaling_path, symlink_path)
@@ -49,7 +49,7 @@ module Logaling
     end
 
     def import(glossary_source)
-      FileUtils.mkdir_p(cache_path) unless File.exist?(cache_path)
+      FileUtils.mkdir_p(cache_path)
       Dir.chdir(cache_path) do
         glossary_source.import
       end
@@ -58,7 +58,7 @@ module Logaling
     end
 
     def import_tmx(glossary_source, glossary_info)
-      FileUtils.mkdir_p(cache_path) unless File.exist?(cache_path)
+      FileUtils.mkdir_p(cache_path)
       Dir.chdir(cache_path) do
         glossary_source.import(glossary_info)
       end
