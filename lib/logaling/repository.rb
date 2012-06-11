@@ -78,19 +78,9 @@ module Logaling
       terms
     end
 
-    def show_glossary(glossary_source)
-      raise Logaling::GlossaryDBNotFound unless File.exist?(logaling_db_home)
-
-      terms = []
-      Logaling::GlossaryDB.open(logaling_db_home, "utf8") do |db|
-        terms = db.translation_list(glossary_source)
-      end
-      terms
-    end
-
     def projects
       (imported_glossaries | registered_projects).sort.map do |project_path|
-        Logaling::Project.new(project_path)
+        Logaling::Project.new(project_path, self)
       end
     end
 
@@ -162,6 +152,10 @@ module Logaling
       project = projects.detect{|project| project.name == project_name}
     end
 
+    def logaling_db_home
+      File.join(@path, "db")
+    end
+
     private
     def get_glossary(path)
       glossary_name, source_language, target_language = File::basename(path, ".*").split(".")
@@ -170,10 +164,6 @@ module Logaling
 
     def get_all_glossary_sources(path)
       %w(yml tsv csv).map{|type| File.join(path, "*.#{type}") }
-    end
-
-    def logaling_db_home
-      File.join(@path, "db")
     end
 
     def logaling_projects_path

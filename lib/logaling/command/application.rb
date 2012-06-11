@@ -19,6 +19,7 @@ require 'thor'
 require 'rainbow'
 require 'pathname'
 require "logaling/repository"
+require "logaling/glossary"
 require "logaling/glossary_source"
 require "logaling/config"
 
@@ -275,8 +276,9 @@ module Logaling::Command
       }
       @config.check_required_option(required_options)
       check_logaling_home_exists
-      @repository.index
-      terms = @repository.show_glossary(glossary_source)
+      project = @repository.find_project(@config.glossary)
+      glossary = project.find_glossary(@config.source_language, @config.target_language)
+      terms = glossary.terms
       unless terms.empty?
         run_pager
         max_str_size = terms.map{|term| term[:source_term].size}.sort.last

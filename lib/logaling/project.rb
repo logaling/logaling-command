@@ -15,14 +15,27 @@
 
 module Logaling
   class Project
-    attr_reader :path
+    attr_reader :path, :repository
 
-    def initialize(path)
+    def initialize(path, repository=nil)
       @path = path
+      @repository = repository
     end
 
     def name
       File.basename(@path)
+    end
+
+    def find_glossary(source_language, target_language)
+      Logaling::Glossary.new(name, source_language, target_language, self)
+    end
+
+    def glossary_source_path
+      File.join(@path, "glossary")
+    end
+
+    def glossary_db_path
+      @repository.logaling_db_home
     end
   end
 end
