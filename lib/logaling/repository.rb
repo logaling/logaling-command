@@ -118,36 +118,6 @@ module Logaling
       File.exist?(path) ? path : nil
     end
 
-    def bilingual_pair_exists?(source_term, target_term, glossary)
-      raise Logaling::GlossaryDBNotFound unless File.exist?(logaling_db_home)
-
-      terms = []
-      Logaling::GlossaryDB.open(logaling_db_home, "utf8") do |db|
-        terms = db.get_bilingual_pair(source_term, target_term, glossary)
-      end
-
-      if terms.size > 0
-        true
-      else
-        false
-      end
-    end
-
-    def bilingual_pair_exists_and_has_same_note?(source_term, target_term, note, glossary)
-      raise Logaling::GlossaryDBNotFound unless File.exist?(logaling_db_home)
-
-      terms = []
-      Logaling::GlossaryDB.open(logaling_db_home, "utf8") do |db|
-        terms = db.get_bilingual_pair(source_term, target_term, glossary, note)
-      end
-
-      if terms.size > 0
-        true
-      else
-        false
-      end
-    end
-
     def find_project(project_name)
       project = projects.detect{|project| project.name == project_name}
     end
