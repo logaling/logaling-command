@@ -318,10 +318,6 @@ module Logaling::Command
     end
 
     private
-    def glossary_source
-      @glossary_source ||= Logaling::GlossarySource.new(@config.glossary, @config.source_language, @config.target_language, @logaling_home)
-    end
-
     def error(msg)
       STDERR.puts(msg)
       exit 1
