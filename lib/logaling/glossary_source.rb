@@ -62,8 +62,9 @@ module Logaling
       end
     end
     attr_reader :glossary, :source_language, :target_language
+    attr_writer :source_path
 
-    def initialize(glossary_name, source_language, target_language, logaling_home)
+    def initialize(glossary_name, source_language, target_language, logaling_home = nil)
       @logaling_home = logaling_home
       @glossary = glossary_name
       @source_language = source_language

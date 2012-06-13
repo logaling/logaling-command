@@ -169,13 +169,13 @@ module Logaling::Command
       }
       @config.check_required_option(required_options)
       check_logaling_home_exists
-      @repository.index
-
-      if @repository.bilingual_pair_exists?(source_term, target_term, @config.glossary)
+      project = @repository.find_project(@config.glossary)
+      glossary = project.find_glossary(@config.source_language, @config.target_language)
+      if glossary.bilingual_pair_exists?(source_term, target_term)
         raise Logaling::TermError, "term '#{source_term}: #{target_term}' already exists in '#{@config.glossary}'"
       end
 
-      glossary_source.add(source_term, target_term, note)
+      glossary.add(source_term, target_term, note)
     rescue Logaling::CommandFailed, Logaling::TermError => e
       say e.message
     rescue Logaling::GlossaryNotFound => e
