@@ -55,6 +55,14 @@ module Logaling
       glossary_source.update(source_term, target_term, new_target_term, note)
     end
 
+    def delete(source_term, target_term)
+      glossary_source.delete(source_term, target_term)
+    end
+
+    def delete_all(source_term, force=false)
+      glossary_source.delete_all(source_term, force)
+    end
+
     private
     def index
       Logaling::GlossaryDB.open(@project.glossary_db_path, "utf8") do |db|

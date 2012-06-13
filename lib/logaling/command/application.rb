@@ -192,11 +192,13 @@ module Logaling::Command
       }
       @config.check_required_option(required_options)
       check_logaling_home_exists
+      project = @repository.find_project(@config.glossary)
+      glossary = project.find_glossary(@config.source_language, @config.target_language)
 
       if target_term
-        glossary_source.delete(source_term, target_term)
+        glossary.delete(source_term, target_term)
       else
-        glossary_source.delete_all(source_term, options["force"])
+        glossary.delete_all(source_term, options["force"])
       end
     rescue Logaling::CommandFailed, Logaling::TermError => e
       say e.message
