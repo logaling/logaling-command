@@ -26,6 +26,7 @@ module Logaling
     let(:glossary_source_path) { glossary_source.source_path }
     let(:repository) { Logaling::Repository.new(logaling_home) }
     let(:db_home) { File.join(logaling_home, "db") }
+    let(:glossary) {repository.find_project(project).find_glossary('en', 'ja')}
 
     before do
       FileUtils.remove_entry_secure(File.join(logaling_home, 'projects', 'spec'), true)
@@ -39,7 +40,7 @@ module Logaling
           glossary_source.add("user-logaling", "ユーザー", "")
           File.stub!(:mtime).and_return(Time.now - 1)
           repository.index
-          @terms = repository.lookup("user-logaling", glossary_source)
+          @terms = repository.lookup("user-logaling", glossary)
         end
 
         it 'succeed at find by term' do
@@ -98,7 +99,7 @@ module Logaling
           FileUtils.touch(tsv_path)
           File.open(tsv_path, "w"){|f| f.puts "test-logaling\tユーザー\ntest-logaling\tユーザ"}
           repository.index
-          @terms = repository.lookup("test-logaling", glossary_source)
+          @terms = repository.lookup("test-logaling", glossary)
         end
 
         it 'succeed at find by term' do
@@ -122,7 +123,7 @@ module Logaling
           FileUtils.touch(glossary_source_path)
           glossary_source.add("spec_logaling", "スペック", "備考")
           repository.index
-          @terms = repository.lookup("spec_logaling", glossary_source)
+          @terms = repository.lookup("spec_logaling", glossary)
         end
 
         it 'glossaries should be indexed' do
@@ -140,7 +141,7 @@ module Logaling
           FileUtils.touch(tsv_path)
           File.open(tsv_path, "w"){|f| f.puts "user-logaling\tユーザ"}
           repository.index
-          @terms = repository.lookup("user-logaling", glossary_source)
+          @terms = repository.lookup("user-logaling", glossary)
         end
 
 
@@ -159,7 +160,7 @@ module Logaling
           FileUtils.touch(csv_path)
           File.open(csv_path, "w"){|f| f.puts "test_logaling,テスト"}
           repository.index
-          @terms = repository.lookup("test_logaling", glossary_source)
+          @terms = repository.lookup("test_logaling", glossary)
         end
 
         it 'glossaries should be indexed' do

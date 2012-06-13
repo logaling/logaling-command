@@ -84,18 +84,18 @@ module Logaling
       create_terms if offline_index?
     end
 
-    def lookup(source_term, glossary_source=nil)
+    def lookup(source_term, glossary=nil)
       records_selected = Groonga["translations"].select do |record|
         conditions = [record.source_term =~ source_term]
-        if glossary_source
-          conditions << (record.source_language =~ glossary_source.source_language) if glossary_source.source_language
-          conditions << (record.target_language =~ glossary_source.target_language) if glossary_source.target_language
+        if glossary
+          conditions << (record.source_language =~ glossary.source_language) if glossary.source_language
+          conditions << (record.target_language =~ glossary.target_language) if glossary.target_language
         end
         conditions
       end
-      if glossary_source
+      if glossary
         specified_glossary = records_selected.select do |record|
-          record.glossary == glossary_source.glossary
+          record.glossary == glossary.name
         end
         specified_glossary.each do |record|
           record.key._score += 10

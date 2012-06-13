@@ -25,6 +25,7 @@ module Logaling
     let(:glossary_source) { GlossarySource.new(project, 'en', 'ja', logaling_home) }
     let(:glossary_source_path) { glossary_source.source_path }
     let(:repository) { Logaling::Repository.new(logaling_home) }
+    let(:glossary) {repository.find_project(project).find_glossary('en', 'ja')}
 
     before do
       FileUtils.remove_entry_secure(File.join(logaling_home, 'projects', 'spec'), true)
@@ -101,7 +102,7 @@ module Logaling
           glossary_source.add("delete_logaling", "てすと2", "備考")
           glossary_source.delete("delete_logaling", "てすと1")
           repository.index
-          @result = repository.lookup("delete_logaling", glossary_source)
+          @result = repository.lookup("delete_logaling", glossary)
         end
 
         it 'should delete the bilingual pair' do
@@ -138,7 +139,7 @@ module Logaling
             glossary_source.add("user_logaling", "ユーザ", "備考")
             glossary_source.delete_all("user_logaling")
             repository.index
-            @result = repository.lookup("user_logaling", glossary_source)
+            @result = repository.lookup("user_logaling", glossary)
           end
 
           it 'should delete the term' do

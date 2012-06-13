@@ -64,7 +64,7 @@ module Logaling
       raise Logaling::CommandFailed, "Failed import_tmx #{glossary_source.class.name} to #{cache_path}."
     end
 
-    def lookup(source_term, glossary_source, dictionary=false)
+    def lookup(source_term, glossary, dictionary=false)
       raise Logaling::GlossaryDBNotFound unless File.exist?(logaling_db_home)
 
       terms = []
@@ -72,7 +72,7 @@ module Logaling
         if dictionary
           terms = db.lookup_dictionary(source_term)
         else
-          terms = db.lookup(source_term, glossary_source)
+          terms = db.lookup(source_term, glossary)
         end
       end
       terms
