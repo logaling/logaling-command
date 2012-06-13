@@ -98,7 +98,7 @@ module Logaling
           unless db.glossary_source_exist?(glossary_source, indexed_at)
             glossary_name, source_language, target_language = get_glossary(glossary_source)
             puts "now index #{glossary_name}..."
-            db.index_glossary(glossary_name, glossary_source, source_language, target_language, indexed_at)
+            db.index_glossary(glossary_name, glossary_source, source_language, target_language)
           end
         end
         (db.get_all_glossary_source - all_glossaries).each do |glossary_source|
