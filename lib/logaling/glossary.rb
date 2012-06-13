@@ -45,7 +45,7 @@ module Logaling
           indexed_at = File.mtime(glossary_source)
           unless db.glossary_source_exist?(glossary_source, indexed_at)
             puts "now index #{@name}..."
-            db.index_glossary(GlossarySource.load(glossary_source), @name, glossary_source, @source_language, @target_language, indexed_at)
+            db.index_glossary(@name, glossary_source, @source_language, @target_language, indexed_at)
           end
         end
         glossary_string = [@name, @source_language, @target_language].join('.')
