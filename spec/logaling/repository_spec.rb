@@ -20,13 +20,10 @@ require "fileutils"
 
 module Logaling
   describe Repository do
-    let(:project) { "spec" }
     let(:logaling_home) { @logaling_home }
-    let(:db_home) { File.join(logaling_home, "db") }
     let(:repository) { Logaling::Repository.new(logaling_home) }
-    let(:glossary) { repository.find_project(project).find_glossary('en', 'ja') }
-    let(:glossary_source) { glossary.glossary_source }
-    let(:glossary_source_path) { glossary_source.source_path }
+    let(:glossary) { repository.find_project('spec').find_glossary('en', 'ja') }
+    let(:glossary_source_path) { glossary.glossary_source.source_path }
 
     before do
       FileUtils.remove_entry_secure(File.join(logaling_home, 'projects', 'spec'), true)
@@ -112,7 +109,6 @@ module Logaling
     end
 
     describe '#index' do
-      let(:logaling_db) { Logaling::GlossaryDB.new }
       let(:tsv_path) { File.join(File.dirname(glossary_source_path), "spec.en.ja.tsv") }
       let(:csv_path) { File.join(File.dirname(glossary_source_path), "spec.en.ja.csv") }
 
