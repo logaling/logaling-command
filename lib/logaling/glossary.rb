@@ -63,6 +63,19 @@ module Logaling
       glossary_source.delete_all(source_term, force)
     end
 
+    def glossary_source
+      if @glossary_source
+        @glossary_source
+      else
+        @glossary_source = Logaling::GlossarySource.new(@name, @source_language, @target_language)
+        file_name = [@name, @source_language, @target_language, 'yml'].join('.')
+        source_dir = @project.glossary_source_path
+        FileUtils.mkdir_p(source_dir)
+        @glossary_source.source_path = File.join(source_dir, file_name)
+        @glossary_source
+      end
+    end
+
     private
     def index
       Logaling::GlossaryDB.open(@project.glossary_db_path, "utf8") do |db|
@@ -89,17 +102,6 @@ module Logaling
         File.join(@project.glossary_source_path, file_name)
       end
       Dir.glob(glob_condition)
-    end
-
-    def glossary_source
-      if @glossary_source
-        @glossary_source
-      else
-        @glossary_source = Logaling::GlossarySource.new(@name, @source_language, @target_language)
-        file_name = [@name, @source_language, @target_language, 'yml'].join('.')
-        @glossary_source.source_path = File.join(@project.glossary_source_path, file_name)
-        @glossary_source
-      end
     end
   end
 end
