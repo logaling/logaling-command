@@ -95,7 +95,6 @@ module Logaling
         let(:tsv_path) { glossary_source_path.sub(/yml$/, 'tsv') }
 
         before do
-          FileUtils.mkdir_p(File.dirname(tsv_path))
           FileUtils.touch(tsv_path)
           File.open(tsv_path, "w"){|f| f.puts "test-logaling\tユーザー\ntest-logaling\tユーザ"}
           repository.index
@@ -119,7 +118,6 @@ module Logaling
 
       context 'when yml file as glossary exists' do
         before do
-          FileUtils.mkdir_p(File.dirname(glossary_source_path))
           FileUtils.touch(glossary_source_path)
           glossary.add("spec_logaling", "スペック", "備考")
           repository.index
@@ -137,7 +135,6 @@ module Logaling
 
       context 'when tsv file as glossary exists' do
         before do
-          FileUtils.mkdir_p(File.dirname(glossary_source_path))
           FileUtils.touch(tsv_path)
           File.open(tsv_path, "w"){|f| f.puts "user-logaling\tユーザ"}
           repository.index
@@ -155,7 +152,6 @@ module Logaling
 
       context 'when csv file as glosary exists' do
         before do
-          FileUtils.mkdir_p(File.dirname(glossary_source_path))
           FileUtils.touch(csv_path)
           File.open(csv_path, "w"){|f| f.puts "test_logaling,テスト"}
           repository.index
