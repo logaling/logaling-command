@@ -61,10 +61,10 @@ module Logaling
         glossary_source
       end
     end
-    attr_writer :source_path
+    attr_reader :source_path
 
-    def initialize(glossary, logaling_home = nil)
-      @logaling_home = logaling_home
+    def initialize(source_path, glossary)
+      @source_path = source_path
       @glossary = glossary
     end
 
@@ -121,15 +121,6 @@ module Logaling
         raise TermError, "There are duplicate terms in glossary.\n" +
           "If you really want to delete, please put `loga delete [SOURCE_TERM] --force`\n" +
           " or `loga delete [SOURCE_TERM] [TARGET_TERM]`"
-      end
-    end
-
-    def source_path
-      if @source_path
-        @source_path
-      else
-        fname = [@glossary.name, @glossary.source_language, @glossary.target_language].join(".")
-        @source_path = File.join(@logaling_home, "projects", @glossary.name, "glossary", "#{fname}.yml")
       end
     end
 
