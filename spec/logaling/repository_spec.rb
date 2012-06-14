@@ -144,7 +144,6 @@ module Logaling
           @terms = repository.lookup("user-logaling", glossary)
         end
 
-
         it 'glossaries should be indexed' do
           @terms.size.should == 1
         end
