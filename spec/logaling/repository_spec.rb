@@ -26,7 +26,7 @@ module Logaling
     let(:glossary_source_path) { glossary_source.source_path }
     let(:repository) { Logaling::Repository.new(logaling_home) }
     let(:db_home) { File.join(logaling_home, "db") }
-    let(:glossary) {repository.find_project(project).find_glossary('en', 'ja')}
+    let(:glossary) { repository.find_project(project).find_glossary('en', 'ja') }
 
     before do
       FileUtils.remove_entry_secure(File.join(logaling_home, 'projects', 'spec'), true)
