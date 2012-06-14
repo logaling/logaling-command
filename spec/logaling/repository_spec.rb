@@ -22,22 +22,22 @@ module Logaling
   describe Repository do
     let(:project) { "spec" }
     let(:logaling_home) { @logaling_home }
-    let(:glossary_source) { GlossarySource.new(project, 'en', 'ja', logaling_home) }
-    let(:glossary_source_path) { glossary_source.source_path }
-    let(:repository) { Logaling::Repository.new(logaling_home) }
     let(:db_home) { File.join(logaling_home, "db") }
+    let(:repository) { Logaling::Repository.new(logaling_home) }
     let(:glossary) { repository.find_project(project).find_glossary('en', 'ja') }
+    let(:glossary_source) { glossary.glossary_source }
+    let(:glossary_source_path) { glossary_source.source_path }
 
     before do
       FileUtils.remove_entry_secure(File.join(logaling_home, 'projects', 'spec'), true)
-      FileUtils.mkdir_p(File.dirname(glossary_source_path))
+      FileUtils.mkdir_p(File.join(logaling_home, 'projects', 'spec'))
     end
 
     describe '#lookup' do
       context 'with arguments show existing bilingual pair' do
         before do
-          glossary_source.add("user-logaling", "ユーザ", "ユーザーではない")
-          glossary_source.add("user-logaling", "ユーザー", "")
+          glossary.add("user-logaling", "ユーザ", "ユーザーではない")
+          glossary.add("user-logaling", "ユーザー", "")
           File.stub!(:mtime).and_return(Time.now - 1)
           repository.index
           @terms = repository.lookup("user-logaling", glossary)
@@ -50,13 +50,13 @@ module Logaling
 
       context 'with dictionary option' do
         before do
-          glossary_source.add("user", "ユーザ", "ユーザーではない")
-          glossary_source.add("user-logaling", "ユーザ", "ユーザーではない")
-          glossary_source.add("user-logaling test", "ユーザーてすと", "")
-          glossary_source.add("ゆーざ", "test user-logaling test text", "")
+          glossary.add("user", "ユーザ", "ユーザーではない")
+          glossary.add("user-logaling", "ユーザ", "ユーザーではない")
+          glossary.add("user-logaling test", "ユーザーてすと", "")
+          glossary.add("ゆーざ", "test user-logaling test text", "")
           File.stub!(:mtime).and_return(Time.now - 1)
           repository.index
-          @terms = repository.lookup("user-logaling", glossary_source, true)
+          @terms = repository.lookup("user-logaling", glossary, true)
           @result = [{
             :glossary_name=>"spec",
             :source_language=>"en",
@@ -121,7 +121,7 @@ module Logaling
         before do
           FileUtils.mkdir_p(File.dirname(glossary_source_path))
           FileUtils.touch(glossary_source_path)
-          glossary_source.add("spec_logaling", "スペック", "備考")
+          glossary.add("spec_logaling", "スペック", "備考")
           repository.index
           @terms = repository.lookup("spec_logaling", glossary)
         end
