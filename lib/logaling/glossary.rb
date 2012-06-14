@@ -67,7 +67,7 @@ module Logaling
       if @glossary_source
         @glossary_source
       else
-        @glossary_source = Logaling::GlossarySource.new(@name, @source_language, @target_language)
+        @glossary_source = Logaling::GlossarySource.new(self)
         file_name = [@name, @source_language, @target_language, 'yml'].join('.')
         source_dir = @project.glossary_source_path
         FileUtils.mkdir_p(source_dir)

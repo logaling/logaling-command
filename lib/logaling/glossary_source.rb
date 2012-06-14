@@ -63,11 +63,9 @@ module Logaling
     end
     attr_writer :source_path
 
-    def initialize(glossary_name, source_language, target_language, logaling_home = nil)
+    def initialize(glossary, logaling_home = nil)
       @logaling_home = logaling_home
-      @glossary = glossary_name
-      @source_language = source_language
-      @target_language = target_language
+      @glossary = glossary
     end
 
     def add(source_term, target_term, note)
@@ -90,7 +88,7 @@ module Logaling
         glossary_source[target_index] = rebuild_term(glossary_source[target_index], source_term, new_target_term, note)
         dump_glossary_source(glossary_source)
       else
-        raise TermError, "Can't found term '#{source_term}: #{target_term}' in '#{@glossary}'"
+        raise TermError, "Can't found term '#{source_term}: #{target_term}' in '#{@glossary.name}'"
       end
     end
 
@@ -100,7 +98,7 @@ module Logaling
       glossary_source = GlossarySource.load_glossary_source(source_path)
       target_index = find_term_index(glossary_source, source_term, target_term)
       unless target_index
-        raise TermError, "Can't found term '#{source_term} #{target_term}' in '#{@glossary}'" unless target_index
+        raise TermError, "Can't found term '#{source_term} #{target_term}' in '#{@glossary.name}'" unless target_index
       end
 
       glossary_source.delete_at(target_index)
@@ -113,7 +111,7 @@ module Logaling
       glossary_source = GlossarySource.load_glossary_source(source_path)
       delete_candidates = target_terms(glossary_source, source_term)
       if delete_candidates.empty?
-        raise TermError, "Can't found term '#{source_term} in '#{@glossary}'"
+        raise TermError, "Can't found term '#{source_term} in '#{@glossary.name}'"
       end
 
       if delete_candidates.size == 1 || force
@@ -130,8 +128,8 @@ module Logaling
       if @source_path
         @source_path
       else
-        fname = [@glossary, @source_language, @target_language].join(".")
-        @source_path = File.join(@logaling_home, "projects", @glossary, "glossary", "#{fname}.yml")
+        fname = [@glossary.name, @glossary.source_language, @glossary.target_language].join(".")
+        @source_path = File.join(@logaling_home, "projects", @glossary.name, "glossary", "#{fname}.yml")
       end
     end
 
