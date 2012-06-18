@@ -124,6 +124,10 @@ module Logaling
       end
     end
 
+    def load
+      GlossarySource.load_glossary_source(@source_path)
+    end
+
     def mtime
       File.mtime(@source_path)
     end

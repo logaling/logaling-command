@@ -75,7 +75,7 @@ module Logaling
 
       add_glossary_source(glossary_source.source_path, File.mtime(glossary_source.source_path))
       add_glossary(glossary.name)
-      GlossarySource.load(glossary_source.source_path).each do |term|
+      glossary_source.load.each do |term|
         source_term = term['source_term']
         target_term = term['target_term']
         note = term['note']
