@@ -234,9 +234,9 @@ module Logaling
       ]).map{|record| record.key}
     end
 
-    def glossary_sources_related_on_glossary(glossary_string)
+    def glossary_sources_related_on_glossary(glossary)
       records = Groonga["glossary_sources"].select do |record|
-        [record.key =~ glossary_string]
+        [record.key =~ glossary.to_s]
       end
       records.map{|record| record.key.key }
     end

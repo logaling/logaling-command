@@ -75,6 +75,10 @@ module Logaling
       end
     end
 
+    def to_s
+      [@name, @source_language, @target_language].join('.')
+    end
+
     private
     def index
       Logaling::GlossaryDB.open(@project.glossary_db_path, "utf8") do |db|
@@ -85,8 +89,7 @@ module Logaling
             db.index_glossary_source(glossary_source)
           end
         end
-        glossary_string = [@name, @source_language, @target_language].join('.')
-        indexed_glossary_sources = db.glossary_sources_related_on_glossary(glossary_string)
+        indexed_glossary_sources = db.glossary_sources_related_on_glossary(self)
         (indexed_glossary_sources - glossary_sources.map(&:source_path)).each do |removed_glossary_source|
           puts "now deindex #{@name}..."
           db.deindex_glossary(@name, removed_glossary_source)
