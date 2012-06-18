@@ -61,7 +61,7 @@ module Logaling
         glossary_source
       end
     end
-    attr_reader :source_path
+    attr_reader :source_path, :glossary
 
     def initialize(source_path, glossary)
       @source_path = source_path

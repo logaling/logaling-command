@@ -67,6 +67,24 @@ module Logaling
       delete_glossary_source(glossary_source)
     end
 
+    def index_glossary_source(glossary_source)
+      delete_terms if offline_index?
+      glossary = glossary_source.glossary
+
+      deindex_glossary(glossary.name, glossary_source.source_path)
+
+      add_glossary_source(glossary_source.source_path, File.mtime(glossary_source.source_path))
+      add_glossary(glossary.name)
+      GlossarySource.load(glossary_source.source_path).each do |term|
+        source_term = term['source_term']
+        target_term = term['target_term']
+        note = term['note']
+        add_translation(glossary.name, glossary_source.source_path, glossary.source_language, glossary.target_language, source_term, target_term, note)
+      end
+
+      create_terms if offline_index?
+    end
+
     def index_glossary(glossary_name, glossary_source, source_language, target_language)
       delete_terms if offline_index?
 
