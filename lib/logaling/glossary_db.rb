@@ -238,7 +238,7 @@ module Logaling
       records = Groonga["glossary_sources"].select do |record|
         [record.key =~ glossary.to_s]
       end
-      records.map{|record| record.key.key }
+      records.map{|record| GlossarySource.new(record.key.key, glossary) }
     end
 
     def get_all_glossary

@@ -90,9 +90,9 @@ module Logaling
           end
         end
         indexed_glossary_sources = db.glossary_sources_related_on_glossary(self)
-        (indexed_glossary_sources - glossary_sources.map(&:source_path)).each do |removed_glossary_source|
+        (indexed_glossary_sources - glossary_sources).each do |removed_glossary_source|
           puts "now deindex #{@name}..."
-          db.deindex_glossary(@name, removed_glossary_source)
+          db.deindex_glossary_source(removed_glossary_source)
         end
       end
     end

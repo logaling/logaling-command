@@ -128,6 +128,15 @@ module Logaling
       GlossarySource.load_glossary_source(@source_path)
     end
 
+    def eql?(other)
+      return false unless self.class == other.class
+      @source_path == other.source_path
+    end
+
+    def hash
+      @source_path.hash
+    end
+
     def mtime
       File.mtime(@source_path)
     end
