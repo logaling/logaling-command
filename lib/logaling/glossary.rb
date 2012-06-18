@@ -99,7 +99,7 @@ module Logaling
 
     def glossary_sources
       glob_condition = SUPPORTED_FILE_TYPE.map do |type|
-        file_name = [@name, @source_language, @target_language, type].join('.')
+        file_name = [self.to_s, type].join('.')
         File.join(@project.glossary_source_path, file_name)
       end
       Dir.glob(glob_condition).map {|source_path| GlossarySource.new(source_path, self)}
