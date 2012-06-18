@@ -124,6 +124,10 @@ module Logaling
       end
     end
 
+    def mtime
+      File.mtime(@source_path)
+    end
+
     private
     def build_term(source_term, target_term, note)
       note ||= ''
