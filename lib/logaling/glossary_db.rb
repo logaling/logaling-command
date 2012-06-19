@@ -216,11 +216,11 @@ module Logaling
       records.expression.close
     end
 
-    def glossary_source_exist?(glossary_source, indexed_at)
+    def glossary_source_exist?(glossary_source)
       glossary = Groonga["glossary_sources"].select do |record|
         [
-          record.key == glossary_source,
-          record.indexed_at == indexed_at
+          record.key == glossary_source.source_path,
+          record.indexed_at == glossary_source.mtime
         ]
       end
       !glossary.size.zero?

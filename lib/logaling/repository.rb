@@ -96,7 +96,7 @@ module Logaling
         all_glossary_sources.each do |glossary_source|
           indexed_at = glossary_source.mtime
           glossary = glossary_source.glossary
-          unless db.glossary_source_exist?(glossary_source.source_path, indexed_at)
+          unless db.glossary_source_exist?(glossary_source)
             puts "now index #{glossary.name}..."
             db.index_glossary(glossary, glossary_source)
           end
