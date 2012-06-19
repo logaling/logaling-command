@@ -61,10 +61,10 @@ module Logaling
       @database = nil
     end
 
-    def deindex_glossary(glossary_name, glossary_source)
-      delete_translations_by_glossary_source(glossary_source)
-      delete_glossary(glossary_name)
-      delete_glossary_source(glossary_source)
+    def deindex_glossary(glossary, glossary_source)
+      delete_translations_by_glossary_source(glossary_source.source_path)
+      delete_glossary(glossary.name)
+      delete_glossary_source(glossary_source.source_path)
     end
 
     def deindex_glossary_source(glossary_source)
@@ -89,18 +89,18 @@ module Logaling
       create_terms if offline_index?
     end
 
-    def index_glossary(glossary_name, glossary_source, source_language, target_language)
+    def index_glossary(glossary, glossary_source)
       delete_terms if offline_index?
 
-      deindex_glossary(glossary_name, glossary_source)
+      deindex_glossary(glossary, glossary_source)
 
-      add_glossary_source(glossary_source, File.mtime(glossary_source))
-      add_glossary(glossary_name)
-      GlossarySource.load(glossary_source).each do |term|
+      add_glossary_source(glossary_source.source_path, glossary_source.mtime)
+      add_glossary(glossary.name)
+      GlossarySource.load(glossary_source.source_path).each do |term|
         source_term = term['source_term']
         target_term = term['target_term']
         note = term['note']
-        add_translation(glossary_name, glossary_source, source_language, target_language, source_term, target_term, note)
+        add_translation(glossary.name, glossary_source.source_path, glossary.source_language, glossary.target_language, source_term, target_term, note)
       end
 
       create_terms if offline_index?

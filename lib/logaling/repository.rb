@@ -98,7 +98,7 @@ module Logaling
           glossary = glossary_source.glossary
           unless db.glossary_source_exist?(glossary_source.source_path, indexed_at)
             puts "now index #{glossary.name}..."
-            db.index_glossary(glossary.name, glossary_source.source_path, glossary.source_language, glossary.target_language)
+            db.index_glossary(glossary, glossary_source)
           end
         end
         (db.get_all_glossary_source - all_glossaries.map(&:source_path)).each do |glossary_source_path|
@@ -106,7 +106,7 @@ module Logaling
           glossary = Logaling::Glossary.new(glossary_name, source_language, target_language)
           glossary_source = Logaling::GlossarySource.new(glossary_source_path, glossary)
           puts "now deindex #{glossary.name}..."
-          db.deindex_glossary(glossary.name, glossary_source.source_path)
+          db.deindex_glossary(glossary, glossary_source)
         end
       end
     end
