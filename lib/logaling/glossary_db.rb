@@ -95,7 +95,7 @@ module Logaling
       deindex_glossary(glossary, glossary_source)
 
       add_glossary_source(glossary_source)
-      add_glossary(glossary.name)
+      add_glossary(glossary)
       GlossarySource.load(glossary_source.source_path).each do |term|
         source_term = term['source_term']
         target_term = term['target_term']
@@ -276,8 +276,8 @@ module Logaling
       records.expression.close
     end
 
-    def add_glossary(glossary_name)
-      Groonga["glossaries"].add(glossary_name)
+    def add_glossary(glossary)
+      Groonga["glossaries"].add(glossary.name)
     end
 
     def delete_translations_by_glossary_source(glossary_source)
