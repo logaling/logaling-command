@@ -89,26 +89,24 @@ module Logaling
     end
 
     def index
-      project_glossaries = Dir[File.join(@path, "projects", "*")].map do |project|
-        Dir.glob(get_all_glossary_sources(File.join(project, "glossary")))
-      end
-      imported_glossaries = Dir.glob(get_all_glossary_sources(cache_path))
-      all_glossaries = project_glossaries.flatten + imported_glossaries
+      all_glossaries = projects.map{|project| project.glossary_sources}.flatten
 
       Logaling::GlossaryDB.open(logaling_db_home, "utf8") do |db|
         db.recreate_table
         all_glossaries.each do |glossary_source|
-          indexed_at = File.mtime(glossary_source)
-          unless db.glossary_source_exist?(glossary_source, indexed_at)
-            glossary_name, source_language, target_language = get_glossary(glossary_source)
-            puts "now index #{glossary_name}..."
-            db.index_glossary(glossary_name, glossary_source, source_language, target_language)
+          indexed_at = glossary_source.mtime
+          glossary = glossary_source.glossary
+          unless db.glossary_source_exist?(glossary_source.source_path, indexed_at)
+            puts "now index #{glossary.name}..."
+            db.index_glossary(glossary.name, glossary_source.source_path, glossary.source_language, glossary.target_language)
           end
         end
-        (db.get_all_glossary_source - all_glossaries).each do |glossary_source|
-          glossary_name, source_language, target_language = get_glossary(glossary_source)
-          puts "now deindex #{glossary_name}..."
-          db.deindex_glossary(glossary_name, glossary_source)
+        (db.get_all_glossary_source - all_glossaries.map(&:source_path)).each do |glossary_source_path|
+          glossary_name, source_language, target_language = get_glossary(glossary_source_path)
+          glossary = Logaling::Glossary.new(glossary_name, source_language, target_language)
+          glossary_source = Logaling::GlossarySource.new(glossary_source_path, glossary)
+          puts "now deindex #{glossary.name}..."
+          db.deindex_glossary(glossary.name, glossary_source.source_path)
         end
       end
     end

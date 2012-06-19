@@ -37,11 +37,24 @@ module Logaling
     def glossary_db_path
       @repository.logaling_db_home
     end
+
+    def glossary_sources
+      all_glossary_source_path = Dir.glob(File.join(glossary_source_path, "*"))
+      all_glossary_source_path.map do |source_path|
+        name, source_language, target_language, type = File.basename(source_path).split(/\./)
+        GlossarySource.new(source_path, find_glossary(source_language, target_language))
+      end
+    end
   end
 
   class ImportedProject < Project
     def name
       File.basename(@path).split(/\./).first
+    end
+
+    def glossary_sources
+      name, source_language, target_language, type = File.basename(@path).split(/\./)
+      [GlossarySource.new(@path, find_glossary(source_language, target_language))]
     end
   end
 end
