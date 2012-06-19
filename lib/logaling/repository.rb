@@ -89,11 +89,11 @@ module Logaling
     end
 
     def index
-      all_glossaries = projects.map{|project| project.glossary_sources}.flatten
+      all_glossary_sources = projects.map{|project| project.glossary_sources}.flatten
 
       Logaling::GlossaryDB.open(logaling_db_home, "utf8") do |db|
         db.recreate_table
-        all_glossaries.each do |glossary_source|
+        all_glossary_sources.each do |glossary_source|
           indexed_at = glossary_source.mtime
           glossary = glossary_source.glossary
           unless db.glossary_source_exist?(glossary_source.source_path, indexed_at)
@@ -101,7 +101,7 @@ module Logaling
             db.index_glossary(glossary, glossary_source)
           end
         end
-        (db.get_all_glossary_source - all_glossaries.map(&:source_path)).each do |glossary_source_path|
+        (db.get_all_glossary_source - all_glossary_sources.map(&:source_path)).each do |glossary_source_path|
           glossary_name, source_language, target_language = get_glossary(glossary_source_path)
           glossary = Logaling::Glossary.new(glossary_name, source_language, target_language)
           glossary_source = Logaling::GlossarySource.new(glossary_source_path, glossary)
