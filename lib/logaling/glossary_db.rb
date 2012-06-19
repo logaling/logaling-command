@@ -228,7 +228,7 @@ module Logaling
       glossary.expression.close
     end
 
-    def get_all_glossary_source
+    def get_all_glossary_sources
       source_paths = Groonga["glossary_sources"].sort([
         {:key=>"_key", :order=>'ascending'}
       ]).map{|record| record.key}

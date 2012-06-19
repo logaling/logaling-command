@@ -100,7 +100,7 @@ module Logaling
             db.index_glossary(glossary, glossary_source)
           end
         end
-        (db.get_all_glossary_source - all_glossary_sources).each do |glossary_source|
+        (db.get_all_glossary_sources - all_glossary_sources).each do |glossary_source|
           glossary = glossary_source.glossary
           puts "now deindex #{glossary.name}..."
           db.deindex_glossary(glossary, glossary_source)
