@@ -94,7 +94,6 @@ module Logaling
       Logaling::GlossaryDB.open(logaling_db_home, "utf8") do |db|
         db.recreate_table
         all_glossary_sources.each do |glossary_source|
-          indexed_at = glossary_source.mtime
           glossary = glossary_source.glossary
           unless db.glossary_source_exist?(glossary_source)
             puts "now index #{glossary.name}..."
