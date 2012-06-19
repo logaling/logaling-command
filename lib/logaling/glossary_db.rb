@@ -229,9 +229,14 @@ module Logaling
     end
 
     def get_all_glossary_source
-      Groonga["glossary_sources"].sort([
+      source_paths = Groonga["glossary_sources"].sort([
         {:key=>"_key", :order=>'ascending'}
       ]).map{|record| record.key}
+      source_paths.map do |source_path|
+        glossary_name, source_language, target_language = File.basename(source_path).split(/\./)
+        glossary = Glossary.new(glossary_name, source_language, target_language)
+        GlossarySource.new(source_path, glossary)
+      end
     end
 
     def glossary_sources_related_on_glossary(glossary)

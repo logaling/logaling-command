@@ -100,10 +100,8 @@ module Logaling
             db.index_glossary(glossary, glossary_source)
           end
         end
-        (db.get_all_glossary_source - all_glossary_sources.map(&:source_path)).each do |glossary_source_path|
-          glossary_name, source_language, target_language = get_glossary(glossary_source_path)
-          glossary = Logaling::Glossary.new(glossary_name, source_language, target_language)
-          glossary_source = Logaling::GlossarySource.new(glossary_source_path, glossary)
+        (db.get_all_glossary_source - all_glossary_sources).each do |glossary_source|
+          glossary = glossary_source.glossary
           puts "now deindex #{glossary.name}..."
           db.deindex_glossary(glossary, glossary_source)
         end
