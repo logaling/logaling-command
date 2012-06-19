@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2011  Miho SUZUKI
+# Copyright (C) 2012  Koji SHIMADA <koji.shimada@enishi-tech.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,20 +15,27 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-require "logaling/glossary_sources/glossary_yaml_source"
-require "logaling/glossary_sources/glossary_csv_source"
-require "logaling/glossary_sources/glossary_tsv_source"
-
 module Logaling
-  class GlossarySource
-    def self.create(source_path, glossary)
-      case File.extname(source_path)
-      when ".csv"
-        GlossarySources::GlossaryCsvSource.new(source_path, glossary)
-      when ".tsv"
-        GlossarySources::GlossaryTsvSource.new(source_path, glossary)
-      when ".yml"
-        GlossarySources::GlossaryYamlSource.new(source_path, glossary)
+  module GlossarySources
+    class Base
+      attr_reader :source_path, :glossary
+
+      def initialize(source_path, glossary)
+        @source_path = source_path
+        @glossary = glossary
+      end
+
+      def eql?(other)
+        return false unless self.class == other.class
+        @source_path == other.source_path
+      end
+
+      def hash
+        @source_path.hash
+      end
+
+      def mtime
+        File.mtime(@source_path)
       end
     end
   end

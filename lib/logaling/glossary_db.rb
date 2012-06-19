@@ -96,7 +96,7 @@ module Logaling
 
       add_glossary_source(glossary_source)
       add_glossary(glossary)
-      GlossarySource.load(glossary_source.source_path).each do |term|
+      glossary_source.load.each do |term|
         source_term = term['source_term']
         target_term = term['target_term']
         note = term['note']
@@ -235,7 +235,7 @@ module Logaling
       source_paths.map do |source_path|
         glossary_name, source_language, target_language = File.basename(source_path).split(/\./)
         glossary = Glossary.new(glossary_name, source_language, target_language)
-        GlossarySource.new(source_path, glossary)
+        GlossarySource.create(source_path, glossary)
       end
     end
 
@@ -243,7 +243,7 @@ module Logaling
       records = Groonga["glossary_sources"].select do |record|
         [record.key =~ glossary.to_s]
       end
-      records.map{|record| GlossarySource.new(record.key.key, glossary) }
+      records.map{|record| GlossarySource.create(record.key.key, glossary) }
     end
 
     def get_all_glossary

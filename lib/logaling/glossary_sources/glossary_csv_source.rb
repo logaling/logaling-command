@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2011  Miho SUZUKI
+# Copyright (C) 2012  Koji SHIMADA <koji.shimada@enishi-tech.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,21 +15,19 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-require "logaling/glossary_sources/glossary_yaml_source"
-require "logaling/glossary_sources/glossary_csv_source"
-require "logaling/glossary_sources/glossary_tsv_source"
+require "logaling/glossary_sources/base"
+require "csv"
 
-module Logaling
-  class GlossarySource
-    def self.create(source_path, glossary)
-      case File.extname(source_path)
-      when ".csv"
-        GlossarySources::GlossaryCsvSource.new(source_path, glossary)
-      when ".tsv"
-        GlossarySources::GlossaryTsvSource.new(source_path, glossary)
-      when ".yml"
-        GlossarySources::GlossaryYamlSource.new(source_path, glossary)
+module Logaling::GlossarySources
+  class GlossaryCsvSource < Base
+    def load
+      glossary_source = []
+      CSV.open(source_path, "r:utf-8",  {:col_sep => ','}) do |csv|
+        csv.each do |row|
+          glossary_source << {"source_term" => row[0], "target_term" => row[1], "note" => ""} if row.size >= 2
+        end
       end
+      glossary_source
     end
   end
 end

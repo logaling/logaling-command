@@ -152,7 +152,7 @@ module Logaling
             glossary.add("delete_logaling", "てすと1", "備考")
             glossary.add("delete_logaling", "てすと2", "備考")
             glossary.delete_all("delete_logaling", true)
-            @result = Logaling::GlossarySource.load_glossary_source_yml(glossary_source_path)
+            @result = Logaling::GlossarySource.create(glossary_source_path, glossary).load
           end
 
           it {

@@ -42,7 +42,7 @@ module Logaling
       all_glossary_source_path = Dir.glob(File.join(glossary_source_path, "*"))
       all_glossary_source_path.map do |source_path|
         name, source_language, target_language, type = File.basename(source_path).split(/\./)
-        GlossarySource.new(source_path, find_glossary(source_language, target_language))
+        GlossarySource.create(source_path, find_glossary(source_language, target_language))
       end
     end
   end
@@ -54,7 +54,7 @@ module Logaling
 
     def glossary_sources
       name, source_language, target_language, type = File.basename(@path).split(/\./)
-      [GlossarySource.new(@path, find_glossary(source_language, target_language))]
+      [GlossarySource.create(@path, find_glossary(source_language, target_language))]
     end
   end
 end

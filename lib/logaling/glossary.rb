@@ -71,7 +71,7 @@ module Logaling
         source_dir = @project.glossary_source_path
         FileUtils.mkdir_p(source_dir)
         source_path = File.join(source_dir, file_name)
-        Logaling::GlossarySource.new(source_path, self)
+        @glossary_source = Logaling::GlossarySource.create(source_path, self)
       end
     end
 
@@ -102,7 +102,7 @@ module Logaling
         file_name = [self.to_s, type].join('.')
         File.join(@project.glossary_source_path, file_name)
       end
-      Dir.glob(glob_condition).map {|source_path| GlossarySource.new(source_path, self)}
+      Dir.glob(glob_condition).map {|source_path| GlossarySource.create(source_path, self)}
     end
   end
 end
