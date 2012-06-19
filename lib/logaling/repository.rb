@@ -79,7 +79,7 @@ module Logaling
     end
 
     def projects
-      projects = registered_projects.map do |project_path|
+      projects = registered_project_paths.map do |project_path|
         Logaling::Project.new(project_path, self)
       end
       projects += imported_glossaries.map do |imported_project_path|
@@ -114,7 +114,7 @@ module Logaling
     end
 
     def glossary_counts
-      [registered_projects, imported_glossaries].map(&:size).inject(&:+)
+      [registered_project_paths, imported_glossaries].map(&:size).inject(&:+)
     end
 
     def config_path
@@ -148,7 +148,7 @@ module Logaling
       File.join(@path, "cache")
     end
 
-    def registered_projects
+    def registered_project_paths
       Dir[File.join(logaling_projects_path, "*")]
     end
 
