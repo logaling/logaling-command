@@ -38,4 +38,10 @@ module Logaling
       @repository.logaling_db_home
     end
   end
+
+  class ImportedProject < Project
+    def name
+      File.basename(@path).split(/\./).first
+    end
+  end
 end

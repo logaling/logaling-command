@@ -79,9 +79,13 @@ module Logaling
     end
 
     def projects
-      (imported_glossaries | registered_projects).sort.map do |project_path|
+      projects = registered_projects.map do |project_path|
         Logaling::Project.new(project_path, self)
       end
+      projects += imported_glossaries.map do |imported_project_path|
+        Logaling::ImportedProject.new(imported_project_path, self)
+      end
+      projects.sort_by(&:path)
     end
 
     def index
