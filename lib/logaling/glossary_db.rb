@@ -78,7 +78,7 @@ module Logaling
 
       deindex_glossary_source(glossary_source)
 
-      add_glossary_source(glossary_source.source_path, File.mtime(glossary_source.source_path))
+      add_glossary_source(glossary_source)
       glossary_source.load.each do |term|
         source_term = term['source_term']
         target_term = term['target_term']
@@ -94,7 +94,7 @@ module Logaling
 
       deindex_glossary(glossary, glossary_source)
 
-      add_glossary_source(glossary_source.source_path, glossary_source.mtime)
+      add_glossary_source(glossary_source)
       add_glossary(glossary.name)
       GlossarySource.load(glossary_source.source_path).each do |term|
         source_term = term['source_term']
@@ -260,8 +260,8 @@ module Logaling
       records.expression.close
     end
 
-    def add_glossary_source(glossary_source, indexed_at)
-      Groonga["glossary_sources"].add(glossary_source, :indexed_at => indexed_at)
+    def add_glossary_source(glossary_source)
+      Groonga["glossary_sources"].add(glossary_source.source_path, :indexed_at => glossary_source.mtime)
     end
 
     def delete_glossary(glossary_name)
