@@ -82,7 +82,7 @@ module Logaling
       projects = registered_project_paths.map do |project_path|
         Logaling::Project.new(project_path, self)
       end
-      projects += imported_glossaries.map do |imported_project_path|
+      projects += imported_glossary_paths.map do |imported_project_path|
         Logaling::ImportedProject.new(imported_project_path, self)
       end
       projects.sort_by(&:path)
@@ -114,7 +114,7 @@ module Logaling
     end
 
     def glossary_counts
-      [registered_project_paths, imported_glossaries].map(&:size).inject(&:+)
+      [registered_project_paths, imported_glossary_paths].map(&:size).inject(&:+)
     end
 
     def config_path
@@ -152,7 +152,7 @@ module Logaling
       Dir[File.join(logaling_projects_path, "*")]
     end
 
-    def imported_glossaries
+    def imported_glossary_paths
       Dir[File.join(cache_path, "*")]
     end
   end
