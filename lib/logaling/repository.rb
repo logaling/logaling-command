@@ -126,15 +126,6 @@ module Logaling
     end
 
     private
-    def get_glossary(path)
-      glossary_name, source_language, target_language = File::basename(path, ".*").split(".")
-      [glossary_name, source_language, target_language]
-    end
-
-    def get_all_glossary_sources(path)
-      %w(yml tsv csv).map{|type| File.join(path, "*.#{type}") }
-    end
-
     def logaling_projects_path
       File.join(@path, "projects")
     end
