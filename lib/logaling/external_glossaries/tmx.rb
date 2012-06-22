@@ -23,8 +23,8 @@ module Logaling
     output_format   'csv'
 
     private
-    def convert_to_csv(csv, glossary_info)
-      doc = ::Nokogiri::XML(open(glossary_info[:url], "r"))
+    def convert_to_csv(csv, glossary, url)
+      doc = ::Nokogiri::XML(open(url, "r"))
       tu_nodes = doc.xpath('//tmx/body/tu')
       tu_nodes.each do |tu|
         original = ""
@@ -33,12 +33,12 @@ module Logaling
         tu.children.each do |tuv|
           if tuv.name == "tuv"
             lang = convert_language_code_iso_639(tuv["lang"])
-            if lang == glossary_info[:source_language]
+            if lang == glossary.source_language
               tuv.children.each do |child|
                 original = child.text.strip if child.name == "seg"
                 notes << child.text.strip if child.name == "note"
               end
-            elsif lang == glossary_info[:target_language]
+            elsif lang == glossary.target_language
               tuv.children.each do |child|
                 translation = child.text.strip if child.name == "seg"
                 notes << child.text.strip if child.name == "note"

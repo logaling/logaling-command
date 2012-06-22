@@ -53,10 +53,10 @@ module Logaling
       raise Logaling::CommandFailed, "Failed import #{glossary_source.class.name} to #{cache_path}."
     end
 
-    def import_tmx(glossary_source, glossary_info)
+    def import_tmx(glossary_source, glossary, url)
       FileUtils.mkdir_p(cache_path)
       Dir.chdir(cache_path) do
-        glossary_source.import(glossary_info)
+        glossary_source.import(glossary, url)
       end
     rescue Logaling::GlossaryNotFound => e
       raise e

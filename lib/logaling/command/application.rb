@@ -93,9 +93,13 @@ module Logaling::Command
       else
         case external_glossary
         when 'tmx'
-          glossary_info = initialize_import_parameter(args)
-          check_import_parameter(glossary_info)
-          @repository.import_tmx(Logaling::ExternalGlossary.get(external_glossary), glossary_info)
+          check_import_parameter(args)
+          url = args[1]
+          if url && !URI.parse(url).host
+            url = File::expand_path(url)
+          end
+          glossary = Logaling::Glossary.new(args[0], args[2], args[3])
+          @repository.import_tmx(Logaling::ExternalGlossary.get(external_glossary), glossary, url)
           @repository.index
         else
           @repository.import(Logaling::ExternalGlossary.get(external_glossary))
@@ -359,23 +363,10 @@ module Logaling::Command
       end
     end
 
-    def check_import_parameter(glossary_info)
-      unless glossary_info[:name] && glossary_info[:url]
+    def check_import_parameter(args)
+      unless args[0] && args[1]
         raise Logaling::CommandFailed, "Do 'loga import tmx <glossary name> <url or path>'"
       end
-    end
-
-    def initialize_import_parameter(arr)
-      glossary_info = {}
-      url = arr[1]
-      if url && !URI.parse(url).host
-        url = File::expand_path(url)
-      end
-      glossary_info[:name] = arr[0]
-      glossary_info[:url] = url
-      glossary_info[:source_language] = arr[2]
-      glossary_info[:target_language] = arr[3]
-      glossary_info
     end
 
     def register_and_index
