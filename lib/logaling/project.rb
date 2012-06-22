@@ -15,6 +15,24 @@
 
 module Logaling
   class Project
+    class << self
+      def find_dotfile(dir=Dir.pwd)
+        searched_path = []
+        loop do
+          path = File.join(dir, '.logaling')
+          if File.exist?(path)
+            return path
+          else
+            unless Pathname.new(dir).root?
+              searched_path << dir
+              dir = File.dirname(dir)
+            else
+              raise Logaling::ProjectNotFound, "Can't found .logaling in #{searched_path}"
+            end
+          end
+        end
+      end
+    end
     attr_reader :path, :repository
 
     def initialize(path, repository=nil)

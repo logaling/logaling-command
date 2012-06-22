@@ -19,6 +19,7 @@ require 'thor'
 require 'rainbow'
 require 'pathname'
 require "logaling/repository"
+require "logaling/project"
 require "logaling/glossary"
 require "logaling/glossary_source"
 require "logaling/config"
@@ -34,10 +35,10 @@ module Logaling::Command
       @repository = Logaling::Repository.new(@logaling_home)
       @config = Logaling::Config.load(@repository.config_path)
 
-      @dotfile_path = options["logaling-config"] ? options["logaling-config"] : find_dotfile
+      @dotfile_path = options["logaling-config"] ? options["logaling-config"] : Logaling::Project.find_dotfile
       @project_config_path = File.join(@dotfile_path, 'config')
       @config.load(@project_config_path)
-    rescue Logaling::CommandFailed # can't find .logaling
+    rescue Logaling::ProjectNotFound => e
       @project_config_path = nil
     ensure
       @config.merge!(options)
@@ -72,7 +73,7 @@ module Logaling::Command
         config.save(File.join(logaling_config_path, "config"))
 
         unless options["no-register"]
-          @dotfile_path = options["logaling-config"] ? options["logaling-config"] : find_dotfile
+          @dotfile_path = options["logaling-config"] ? options["logaling-config"] : Logaling::Project.find_dotfile
           @project_config_path = File.join(@dotfile_path, 'config')
           @config.load(@project_config_path)
           register_and_index
@@ -325,24 +326,6 @@ module Logaling::Command
     def error(msg)
       STDERR.puts(msg)
       exit 1
-    end
-
-    def find_dotfile
-      dir = Dir.pwd
-      searched_path = []
-      loop do
-        path = File.join(dir, '.logaling')
-        if File.exist?(path)
-          return path
-        else
-          unless Pathname.new(dir).root?
-            searched_path << dir
-            dir = File.dirname(dir)
-          else
-            raise(Logaling::CommandFailed, "Can't found .logaling in #{searched_path}")
-          end
-        end
-      end
     end
 
     def logaling_config_path
