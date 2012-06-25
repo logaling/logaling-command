@@ -243,6 +243,7 @@ module Logaling::Command
       @repository.index
       if @config.glossary
         project = @repository.find_project(@config.glossary)
+        raise Logaling::ProjectNotFound unless project
         glossary = project.find_glossary(@config.source_language, @config.target_language)
       else
         glossary = nil
@@ -270,6 +271,8 @@ module Logaling::Command
       else
         "source-term <#{source_term}> not found"
       end
+    rescue Logaling::ProjectNotFound
+      say "glossary <#{@config.glossary}> not found"
     rescue Logaling::CommandFailed, Logaling::TermError => e
       say e.message
     end
@@ -303,7 +306,6 @@ module Logaling::Command
       else
         "glossary <#{@config.glossary}> not found"
       end
-
     rescue Logaling::CommandFailed, Logaling::GlossaryDBNotFound => e
       say e.message
     end
