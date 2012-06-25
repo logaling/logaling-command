@@ -16,8 +16,9 @@
 module Logaling
   class Project
     class << self
-      def find_dotfile(dir=Dir.pwd)
+      def find_dotfile(base_dir=Dir.pwd)
         searched_path = []
+        dir = base_dir
         loop do
           path = File.join(dir, '.logaling')
           if File.exist?(path)
