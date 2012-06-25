@@ -241,8 +241,12 @@ module Logaling::Command
     def lookup(source_term)
       check_logaling_home_exists
       @repository.index
-      project = @repository.find_project(@config.glossary)
-      glossary = project.find_glossary(@config.source_language, @config.target_language)
+      if @config.glossary
+        project = @repository.find_project(@config.glossary)
+        glossary = project.find_glossary(@config.source_language, @config.target_language)
+      else
+        glossary = nil
+      end
       terms = @repository.lookup(source_term, glossary, options["dictionary"])
       unless terms.empty?
         max_str_size = terms.map{|term| term[:source_term].size}.sort.last
