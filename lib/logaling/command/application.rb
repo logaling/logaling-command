@@ -97,7 +97,7 @@ module Logaling::Command
           check_import_parameter(args)
           url = args[1]
           if url && !URI.parse(url).host
-            url = File::expand_path(url)
+            url = File.expand_path(url)
           end
           glossary = Logaling::Glossary.new(args[0], args[2], args[3])
           @repository.import_tmx(Logaling::ExternalGlossary.get(external_glossary), glossary, url)
