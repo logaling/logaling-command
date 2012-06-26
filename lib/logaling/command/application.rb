@@ -187,7 +187,8 @@ module Logaling::Command
     rescue Logaling::GlossaryNotFound => e
       say "Try 'loga new or register' first."
     rescue Logaling::ProjectNotFound
-      say "glossary <#{@config.glossary}> not found"
+      say "glossary <#{@config.glossary}> not found."
+      say "Try 'loga list' and confirm glossary name."
     end
 
     desc 'delete [SOURCE TERM] [TARGET TERM(optional)] [--force(optional)]', 'Delete term.'
@@ -214,7 +215,8 @@ module Logaling::Command
     rescue Logaling::GlossaryNotFound => e
       say "Try 'loga new or register' first."
     rescue Logaling::ProjectNotFound
-      say "glossary <#{@config.glossary}> not found"
+      say "glossary <#{@config.glossary}> not found."
+      say "Try 'loga list' and confirm glossary name."
     end
 
     desc 'update [SOURCE TERM] [TARGET TERM] [NEW TARGET TERM] [NOTE(optional)]', 'Update term.'
@@ -239,7 +241,8 @@ module Logaling::Command
     rescue Logaling::GlossaryNotFound => e
       say "Try 'loga new or register' first."
     rescue Logaling::ProjectNotFound
-      say "glossary <#{@config.glossary}> not found"
+      say "glossary <#{@config.glossary}> not found."
+      say "Try 'loga list' and confirm glossary name."
     end
 
     desc 'lookup [TERM]', 'Lookup terms.'
@@ -281,7 +284,8 @@ module Logaling::Command
         "source-term <#{source_term}> not found"
       end
     rescue Logaling::ProjectNotFound
-      say "glossary <#{@config.glossary}> not found"
+      say "glossary <#{@config.glossary}> not found."
+      say "Try 'loga list' and confirm glossary name."
     rescue Logaling::CommandFailed, Logaling::TermError => e
       say e.message
     end
@@ -319,7 +323,8 @@ module Logaling::Command
     rescue Logaling::CommandFailed, Logaling::GlossaryDBNotFound => e
       say e.message
     rescue Logaling::ProjectNotFound
-      say "glossary <#{@config.glossary}> not found"
+      say "glossary <#{@config.glossary}> not found."
+      say "Try 'loga list' and confirm glossary name."
     end
 
     desc 'list', 'Show glossary list.'
