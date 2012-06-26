@@ -134,10 +134,6 @@ module Logaling
                  :normalize => true}
       snippet = records_selected.expression.snippet(["<snippet>", "</snippet>"], options)
       struct_result(records, snippet)
-    ensure
-      snippet.close if snippet
-      records_selected.expression.close if records_selected
-      specified_glossary.expression.close if specified_glossary
     end
 
     def lookup_dictionary(search_word)
@@ -170,9 +166,6 @@ module Logaling
       snippet = records_selected.expression.snippet(["<snippet>", "</snippet>"], options)
 
       struct_result(records, snippet)
-    ensure
-      snippet.close if snippet
-      records_selected.expression.close if records_selected
     end
 
     def translation_list(glossary, order='ascending')
@@ -190,8 +183,6 @@ module Logaling
       ])
 
       struct_result(records)
-    ensure
-      records_raw.expression.close
     end
 
     def get_bilingual_pair(source_term, target_term, glossary, note=nil)
@@ -212,8 +203,6 @@ module Logaling
         end
       end
       struct_result(records)
-    ensure
-      records.expression.close
     end
 
     def glossary_source_exist?(glossary_source)
@@ -224,8 +213,6 @@ module Logaling
         ]
       end
       !glossary.size.zero?
-    ensure
-      glossary.expression.close
     end
 
     def get_all_glossary_sources
@@ -261,8 +248,6 @@ module Logaling
       records.each do |record|
         record.key.delete
       end
-    ensure
-      records.expression.close
     end
 
     def add_glossary_source(glossary_source)
@@ -277,8 +262,6 @@ module Logaling
       records.each do |record|
         record.key.delete
       end
-    ensure
-      records.expression.close
     end
 
     def add_glossary(glossary)
@@ -293,8 +276,6 @@ module Logaling
       records.each do |record|
         record.key.delete
       end
-    ensure
-      records.expression.close
     end
 
     def delete_terms
@@ -437,8 +418,6 @@ module Logaling
         config.conf_value
       end
       value.size > 0 ? value[0] : ""
-    ensure
-      records.expression.close
     end
 
     def add_config(conf_key, conf_value)
