@@ -15,19 +15,21 @@
 
 module Logaling
   class Project
-    def self.find_dotfile(base_dir=Dir.pwd)
-      searched_path = []
-      dir = base_dir
-      loop do
-        path = File.join(dir, '.logaling')
-        if File.exist?(path)
-          return path
-        else
-          unless Pathname.new(dir).root?
-            searched_path << dir
-            dir = File.dirname(dir)
+    class << self
+      def find_dotfile(base_dir=Dir.pwd)
+        searched_path = []
+        dir = base_dir
+        loop do
+          path = File.join(dir, '.logaling')
+          if File.exist?(path)
+            return path
           else
-            raise Logaling::ProjectNotFound, "Can't found .logaling in #{searched_path}"
+            unless Pathname.new(dir).root?
+              searched_path << dir
+              dir = File.dirname(dir)
+            else
+              raise Logaling::ProjectNotFound, "Can't found .logaling in #{searched_path}"
+            end
           end
         end
       end
