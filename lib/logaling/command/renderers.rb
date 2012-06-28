@@ -28,15 +28,7 @@ module Logaling::Command
       def render(output); end
 
       def glossary_name
-        if @repository.glossary_counts > 1
-          if @term[:glossary_name] == @config.glossary
-            @term[:glossary_name].foreground(:white).background(:green)
-          else
-            @term[:glossary_name]
-          end
-        else
-          ""
-        end
+        @term[:glossary_name]
       end
 
       def note
@@ -83,6 +75,18 @@ module Logaling::Command
         output.printf("  %-#{@max_str_size+10}s %s\n", source_term, format)
       end
 
+      def glossary_name
+        if @repository.glossary_counts > 1
+          if @term[:glossary_name] == @config.glossary
+            @term[:glossary_name].foreground(:white).background(:green)
+          else
+            @term[:glossary_name]
+          end
+        else
+          ""
+        end
+      end
+
       def note
         note_string = super
         "# #{note_string}" if note_string
@@ -92,7 +96,7 @@ module Logaling::Command
     class TermCsvRenderer < TermRenderer
       def render(output)
         items = [source_term, target_term, note,
-                 @config.source_language, @config.target_language]
+                 @config.source_language, @config.target_language, glossary_name]
         output.print(CSV.generate {|csv| csv << items})
       end
     end
@@ -111,7 +115,8 @@ module Logaling::Command
         record = {
           :source => source_term, :target => target_term, :note => note,
           :source_language => @config.source_language,
-          :target_language => @config.target_language
+          :target_language => @config.target_language,
+          :glossary => glossary_name
         }
         output.print JSON.pretty_generate(record)
         output.puts("\n]") if last_line?
