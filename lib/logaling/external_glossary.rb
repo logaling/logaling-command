@@ -68,19 +68,19 @@ class Logaling::ExternalGlossary
     end
   end
 
-  def import(glossary_info=nil)
-    if glossary_info && glossary_info[:url]
-      unless file_exists?(glossary_info[:url])
-        raise Logaling::GlossaryNotFound, "Failed open url/path <#{glossary_info[:url]}>"
+  def import(glossary=nil, url=nil)
+    if glossary && url
+      unless file_exists?(url)
+        raise Logaling::GlossaryNotFound, "Failed open url/path <#{url}>"
       end
     end
-    File.open(import_file_name(glossary_info), "w") do |output|
+    File.open(import_file_name(glossary), "w") do |output|
       output_format = self.class.output_format
       output_format = output_format.to_s if output_format.is_a?(Symbol)
       case output_format
       when "csv"
-        if glossary_info
-          convert_to_csv(CSV.new(output), glossary_info)
+        if glossary
+          convert_to_csv(CSV.new(output), glossary, url)
         else
           convert_to_csv(CSV.new(output))
         end
@@ -91,14 +91,14 @@ class Logaling::ExternalGlossary
   end
 
   private
-  def import_file_name(glossary_info=nil)
-    if glossary_info
-      glossary_info[:name] ||= self.class.name
-      glossary_info[:source_language] ||= self.class.source_language
-      glossary_info[:target_language] ||= self.class.target_language
+  def import_file_name(glossary=nil)
+    if glossary
+      glossary.name ||= self.class.name
+      glossary.source_language ||= self.class.source_language
+      glossary.target_language ||= self.class.target_language
 
-      [glossary_info[:name], glossary_info[:source_language],
-       glossary_info[:target_language], self.class.output_format].join('.')
+      [glossary.name, glossary.source_language,
+       glossary.target_language, self.class.output_format].join('.')
     else
       [self.class.name, self.class.source_language,
        self.class.target_language, self.class.output_format].join('.')

@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 #
 # Copyright (C) 2011  Miho SUZUKI
-# Copyright (C) 2011  Kouhei Sutou <kou@clear-code.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,16 +15,21 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-require "logaling/command"
+require "logaling/glossary_sources/glossary_yaml_source"
+require "logaling/glossary_sources/glossary_csv_source"
+require "logaling/glossary_sources/glossary_tsv_source"
 
 module Logaling
-  class LogalingError < RuntimeError; end
-  class TermError < LogalingError; end
-  class CommandFailed < LogalingError; end
-  class GlossaryAlreadyRegistered < LogalingError; end
-  class GlossaryNotFound < LogalingError; end
-  class GlossaryDBNotFound < LogalingError; end
-  class ExternalGlossaryNotFound < LogalingError; end
-  class UnsupportedFormat < LogalingError; end
-  class ProjectNotFound < LogalingError; end
+  class GlossarySource
+    def self.create(source_path, glossary)
+      case File.extname(source_path)
+      when ".csv"
+        GlossarySources::GlossaryCsvSource.new(source_path, glossary)
+      when ".tsv"
+        GlossarySources::GlossaryTsvSource.new(source_path, glossary)
+      when ".yml"
+        GlossarySources::GlossaryYamlSource.new(source_path, glossary)
+      end
+    end
+  end
 end

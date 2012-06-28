@@ -49,11 +49,10 @@ module Logaling
     end
 
     def recreate_table
-      version = Groonga["configurations"] ? get_config("version") : 0
-      if version.to_i != VERSION
+      unless latest_version?
         remove_schema
         populate_schema
-        add_config("version", VERSION.to_s)
+        update_version_to_latest
       end
     end
 
@@ -62,41 +61,63 @@ module Logaling
       @database = nil
     end
 
-    def deindex_glossary(glossary_name, glossary_source)
-      delete_translations_by_glossary_source(glossary_source)
-      delete_glossary(glossary_name)
-      delete_glossary_source(glossary_source)
+    def deindex_glossary(glossary, glossary_source)
+      delete_translations_by_glossary_source(glossary_source.source_path)
+      delete_glossary(glossary.name)
+      delete_glossary_source(glossary_source.source_path)
     end
 
-    def index_glossary(glossary, glossary_name, glossary_source, source_language, target_language, indexed_at)
+    def deindex_glossary_source(glossary_source)
+      delete_translations_by_glossary_source(glossary_source.source_path)
+      delete_glossary_source(glossary_source.source_path)
+    end
+
+    def index_glossary_source(glossary_source)
       delete_terms if offline_index?
+      glossary = glossary_source.glossary
 
-      deindex_glossary(glossary_name, glossary_source)
+      deindex_glossary_source(glossary_source)
 
-      add_glossary_source(glossary_source, indexed_at)
-      add_glossary(glossary_name)
-      glossary.each do |term|
+      add_glossary_source(glossary_source)
+      glossary_source.load.each do |term|
         source_term = term['source_term']
         target_term = term['target_term']
         note = term['note']
-        add_translation(glossary_name, glossary_source, source_language, target_language, source_term, target_term, note)
+        add_translation(glossary.name, glossary_source.source_path, glossary.source_language, glossary.target_language, source_term, target_term, note)
       end
 
       create_terms if offline_index?
     end
 
-    def lookup(source_term, glossary_source=nil)
+    def index_glossary(glossary, glossary_source)
+      delete_terms if offline_index?
+
+      deindex_glossary(glossary, glossary_source)
+
+      add_glossary_source(glossary_source)
+      add_glossary(glossary)
+      glossary_source.load.each do |term|
+        source_term = term['source_term']
+        target_term = term['target_term']
+        note = term['note']
+        add_translation(glossary.name, glossary_source.source_path, glossary.source_language, glossary.target_language, source_term, target_term, note)
+      end
+
+      create_terms if offline_index?
+    end
+
+    def lookup(source_term, glossary=nil)
       records_selected = Groonga["translations"].select do |record|
         conditions = [record.source_term =~ source_term]
-        if glossary_source
-          conditions << (record.source_language =~ glossary_source.source_language) if glossary_source.source_language
-          conditions << (record.target_language =~ glossary_source.target_language) if glossary_source.target_language
+        if glossary
+          conditions << (record.source_language =~ glossary.source_language) if glossary.source_language
+          conditions << (record.target_language =~ glossary.target_language) if glossary.target_language
         end
         conditions
       end
-      if glossary_source
+      if glossary
         specified_glossary = records_selected.select do |record|
-          record.glossary == glossary_source.glossary
+          record.glossary == glossary.name
         end
         specified_glossary.each do |record|
           record.key._score += 10
@@ -113,12 +134,7 @@ module Logaling
                  :normalize => true}
       snippet = records_selected.expression.snippet(["<snippet>", "</snippet>"], options)
       struct_result(records, snippet)
-    ensure
-      snippet.close if snippet
-      records_selected.expression.close if records_selected
-      specified_glossary.expression.close if specified_glossary
     end
-
 
     def lookup_dictionary(search_word)
       records_selected_source = Groonga["translations"].select do |record|
@@ -150,74 +166,71 @@ module Logaling
       snippet = records_selected.expression.snippet(["<snippet>", "</snippet>"], options)
 
       struct_result(records, snippet)
-    ensure
-      snippet.close if snippet
-      records_selected.expression.close if records_selected
     end
 
-    def translation_list(glossary_source)
+    def translation_list(glossary, order='ascending')
       records_raw = Groonga["translations"].select do |record|
         [
-          record.glossary == glossary_source.glossary,
-          record.source_language == glossary_source.source_language,
-          record.target_language == glossary_source.target_language
+          record.glossary == glossary.name,
+          record.source_language == glossary.source_language,
+          record.target_language == glossary.target_language
         ]
       end
 
       records = records_raw.sort([
-        {:key=>"source_term", :order=>'ascending'},
-        {:key=>"target_term", :order=>'ascending'}])
+        {:key => "source_term", :order => order},
+        {:key => "target_term", :order => order}
+      ])
 
       struct_result(records)
-    ensure
-      records_raw.expression.close
     end
 
-    def get_bilingual_pair(source_term, target_term, glossary)
+    def get_bilingual_pair(source_term, target_term, glossary, note=nil)
       records = Groonga["translations"].select do |record|
-        [
-          record.glossary == glossary,
-          record.source_term == source_term,
-          record.target_term == target_term
-        ]
+        if note
+          [
+            record.glossary == glossary,
+            record.source_term == source_term,
+            record.target_term == target_term,
+            record.note == note
+          ]
+        else
+          [
+            record.glossary == glossary,
+            record.source_term == source_term,
+            record.target_term == target_term
+          ]
+        end
       end
-
       struct_result(records)
-    ensure
-      records.expression.close
     end
 
-    def get_bilingual_pair_with_note(source_term, target_term, note, glossary)
-      records = Groonga["translations"].select do |record|
-        [
-          record.glossary == glossary,
-          record.source_term == source_term,
-          record.target_term == target_term,
-          record.note == note
-        ]
-      end
-
-      struct_result(records)
-    ensure
-      records.expression.close
-    end
-
-    def glossary_source_exist?(glossary_source, indexed_at)
+    def glossary_source_exist?(glossary_source)
       glossary = Groonga["glossary_sources"].select do |record|
         [
-          record.key == glossary_source,
-          record.indexed_at == indexed_at
+          record.key == glossary_source.source_path,
+          record.indexed_at == glossary_source.mtime
         ]
       end
       !glossary.size.zero?
-    ensure
-      glossary.expression.close
     end
 
-    def get_all_glossary_source
-      Groonga["glossary_sources"].sort([
+    def get_all_glossary_sources
+      source_paths = Groonga["glossary_sources"].sort([
         {:key=>"_key", :order=>'ascending'}
       ]).map{|record| record.key}
+      source_paths.map do |source_path|
+        glossary_name, source_language, target_language = File.basename(source_path).split(/\./)
+        glossary = Glossary.new(glossary_name, source_language, target_language)
+        GlossarySource.create(source_path, glossary)
+      end
+    end
+
+    def glossary_sources_related_on_glossary(glossary)
+      records = Groonga["glossary_sources"].select do |record|
+        [record.key =~ glossary.to_s]
+      end
+      records.map{|record| GlossarySource.create(record.key.key, glossary) }
     end
 
     def get_all_glossary
@@ -235,12 +248,10 @@ module Logaling
       records.each do |record|
         record.key.delete
       end
-    ensure
-      records.expression.close
     end
 
-    def add_glossary_source(glossary_source, indexed_at)
-      Groonga["glossary_sources"].add(glossary_source, :indexed_at => indexed_at)
+    def add_glossary_source(glossary_source)
+      Groonga["glossary_sources"].add(glossary_source.source_path, :indexed_at => glossary_source.mtime)
     end
 
     def delete_glossary(glossary_name)
@@ -251,12 +262,10 @@ module Logaling
       records.each do |record|
         record.key.delete
       end
-    ensure
-      records.expression.close
     end
 
-    def add_glossary(glossary_name)
-      Groonga["glossaries"].add(glossary_name)
+    def add_glossary(glossary)
+      Groonga["glossaries"].add(glossary.name)
     end
 
     def delete_translations_by_glossary_source(glossary_source)
@@ -267,8 +276,6 @@ module Logaling
       records.each do |record|
         record.key.delete
       end
-    ensure
-      records.expression.close
     end
 
     def delete_terms
@@ -345,11 +352,9 @@ module Logaling
 
     def remove_schema
       Groonga::Schema.define do |schema|
-        schema.remove_table("configurations") if Groonga["configurations"]
-        schema.remove_table("translations") if Groonga["translations"]
-        schema.remove_table("glossaries") if Groonga["glossaries"]
-        schema.remove_table("glossary_sources") if Groonga["glossary_sources"]
-        schema.remove_table("terms") if Groonga["terms"]
+        %w(configurations translations glossaries glossary_sources terms).each do |table|
+          schema.remove_table(table) if Groonga[table]
+        end
       end
     end
 
@@ -360,8 +365,8 @@ module Logaling
     def struct_result(records, snippet=nil)
       records.map do |record|
         term = record.key
-        snipped_source_term = snippet ? snip_source_term(term, snippet) : []
-        snipped_target_term = snippet ? snip_target_term(term, snippet) : []
+        snipped_source_term = snippet ? struct_snipped_term(term.source_term, snippet) : []
+        snipped_target_term = snippet ? struct_snipped_term(term.target_term, snippet) : []
         {:glossary_name => term.glossary.key,
          :source_language => term.source_language,
          :target_language => term.target_language,
@@ -387,14 +392,21 @@ module Logaling
       structed_source_term
     end
 
-    def snip_source_term(term, snippet)
-        snipped_text = snippet.execute(term.source_term).join
-        struct_snipped_text(snipped_text)
+    def struct_snipped_term(term, snippet)
+      snipped_text = snippet.execute(term).join
+      snipped_text.empty? ? [term] : struct_snipped_text(snipped_text)
     end
 
-    def snip_target_term(term, snippet)
-        snipped_text = snippet.execute(term.target_term).join
-        struct_snipped_text(snipped_text)
+    def latest_version?
+      current_version == VERSION
+    end
+
+    def current_version
+      Groonga["configurations"] ? get_config("version").to_i : 0
+    end
+
+    def update_version_to_latest
+      add_config("version", VERSION.to_s)
     end
 
     def get_config(conf_key)
@@ -406,8 +418,6 @@ module Logaling
         config.conf_value
       end
       value.size > 0 ? value[0] : ""
-    ensure
-      records.expression.close
     end
 
     def add_config(conf_key, conf_value)

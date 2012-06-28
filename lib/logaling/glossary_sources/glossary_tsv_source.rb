@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2011  Miho SUZUKI
-# Copyright (C) 2011  Kouhei Sutou <kou@clear-code.com>
+# Copyright (C) 2012  Koji SHIMADA <koji.shimada@enishi-tech.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,16 +15,19 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-require "logaling/command"
+require "logaling/glossary_sources/base"
+require "csv"
 
-module Logaling
-  class LogalingError < RuntimeError; end
-  class TermError < LogalingError; end
-  class CommandFailed < LogalingError; end
-  class GlossaryAlreadyRegistered < LogalingError; end
-  class GlossaryNotFound < LogalingError; end
-  class GlossaryDBNotFound < LogalingError; end
-  class ExternalGlossaryNotFound < LogalingError; end
-  class UnsupportedFormat < LogalingError; end
-  class ProjectNotFound < LogalingError; end
+module Logaling::GlossarySources
+  class GlossaryTsvSource < Base
+    def load
+      glossary_source = []
+      CSV.open(source_path, "r:utf-8",  {:col_sep => "\t"}) do |tsv|
+        tsv.each do |row|
+          glossary_source << {"source_term" => row[0], "target_term" => row[1], "note" => ""} if row.size >= 2
+        end
+      end
+      glossary_source
+    end
+  end
 end

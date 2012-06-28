@@ -19,7 +19,9 @@ require 'thor'
 require 'rainbow'
 require 'pathname'
 require "logaling/repository"
+require "logaling/project"
 require "logaling/glossary"
+require "logaling/glossary_source"
 require "logaling/config"
 
 module Logaling::Command
@@ -33,10 +35,10 @@ module Logaling::Command
       @repository = Logaling::Repository.new(@logaling_home)
       @config = Logaling::Config.load(@repository.config_path)
 
-      @dotfile_path = options["logaling-config"] ? options["logaling-config"] : find_dotfile
+      @dotfile_path = options["logaling-config"] ? options["logaling-config"] : Logaling::Project.find_dotfile
       @project_config_path = File.join(@dotfile_path, 'config')
       @config.load(@project_config_path)
-    rescue Logaling::CommandFailed # can't find .logaling
+    rescue Logaling::ProjectNotFound => e
       @project_config_path = nil
     ensure
       @config.merge!(options)
@@ -71,7 +73,7 @@ module Logaling::Command
         config.save(File.join(logaling_config_path, "config"))
 
         unless options["no-register"]
-          @dotfile_path = options["logaling-config"] ? options["logaling-config"] : find_dotfile
+          @dotfile_path = options["logaling-config"] ? options["logaling-config"] : Logaling::Project.find_dotfile
           @project_config_path = File.join(@dotfile_path, 'config')
           @config.load(@project_config_path)
           register_and_index
@@ -88,13 +90,17 @@ module Logaling::Command
       require "logaling/external_glossary"
       Logaling::ExternalGlossary.load
       if options["list"]
-        Logaling::ExternalGlossary.list.each {|glossary| say "#{glossary.name.bright} : #{glossary.description}" }
+        Logaling::ExternalGlossary.list.each {|glossary_source| say "#{glossary_source.name.bright} : #{glossary_source.description}" }
       else
         case external_glossary
         when 'tmx'
-          glossary_info = initialize_import_parameter(args)
-          check_import_parameter(glossary_info)
-          @repository.import_tmx(Logaling::ExternalGlossary.get(external_glossary), glossary_info)
+          check_import_parameter(args)
+          url = args[1]
+          if url && !URI.parse(url).host
+            url = File.expand_path(url)
+          end
+          glossary = Logaling::Glossary.new(args[0], args[2], args[3])
+          @repository.import_tmx(Logaling::ExternalGlossary.get(external_glossary), glossary, url)
           @repository.index
         else
           @repository.import(Logaling::ExternalGlossary.get(external_glossary))
@@ -129,12 +135,13 @@ module Logaling::Command
       raise Logaling::CommandFailed, "Can't use '-g <glossary>' option." if options["glossary"]
       @config.check_required_option("glossary" => "Do 'loga unregister' at project directory.")
 
-      @repository.unregister(@config.glossary)
+      project = @repository.find_project(@config.glossary)
+      @repository.unregister(project)
       @repository.index
       say "#{@config.glossary} is now unregistered."
     rescue Logaling::CommandFailed => e
       say e.message
-    rescue Logaling::GlossaryNotFound => e
+    rescue Logaling::ProjectNotFound => e
       say "#{@config.glossary} is not yet registered."
     end
 
@@ -167,9 +174,10 @@ module Logaling::Command
       }
       @config.check_required_option(required_options)
       check_logaling_home_exists
-      @repository.index
-
-      if @repository.bilingual_pair_exists?(source_term, target_term, @config.glossary)
+      project = @repository.find_project(@config.glossary)
+      raise Logaling::ProjectNotFound unless project
+      glossary = project.find_glossary(@config.source_language, @config.target_language)
+      if glossary.bilingual_pair_exists?(source_term, target_term)
         raise Logaling::TermError, "term '#{source_term}: #{target_term}' already exists in '#{@config.glossary}'"
       end
 
@@ -178,6 +186,9 @@ module Logaling::Command
       say e.message
     rescue Logaling::GlossaryNotFound => e
       say "Try 'loga new or register' first."
+    rescue Logaling::ProjectNotFound
+      say "glossary <#{@config.glossary}> not found."
+      say "Try 'loga list' and confirm glossary name."
     end
 
     desc 'delete [SOURCE TERM] [TARGET TERM(optional)] [--force(optional)]', 'Delete term.'
@@ -190,6 +201,9 @@ module Logaling::Command
       }
       @config.check_required_option(required_options)
       check_logaling_home_exists
+      project = @repository.find_project(@config.glossary)
+      raise Logaling::ProjectNotFound unless project
+      glossary = project.find_glossary(@config.source_language, @config.target_language)
 
       if target_term
         glossary.delete(source_term, target_term)
@@ -200,6 +214,9 @@ module Logaling::Command
       say e.message
     rescue Logaling::GlossaryNotFound => e
       say "Try 'loga new or register' first."
+    rescue Logaling::ProjectNotFound
+      say "glossary <#{@config.glossary}> not found."
+      say "Try 'loga list' and confirm glossary name."
     end
 
     desc 'update [SOURCE TERM] [TARGET TERM] [NEW TARGET TERM] [NOTE(optional)]', 'Update term.'
@@ -211,9 +228,10 @@ module Logaling::Command
       }
       @config.check_required_option(required_options)
       check_logaling_home_exists
-      @repository.index
-
-      if @repository.bilingual_pair_exists_and_has_same_note?(source_term, new_target_term, note, @config.glossary)
+      project = @repository.find_project(@config.glossary)
+      raise Logaling::ProjectNotFound unless project
+      glossary = project.find_glossary(@config.source_language, @config.target_language)
+      if glossary.bilingual_pair_exists?(source_term, new_target_term, note)
         raise Logaling::TermError, "term '#{source_term}: #{new_target_term}' already exists in '#{@config.glossary}'"
       end
 
@@ -222,6 +240,9 @@ module Logaling::Command
       say e.message
     rescue Logaling::GlossaryNotFound => e
       say "Try 'loga new or register' first."
+    rescue Logaling::ProjectNotFound
+      say "glossary <#{@config.glossary}> not found."
+      say "Try 'loga list' and confirm glossary name."
     end
 
     desc 'lookup [TERM]', 'Lookup terms.'
@@ -232,27 +253,39 @@ module Logaling::Command
     def lookup(source_term)
       check_logaling_home_exists
       @repository.index
+      if @config.glossary
+        project = @repository.find_project(@config.glossary)
+        raise Logaling::ProjectNotFound unless project
+        glossary = project.find_glossary(@config.source_language, @config.target_language)
+      else
+        glossary = nil
+      end
       terms = @repository.lookup(source_term, glossary, options["dictionary"])
       unless terms.empty?
         max_str_size = terms.map{|term| term[:source_term].size}.sort.last
         run_pager
         terms.each_with_index do |term, i|
-          source_string = extract_keyword_and_coloring(term[:snipped_source_term], term[:source_term])
-          target_string = extract_keyword_and_coloring(term[:snipped_target_term], term[:target_term])
-          note = term[:note].to_s unless term[:note].empty?
-          glossary_name = ""
-          if @repository.glossary_counts > 1
-            glossary_name = term[:glossary_name]
-            if term[:glossary_name] == @config.glossary
-              glossary_name = glossary_name.foreground(:white).background(:green)
-            end
+          case options["output"]
+          when "terminal"
+            term_renderer = Logaling::Command::Renderers::TermDefaultRenderer.new(term, @repository, @config, options)
+            term_renderer.max_str_size = max_str_size
+            term_renderer.render($stdout)
+          when "csv"
+            term_renderer = Logaling::Command::Renderers::TermCsvRenderer.new(term, @repository, @config, options)
+            term_renderer.render($stdout)
+          when "json"
+            term_renderer = Logaling::Command::Renderers::TermJsonRenderer.new(term, @repository, @config, options)
+            term_renderer.index = i
+            term_renderer.last_index = terms.length
+            term_renderer.render($stdout)
           end
-          printer(source_string, target_string, note,
-                  glossary_name, max_str_size, i, terms.length)
         end
       else
         "source-term <#{source_term}> not found"
       end
+    rescue Logaling::ProjectNotFound
+      say "glossary <#{@config.glossary}> not found."
+      say "Try 'loga list' and confirm glossary name."
     rescue Logaling::CommandFailed, Logaling::TermError => e
       say e.message
     end
@@ -272,8 +305,10 @@ module Logaling::Command
       }
       @config.check_required_option(required_options)
       check_logaling_home_exists
-      @repository.index
-      terms = @repository.show_glossary(glossary)
+      project = @repository.find_project(@config.glossary)
+      raise Logaling::ProjectNotFound unless project
+      glossary = project.find_glossary(@config.source_language, @config.target_language)
+      terms = glossary.terms
       unless terms.empty?
         run_pager
         max_str_size = terms.map{|term| term[:source_term].size}.sort.last
@@ -285,9 +320,11 @@ module Logaling::Command
       else
         "glossary <#{@config.glossary}> not found"
       end
-
     rescue Logaling::CommandFailed, Logaling::GlossaryDBNotFound => e
       say e.message
+    rescue Logaling::ProjectNotFound
+      say "glossary <#{@config.glossary}> not found."
+      say "Try 'loga list' and confirm glossary name."
     end
 
     desc 'list', 'Show glossary list.'
@@ -295,50 +332,23 @@ module Logaling::Command
     def list
       check_logaling_home_exists
       @repository.index
-      glossaries = @repository.list
-      unless glossaries.empty?
+      projects = @repository.projects
+      unless projects.empty?
         run_pager
-        glossaries.each do |glossary|
-          printf("  %s\n", glossary)
+        projects.each do |project|
+          printf("  %s\n", project.name)
         end
       else
         "There is no registered glossary."
       end
-
     rescue Logaling::CommandFailed, Logaling::GlossaryDBNotFound => e
       say e.message
     end
 
     private
-    def windows?
-      RUBY_PLATFORM =~ /win32|mingw32/i
-    end
-
-    def glossary
-      @glossary ||= Logaling::Glossary.new(@config.glossary, @config.source_language, @config.target_language, @logaling_home)
-    end
-
     def error(msg)
       STDERR.puts(msg)
       exit 1
-    end
-
-    def find_dotfile
-      dir = Dir.pwd
-      searched_path = []
-      loop do
-        path = File.join(dir, '.logaling')
-        if File.exist?(path)
-          return path
-        else
-          unless Pathname.new(dir).root?
-            searched_path << dir
-            dir = File.dirname(dir)
-          else
-            raise(Logaling::CommandFailed, "Can't found .logaling in #{searched_path}")
-          end
-        end
-      end
     end
 
     def logaling_config_path
@@ -349,42 +359,8 @@ module Logaling::Command
       end
     end
 
-    # http://nex-3.com/posts/73-git-style-automatic-paging-in-ruby
     def run_pager
-      return if options["no-pager"]
-      return if windows?
-      return unless STDOUT.tty?
-
-      read, write = IO.pipe
-
-      unless Kernel.fork # Child process
-        STDOUT.reopen(write)
-        STDERR.reopen(write) if STDERR.tty?
-        read.close
-        write.close
-        return
-      end
-
-      # Parent process, become pager
-      STDIN.reopen(read)
-      read.close
-      write.close
-
-      ENV['LESS'] = 'FSRX' # Don't page if the input is short enough
-
-      # wait until we have input before we start the pager
-      Kernel.select [STDIN]
-      pager = ENV['PAGER'] || 'less'
-      exec pager rescue exec "/bin/sh", "-c", pager
-    end
-
-    def extract_keyword_and_coloring(snipped_term, term)
-      return term if snipped_term.empty? || options["no-color"]
-      display_string = snipped_term.map do |word|
-        word.is_a?(Hash) ? word[:keyword].bright : word
-      end
-      display_string = display_string.join
-      display_string
+      Pager.run unless options["no-pager"]
     end
 
     def check_logaling_home_exists
@@ -393,50 +369,10 @@ module Logaling::Command
       end
     end
 
-    def printer(source_string, target_string, note=nil,
-                glossary_name, max_str_size, i, last)
-      case options["output"]
-      when "terminal"
-        unless note
-          format = target_string + "\t" + glossary_name
-        else
-          format = target_string + "\t# " + note + "\t" + glossary_name
-        end
-        printf("  %-#{max_str_size+10}s %s\n", source_string, format)
-      when "csv"
-        items = [source_string, target_string, note,
-                 @config.source_language, @config.target_language]
-        print(CSV.generate {|csv| csv << items})
-      when "json"
-        puts("[") if i == 0
-        puts(",") if i > 0
-        record = {
-          :source => source_string, :target => target_string, :note => note,
-          :source_language => @config.source_language,
-          :target_language => @config.target_language
-        }
-        print JSON.pretty_generate(record)
-        puts("\n]") if i == last-1
-      end
-    end
-
-    def check_import_parameter(glossary_info)
-      unless glossary_info[:name] && glossary_info[:url]
+    def check_import_parameter(args)
+      unless args[0] && args[1]
         raise Logaling::CommandFailed, "Do 'loga import tmx <glossary name> <url or path>'"
       end
-    end
-
-    def initialize_import_parameter(arr)
-      glossary_info = {}
-      url = arr[1]
-      if url && !URI.parse(url).host
-        url = File::expand_path(url)
-      end
-      glossary_info[:name] = arr[0]
-      glossary_info[:url] = url
-      glossary_info[:source_language] = arr[2]
-      glossary_info[:target_language] = arr[3]
-      glossary_info
     end
 
     def register_and_index

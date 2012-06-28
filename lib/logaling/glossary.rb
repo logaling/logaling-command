@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2011  Miho SUZUKI
+# Copyright (C) 2012  Miho SUZUKI
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,159 +14,95 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-begin
-  require 'psych'
-rescue LoadError => e
-  raise LoadError unless e.message =~ /psych/
-  puts "please install psych first."
-end
-require "yaml"
-require "csv"
-require "fileutils"
-
 module Logaling
   class Glossary
-    class << self
-      def load(file)
-        load_glossary(file)
-      end
+    SUPPORTED_FILE_TYPE = %w(yml tsv csv)
 
-      def load_glossary(file)
-        case File.extname(file)
-        when ".csv"
-          load_glossary_csv(file)
-        when ".tsv"
-          load_glossary_tsv(file)
-        when ".yml"
-          load_glossary_yml(file)
-        end
-      end
+    attr_reader :name, :source_language, :target_language
 
-      def load_glossary_yml(path)
-        YAML::load_file(path) || []
-      end
-
-      def load_glossary_tsv(path)
-        load_glossary_csv(path, "\t")
-      end
-
-      def load_glossary_csv(path, sep=",")
-        glossary = []
-        CSV.open(path, "r:utf-8",  {:col_sep => sep}) do |csv|
-          csv.each do |row|
-            glossary << {"source_term" => row[0], "target_term" => row[1], "note" => ""} if row.size >= 2
-          end
-        end
-        glossary
-      end
-    end
-    attr_reader :glossary, :source_language, :target_language
-
-    def initialize(glossary, source_language, target_language, logaling_home)
-      @logaling_home = logaling_home
-      @glossary = glossary
+    def initialize(name, source_language, target_language, project=nil)
+      @name = name
       @source_language = source_language
       @target_language = target_language
+      @project = project
+    end
+
+    def terms
+      raise Logaling::GlossaryDBNotFound unless File.exist?(@project.glossary_db_path)
+      index
+      terms = []
+      Logaling::GlossaryDB.open(@project.glossary_db_path, "utf8") do |db|
+        terms = db.translation_list(self)
+      end
+      terms
+    end
+
+    def bilingual_pair_exists?(source_term, target_term, note=nil)
+      raise Logaling::GlossaryDBNotFound unless File.exist?(@project.glossary_db_path)
+      index
+      terms = []
+      Logaling::GlossaryDB.open(@project.glossary_db_path, "utf8") do |db|
+        terms = db.get_bilingual_pair(source_term, target_term, @name, note)
+      end
+      !terms.empty?
     end
 
     def add(source_term, target_term, note)
-      FileUtils.touch(source_path) unless File.exist?(source_path)
-
-      glossary = Glossary.load_glossary(source_path)
-      glossary << build_term(source_term, target_term, note)
-      dump_glossary(glossary)
-    rescue
-      raise GlossaryNotFound
+      glossary_source.add(source_term, target_term, note)
     end
 
     def update(source_term, target_term, new_target_term, note)
-      raise GlossaryNotFound unless File.exist?(source_path)
-
-      glossary = Glossary.load_glossary(source_path)
-
-      target_index = find_term_index(glossary, source_term, target_term)
-      if target_index
-        glossary[target_index] = rebuild_term(glossary[target_index], source_term, new_target_term, note)
-        dump_glossary(glossary)
-      else
-        raise TermError, "Can't found term '#{source_term}: #{target_term}' in '#{@glossary}'"
-      end
+      glossary_source.update(source_term, target_term, new_target_term, note)
     end
 
     def delete(source_term, target_term)
-      raise GlossaryNotFound unless File.exist?(source_path)
-
-      glossary = Glossary.load_glossary(source_path)
-      target_index = find_term_index(glossary, source_term, target_term)
-      unless target_index
-        raise TermError, "Can't found term '#{source_term} #{target_term}' in '#{@glossary}'" unless target_index
-      end
-
-      glossary.delete_at(target_index)
-      dump_glossary(glossary)
+      glossary_source.delete(source_term, target_term)
     end
 
     def delete_all(source_term, force=false)
-      raise GlossaryNotFound unless File.exist?(source_path)
+      glossary_source.delete_all(source_term, force)
+    end
 
-      glossary = Glossary.load_glossary(source_path)
-      delete_candidates = target_terms(glossary, source_term)
-      if delete_candidates.empty?
-        raise TermError, "Can't found term '#{source_term} in '#{@glossary}'"
-      end
-
-      if delete_candidates.size == 1 || force
-        glossary.delete_if{|term| term['source_term'] == source_term }
-        dump_glossary(glossary)
+    def glossary_source
+      if @glossary_source
+        @glossary_source
       else
-        raise TermError, "There are duplicate terms in glossary.\n" +
-          "If you really want to delete, please put `loga delete [SOURCE_TERM] --force`\n" +
-          " or `loga delete [SOURCE_TERM] [TARGET_TERM]`"
+        file_name = [@name, @source_language, @target_language, 'yml'].join('.')
+        source_dir = @project.glossary_source_path
+        FileUtils.mkdir_p(source_dir)
+        source_path = File.join(source_dir, file_name)
+        @glossary_source = Logaling::GlossarySource.create(source_path, self)
       end
     end
 
-    def source_path
-      if @source_path
-        @source_path
-      else
-        fname = [@glossary, @source_language, @target_language].join(".")
-        @source_path = File.join(@logaling_home, "projects", @glossary, "glossary", "#{fname}.yml")
-      end
+    def to_s
+      [@name, @source_language, @target_language].join('.')
     end
 
     private
-    def build_term(source_term, target_term, note)
-      note ||= ''
-      {'source_term' => source_term, 'target_term' => target_term, 'note' => note}
-    end
-
-    def rebuild_term(current, source_term, target_term, note)
-      if current['target_term'] != target_term && (note.nil? || note == "")
-        note = current['note']
-      end
-      target_term = current['target_term'] if target_term == ""
-      build_term(source_term, target_term, note)
-    end
-
-    def find_term_index(glossary, source_term, target_term='')
-      glossary.find_index do |term|
-        if target_term.empty?
-          term['source_term'] == source_term
-        else
-          term['source_term'] == source_term && term['target_term'] == target_term
+    def index
+      Logaling::GlossaryDB.open(@project.glossary_db_path, "utf8") do |db|
+        db.recreate_table
+        glossary_sources.each do |glossary_source|
+          unless db.glossary_source_exist?(glossary_source)
+            puts "now index #{@name}..."
+            db.index_glossary_source(glossary_source)
+          end
+        end
+        indexed_glossary_sources = db.glossary_sources_related_on_glossary(self)
+        (indexed_glossary_sources - glossary_sources).each do |removed_glossary_source|
+          puts "now deindex #{@name}..."
+          db.deindex_glossary_source(removed_glossary_source)
         end
       end
     end
 
-    def target_terms(glossary, source_term)
-      glossary.select {|term| term['source_term'] == source_term }
-    end
-
-    def dump_glossary(glossary)
-      File.open(source_path, "w") do |f|
-        f.puts(glossary.to_yaml)
+    def glossary_sources
+      glob_condition = SUPPORTED_FILE_TYPE.map do |type|
+        file_name = [self.to_s, type].join('.')
+        File.join(@project.glossary_source_path, file_name)
       end
+      Dir.glob(glob_condition).map {|source_path| GlossarySource.create(source_path, self)}
     end
   end
 end

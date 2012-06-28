@@ -20,16 +20,14 @@ require "fileutils"
 
 module Logaling
   describe Repository do
-    let(:project) { "spec" }
     let(:logaling_home) { @logaling_home }
-    let(:glossary) { Glossary.new(project, 'en', 'ja', logaling_home) }
-    let(:glossary_path) { glossary.source_path }
     let(:repository) { Logaling::Repository.new(logaling_home) }
-    let(:db_home) { File.join(logaling_home, "db") }
+    let(:glossary) { repository.find_project('spec').find_glossary('en', 'ja') }
+    let(:glossary_source_path) { glossary.glossary_source.source_path }
 
     before do
       FileUtils.remove_entry_secure(File.join(logaling_home, 'projects', 'spec'), true)
-      FileUtils.mkdir_p(File.dirname(glossary_path))
+      FileUtils.mkdir_p(File.join(logaling_home, 'projects', 'spec'))
     end
 
     describe '#lookup' do
@@ -63,7 +61,7 @@ module Logaling
             :source_term=>"user-logaling",
             :snipped_source_term=>["", {:keyword=>"user-logaling"}],
             :target_term=>"ユーザ",
-            :snipped_target_term=>[],
+            :snipped_target_term=>["ユーザ"],
             :note=>"ユーザーではない"},
             {
             :glossary_name=>"spec",
@@ -72,14 +70,14 @@ module Logaling
             :source_term=>"user-logaling test",
             :snipped_source_term=>["", {:keyword=>"user-logaling"}, " test"],
             :target_term=>"ユーザーてすと",
-            :snipped_target_term=>[],
+            :snipped_target_term=>["ユーザーてすと"],
             :note=>""},
             {
             :glossary_name=>"spec",
             :source_language=>"en",
             :target_language=>"ja",
             :source_term=>"ゆーざ",
-            :snipped_source_term=>[],
+            :snipped_source_term=>["ゆーざ"],
             :target_term=>"test user-logaling test text",
             :snipped_target_term=>["test", {:keyword=>" user-logaling"}, " test text"],
             :note=>""}]
@@ -91,10 +89,9 @@ module Logaling
       end
 
       context 'when tsv file as glossary exists' do
-        let(:tsv_path) { glossary_path.sub(/yml$/, 'tsv') }
+        let(:tsv_path) { glossary_source_path.sub(/yml$/, 'tsv') }
 
         before do
-          FileUtils.mkdir_p(File.dirname(tsv_path))
           FileUtils.touch(tsv_path)
           File.open(tsv_path, "w"){|f| f.puts "test-logaling\tユーザー\ntest-logaling\tユーザ"}
           repository.index
@@ -112,14 +109,12 @@ module Logaling
     end
 
     describe '#index' do
-      let(:logaling_db) { Logaling::GlossaryDB.new }
-      let(:tsv_path) { File.join(File.dirname(glossary_path), "spec.en.ja.tsv") }
-      let(:csv_path) { File.join(File.dirname(glossary_path), "spec.en.ja.csv") }
+      let(:tsv_path) { File.join(File.dirname(glossary_source_path), "spec.en.ja.tsv") }
+      let(:csv_path) { File.join(File.dirname(glossary_source_path), "spec.en.ja.csv") }
 
       context 'when yml file as glossary exists' do
         before do
-          FileUtils.mkdir_p(File.dirname(glossary_path))
-          FileUtils.touch(glossary_path)
+          FileUtils.touch(glossary_source_path)
           glossary.add("spec_logaling", "スペック", "備考")
           repository.index
           @terms = repository.lookup("spec_logaling", glossary)
@@ -130,19 +125,17 @@ module Logaling
         end
 
         after do
-          FileUtils.remove_entry_secure(glossary_path, true)
+          FileUtils.remove_entry_secure(glossary_source_path, true)
         end
       end
 
       context 'when tsv file as glossary exists' do
         before do
-          FileUtils.mkdir_p(File.dirname(glossary_path))
           FileUtils.touch(tsv_path)
           File.open(tsv_path, "w"){|f| f.puts "user-logaling\tユーザ"}
           repository.index
           @terms = repository.lookup("user-logaling", glossary)
         end
-
 
         it 'glossaries should be indexed' do
           @terms.size.should == 1
@@ -155,7 +148,6 @@ module Logaling
 
       context 'when csv file as glosary exists' do
         before do
-          FileUtils.mkdir_p(File.dirname(glossary_path))
           FileUtils.touch(csv_path)
           File.open(csv_path, "w"){|f| f.puts "test_logaling,テスト"}
           repository.index

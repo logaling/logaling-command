@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2011  Miho SUZUKI
-# Copyright (C) 2011  Kouhei Sutou <kou@clear-code.com>
+# Copyright (C) 2012  Koji SHIMADA <koji.shimada@enishi-tech.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,16 +15,28 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-require "logaling/command"
-
 module Logaling
-  class LogalingError < RuntimeError; end
-  class TermError < LogalingError; end
-  class CommandFailed < LogalingError; end
-  class GlossaryAlreadyRegistered < LogalingError; end
-  class GlossaryNotFound < LogalingError; end
-  class GlossaryDBNotFound < LogalingError; end
-  class ExternalGlossaryNotFound < LogalingError; end
-  class UnsupportedFormat < LogalingError; end
-  class ProjectNotFound < LogalingError; end
+  module GlossarySources
+    class Base
+      attr_reader :source_path, :glossary
+
+      def initialize(source_path, glossary)
+        @source_path = source_path
+        @glossary = glossary
+      end
+
+      def eql?(other)
+        return false unless self.class == other.class
+        @source_path == other.source_path
+      end
+
+      def hash
+        @source_path.hash
+      end
+
+      def mtime
+        File.mtime(@source_path)
+      end
+    end
+  end
 end
