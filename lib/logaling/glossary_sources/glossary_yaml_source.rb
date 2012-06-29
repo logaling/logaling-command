@@ -29,7 +29,7 @@ module Logaling::GlossarySources
   class GlossaryYamlSource < Base
     def load
       YAML::load_file(source_path) || []
-    rescue
+    rescue TypeError
       []
     end
 
