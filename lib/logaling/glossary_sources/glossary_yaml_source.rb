@@ -29,6 +29,8 @@ module Logaling::GlossarySources
   class GlossaryYamlSource < Base
     def load
       YAML::load_file(source_path) || []
+    rescue TypeError
+      []
     end
 
     def add(source_term, target_term, note)
