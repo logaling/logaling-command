@@ -176,7 +176,7 @@ module Logaling::Command
       check_logaling_home_exists
       project = @repository.find_project(@config.glossary)
       raise Logaling::ProjectNotFound unless project
-      glossary = project.find_glossary(@config.source_language, @config.target_language)
+      glossary = project.glossary(@config.source_language, @config.target_language)
       if glossary.bilingual_pair_exists?(source_term, target_term)
         raise Logaling::TermError, "term '#{source_term}: #{target_term}' already exists in '#{@config.glossary}'"
       end
@@ -203,7 +203,7 @@ module Logaling::Command
       check_logaling_home_exists
       project = @repository.find_project(@config.glossary)
       raise Logaling::ProjectNotFound unless project
-      glossary = project.find_glossary(@config.source_language, @config.target_language)
+      glossary = project.glossary(@config.source_language, @config.target_language)
 
       if target_term
         glossary.delete(source_term, target_term)
@@ -230,7 +230,7 @@ module Logaling::Command
       check_logaling_home_exists
       project = @repository.find_project(@config.glossary)
       raise Logaling::ProjectNotFound unless project
-      glossary = project.find_glossary(@config.source_language, @config.target_language)
+      glossary = project.glossary(@config.source_language, @config.target_language)
       if glossary.bilingual_pair_exists?(source_term, new_target_term, note)
         raise Logaling::TermError, "term '#{source_term}: #{new_target_term}' already exists in '#{@config.glossary}'"
       end
@@ -256,7 +256,7 @@ module Logaling::Command
       if @config.glossary
         project = @repository.find_project(@config.glossary)
         raise Logaling::ProjectNotFound unless project
-        glossary = project.find_glossary(@config.source_language, @config.target_language)
+        glossary = project.glossary(@config.source_language, @config.target_language)
       else
         glossary = nil
       end
@@ -307,7 +307,7 @@ module Logaling::Command
       check_logaling_home_exists
       project = @repository.find_project(@config.glossary)
       raise Logaling::ProjectNotFound unless project
-      glossary = project.find_glossary(@config.source_language, @config.target_language)
+      glossary = project.glossary(@config.source_language, @config.target_language)
       terms = glossary.terms
       unless terms.empty?
         run_pager
