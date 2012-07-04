@@ -22,7 +22,7 @@ module Logaling
   describe Repository do
     let(:logaling_home) { @logaling_home }
     let(:repository) { Logaling::Repository.new(logaling_home) }
-    let(:glossary) { repository.find_project('spec').find_glossary('en', 'ja') }
+    let(:glossary) { repository.find_project('spec').glossary('en', 'ja') }
     let(:glossary_source_path) { glossary.glossary_source.source_path }
 
     before do

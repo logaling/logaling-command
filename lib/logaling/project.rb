@@ -45,16 +45,7 @@ module Logaling
       File.basename(@path)
     end
 
-    def glossaries
-      all_glossary_source_path = Dir.glob(File.join(glossary_source_path, "*"))
-      glossaries = all_glossary_source_path.map do |source_path|
-        name, source_language, target_language, type = File.basename(source_path).split(/\./)
-        find_glossary(source_language, target_language)
-      end
-      glossaries.uniq{|glossary| glossary.to_s }
-    end
-
-    def find_glossary(source_language, target_language)
+    def glossary(source_language, target_language)
       Logaling::Glossary.new(name, source_language, target_language, self)
     end
 
@@ -66,11 +57,20 @@ module Logaling
       @repository.logaling_db_home
     end
 
+    def glossaries
+      all_glossary_source_path = Dir.glob(File.join(glossary_source_path, "*"))
+      glossaries = all_glossary_source_path.map do |source_path|
+        name, source_language, target_language, type = File.basename(source_path).split(/\./)
+        glossary(source_language, target_language)
+      end
+      glossaries.uniq{|glossary| glossary.to_s }
+    end
+
     def glossary_sources
       all_glossary_source_path = Dir.glob(File.join(glossary_source_path, "*"))
       all_glossary_source_path.map do |source_path|
         name, source_language, target_language, type = File.basename(source_path).split(/\./)
-        GlossarySource.create(source_path, find_glossary(source_language, target_language))
+        GlossarySource.create(source_path, glossary(source_language, target_language))
       end
     end
   end
@@ -82,7 +82,7 @@ module Logaling
 
     def glossary_sources
       name, source_language, target_language, type = File.basename(@path).split(/\./)
-      [GlossarySource.create(@path, find_glossary(source_language, target_language))]
+      [GlossarySource.create(@path, glossary(source_language, target_language))]
     end
   end
 end
