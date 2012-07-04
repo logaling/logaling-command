@@ -71,11 +71,11 @@ module Logaling
         GlossarySource.create(source_path, glossary(source_language, target_language))
       end
     end
-  end
 
-  private
-  def all_glossary_source_path
-    Dir.glob(File.join(glossary_source_path, "*"))
+    private
+    def all_glossary_source_path
+      Dir.glob(File.join(glossary_source_path, "*"))
+    end
   end
 
   class ImportedProject < Project
