@@ -26,7 +26,7 @@ module Logaling
     let(:project) { repository.find_project("spec") }
 
     before do
-      FileUtils.remove_entry_secure(project_path, true)
+      FileUtils.rm_rf(project_path, :secure => true)
       FileUtils.mkdir_p(File.join(project_path, "glossary"))
     end
 

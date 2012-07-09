@@ -41,7 +41,7 @@ module Logaling
 
     def unregister(project)
       raise Logaling::ProjectNotFound unless project
-      FileUtils.remove_entry_secure(project.path, true)
+      FileUtils.rm_rf(project.path, :secure => true)
     end
 
     def import(glossary_source)

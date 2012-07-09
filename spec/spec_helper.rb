@@ -43,7 +43,7 @@ RSpec.configure do |config|
   end
 
   config.after(:suite) do
-    FileUtils.remove_entry_secure(LOGALING_HOME, true)
+    FileUtils.rm_rf(LOGALING_HOME, :secure => true)
   end
 
   alias :silence :capture
