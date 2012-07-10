@@ -26,7 +26,7 @@ module Logaling
     let(:glossary_source_path) { glossary.glossary_source.source_path }
 
     before do
-      FileUtils.remove_entry_secure(File.join(logaling_home, 'projects', 'spec'), true)
+      FileUtils.rm_rf(File.join(logaling_home, 'projects', 'spec'), :secure => true)
       FileUtils.mkdir_p(File.join(logaling_home, 'projects', 'spec'))
     end
 
@@ -170,7 +170,7 @@ module Logaling
     end
 
     after do
-      FileUtils.remove_entry_secure(File.join(logaling_home, 'projects', 'spec'), true)
+      FileUtils.rm_rf(File.join(logaling_home, 'projects', 'spec'), :secure => true)
     end
   end
 end
