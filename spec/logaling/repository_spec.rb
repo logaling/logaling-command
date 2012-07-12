@@ -16,6 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 require File.join(File.dirname(__FILE__), "..", "spec_helper")
+require 'yaml'
 require "fileutils"
 
 module Logaling
@@ -114,7 +115,9 @@ module Logaling
 
       context 'when yml file as glossary exists' do
         before do
-          FileUtils.touch(glossary_source_path)
+          File.open(glossary_source_path, 'w') do |f|
+            YAML.dump([], f)
+          end
           glossary.add("spec_logaling", "スペック", "備考")
           repository.index
           @terms = repository.lookup("spec_logaling", glossary)
