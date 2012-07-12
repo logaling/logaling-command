@@ -34,7 +34,7 @@ module Logaling::GlossarySources
     end
 
     def add(source_term, target_term, note)
-      FileUtils.touch(source_path) unless File.exist?(source_path)
+      dump_glossary_source([]) unless File.exist?(source_path)
 
       glossary_source = self.load
       glossary_source << build_term(source_term, target_term, note)
