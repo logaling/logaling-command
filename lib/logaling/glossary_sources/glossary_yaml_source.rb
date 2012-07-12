@@ -118,7 +118,7 @@ module Logaling::GlossarySources
 
     def dump_glossary_source(glossary_source)
       File.open(source_path, "w") do |f|
-        f.puts(glossary_source.to_yaml)
+        YAML.dump(glossary_source, f)
       end
     end
   end
