@@ -1,5 +1,7 @@
 ## logaling-command
 
+[![Build Status](https://secure.travis-ci.org/logaling/logaling-command.png)](http://travis-ci.org/logaling/logaling-command)
+
 [logaling-command](http://logaling.github.com) is a CLI for managing bilingual glossary.
 You can add/update/delete terms to your glossary, and search glossaries at once.
 
