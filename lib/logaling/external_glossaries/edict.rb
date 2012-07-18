@@ -19,7 +19,8 @@ require 'stringio'
 
 module Logaling
   class Edict < ExternalGlossary
-    description     'The EDICT Dictionary File (http://www.csse.monash.edu.au/~jwb/edict.html)'
+    description     'The EDICT Dictionary File'
+    url             'http://www.csse.monash.edu.au/~jwb/edict.html'
     source_language 'ja'
     target_language 'en'
     output_format   'csv'

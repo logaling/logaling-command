@@ -21,7 +21,8 @@ require 'rubygems/package'
 
 module Logaling
   class Gene95 < ExternalGlossary
-    description     'GENE95 Dictionary (http://www.namazu.org/~tsuchiya/sdic/data/gene.html)'
+    description     'GENE95 Dictionary'
+    url             'http://www.namazu.org/~tsuchiya/sdic/data/gene.html'
     source_language 'en'
     target_language 'ja'
     output_format   'csv'

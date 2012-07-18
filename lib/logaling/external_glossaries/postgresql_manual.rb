@@ -19,7 +19,8 @@ require 'nokogiri'
 
 module Logaling
   class PostgresqlManual < ExternalGlossary
-    description     'PostgreSQL7.1 Manual (http://osb.sraoss.co.jp/PostgreSQL/Manual/)'
+    description     'PostgreSQL7.1 Manual'
+    url             'http://osb.sraoss.co.jp/PostgreSQL/Manual/'
     source_language 'en'
     target_language 'ja'
     output_format   'csv'

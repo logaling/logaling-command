@@ -19,7 +19,8 @@ require 'nokogiri'
 
 module Logaling
   class GnomeProject < ExternalGlossary
-    description     'GNOME Translation Project Ja (http://live.gnome.org/TranslationProjectJa)'
+    description     'GNOME Translation Project Ja'
+    url             'http://live.gnome.org/TranslationProjectJa'
     source_language 'en'
     target_language 'ja'
     output_format   'csv'

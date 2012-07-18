@@ -17,7 +17,8 @@ require 'nokogiri'
 
 module Logaling
   class MozillaJapan < ExternalGlossary
-    description     'Mozilla Japan (http://www.mozilla-japan.org/jp/l10n/term/l10n.html)'
+    description     'Mozilla Japan'
+    url             'http://www.mozilla-japan.org/jp/l10n/term/l10n.html'
     source_language 'en'
     target_language 'ja'
     output_format   'csv'
