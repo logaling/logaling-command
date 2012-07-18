@@ -63,6 +63,19 @@ module Logaling::Command
     end
 
     class TermDefaultRenderer < TermRenderer
+      class << self
+        def print_size(string)
+          string.each_char.map{|char| char.bytesize == 1 ? 1 : 2}.inject(0, &:+)
+        end
+
+        def padding_print_size(string_raw, string, max_size)
+          # use size of un-snipped source_term
+          padding_size = max_size - print_size(string_raw)
+          padding_size = 0 if padding_size < 0
+          string + " " * padding_size
+        end
+        public :padding_print_size, :print_size
+      end
       attr_accessor :max_str_size
 
       def initialize(term, repository, config, options)
@@ -71,8 +84,9 @@ module Logaling::Command
       end
 
       def render(output)
-        format = [target_term, note, glossary_name].compact.join("\t")
-        output.printf("  %-#{@max_str_size+10}s %s\n", source_term, format)
+        format = [target_term.strip, note, glossary_name].compact.join("\t")
+        paddinged_source_term = TermDefaultRenderer.padding_print_size(@term[:source_term], source_term, @max_str_size)
+        output.printf("  %s  %s\n", paddinged_source_term, format)
       end
 
       def glossary_name

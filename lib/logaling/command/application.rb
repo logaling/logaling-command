@@ -379,12 +379,10 @@ module Logaling::Command
       @repository.index
     end
 
-    def term_print_size(string)
-      string.each_char.map{|char| char.bytesize == 1 ? 1 : 2}.inject(0, &:+)
-    end
-
     def max_str_size(terms)
-      terms.map{|term| term_print_size(term[:source_term])}.sort.last
+      terms.map{|term|
+        Logaling::Command::Renderers::TermDefaultRenderer.print_size(term[:source_term])
+      }.sort.last
     end
   end
 end
