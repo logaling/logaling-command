@@ -262,7 +262,7 @@ module Logaling::Command
       end
       terms = @repository.lookup(source_term, glossary, options["dictionary"])
       unless terms.empty?
-        max_str_size = terms.map{|term| term[:source_term].size}.sort.last
+        max_str_size = terms.map{|term| term_print_size(term[:source_term])}.sort.last
         run_pager
         terms.each_with_index do |term, i|
           case options["output"]
@@ -311,7 +311,7 @@ module Logaling::Command
       terms = glossary.terms
       unless terms.empty?
         run_pager
-        max_str_size = terms.map{|term| term[:source_term].size}.sort.last
+        max_str_size = terms.map{|term| term_print_size(term[:source_term])}.sort.last
         terms.each do |term|
           target_string = "#{term[:target_term]}"
           target_string <<  "\t# #{term[:note]}" unless term[:note].empty?
@@ -378,6 +378,10 @@ module Logaling::Command
     def register_and_index
       @repository.register(@dotfile_path, @config.glossary)
       @repository.index
+    end
+
+    def term_print_size(string)
+      string.each_char.map{|char| char.bytesize == 1 ? 1 : 2}.inject(0, &:+)
     end
   end
 end
