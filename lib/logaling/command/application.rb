@@ -262,13 +262,12 @@ module Logaling::Command
       end
       terms = @repository.lookup(source_term, glossary, options["dictionary"])
       unless terms.empty?
-        max_str_size = terms.map{|term| term_print_size(term[:source_term])}.sort.last
         run_pager
         terms.each_with_index do |term, i|
           case options["output"]
           when "terminal"
             term_renderer = Logaling::Command::Renderers::TermDefaultRenderer.new(term, @repository, @config, options)
-            term_renderer.max_str_size = max_str_size
+            term_renderer.max_str_size = max_str_size(terms)
             term_renderer.render($stdout)
           when "csv"
             term_renderer = Logaling::Command::Renderers::TermCsvRenderer.new(term, @repository, @config, options)
@@ -311,11 +310,11 @@ module Logaling::Command
       terms = glossary.terms
       unless terms.empty?
         run_pager
-        max_str_size = terms.map{|term| term_print_size(term[:source_term])}.sort.last
+        max_source_term_size = max_str_size(terms)
         terms.each do |term|
           target_string = "#{term[:target_term]}"
           target_string <<  "\t# #{term[:note]}" unless term[:note].empty?
-          printf("  %-#{max_str_size+10}s %s\n", term[:source_term], target_string)
+          printf("  %-#{max_source_term_size+10}s %s\n", term[:source_term], target_string)
         end
       else
         "glossary <#{@config.glossary}> not found"
@@ -382,6 +381,10 @@ module Logaling::Command
 
     def term_print_size(string)
       string.each_char.map{|char| char.bytesize == 1 ? 1 : 2}.inject(0, &:+)
+    end
+
+    def max_str_size(terms)
+      terms.map{|term| term_print_size(term[:source_term])}.sort.last
     end
   end
 end
