@@ -63,20 +63,6 @@ module Logaling::Command
     end
 
     class TermDefaultRenderer < TermRenderer
-      class << self
-        def print_size(string)
-          string.each_char.map{|char| char.bytesize == 1 ? 1 : 2}.inject(0, &:+)
-        end
-
-        def padding_print_size(string_raw, string, max_size)
-          # use size of un-snipped source_term
-          padding_size = max_size - print_size(string_raw)
-          padding_size = 0 if padding_size < 0
-          string + " " * padding_size
-        end
-        public :padding_print_size, :print_size
-      end
-
       def initialize(term, repository, config, options)
         super
         @term[:snipped_source_term] = [@term[:source_term]]
@@ -109,7 +95,7 @@ module Logaling::Command
       end
 
       def padded_source_term
-        TermDefaultRenderer.padding_print_size(@term[:source_term], source_term, @max_str_size)
+        padding_print_size(@term[:source_term], source_term, @max_str_size)
       end
 
       def hide_glossary_name
@@ -118,8 +104,20 @@ module Logaling::Command
 
       def set_max_str_size(terms)
         @max_str_size = terms.map{|term|
-          Logaling::Command::Renderers::TermDefaultRenderer.print_size(term[:source_term])
+          print_size(term[:source_term])
         }.sort.last
+      end
+
+      private
+      def print_size(string)
+        string.each_char.map{|char| char.bytesize == 1 ? 1 : 2}.inject(0, &:+)
+      end
+
+      def padding_print_size(string_raw, string, max_size)
+        # use size of un-snipped source_term
+        padding_size = max_size - print_size(string_raw)
+        padding_size = 0 if padding_size < 0
+        string + " " * padding_size
       end
     end
 
