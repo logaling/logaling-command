@@ -310,11 +310,11 @@ module Logaling::Command
       terms = glossary.terms
       unless terms.empty?
         run_pager
-        max_source_term_size = max_str_size(terms)
         terms.each do |term|
-          target_string = "#{term[:target_term]}"
-          target_string <<  "\t# #{term[:note]}" unless term[:note].empty?
-          printf("  %-#{max_source_term_size+10}s %s\n", term[:source_term], target_string)
+          term_renderer = Logaling::Command::Renderers::TermDefaultRenderer.new(term, @repository, @config, options)
+          term_renderer.max_str_size = max_str_size(terms)
+          term_renderer.hide_glossary_name
+          term_renderer.render($stdout)
         end
       else
         "glossary <#{@config.glossary}> not found"

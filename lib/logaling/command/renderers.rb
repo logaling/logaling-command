@@ -80,6 +80,10 @@ module Logaling::Command
 
       def initialize(term, repository, config, options)
         super
+        @term[:snipped_source_term] = [@term[:source_term]]
+        @term[:snipped_target_term] = [@term[:target_term]]
+        @render_option = {}
+        @render_option[:show_glossary] = true
         @max_str_size = 0
       end
 
@@ -90,7 +94,7 @@ module Logaling::Command
       end
 
       def glossary_name
-        if @repository.glossary_counts > 1
+        if @render_option[:show_glossary] && @repository.glossary_counts > 1
           if @term[:glossary_name] == @config.glossary
             @term[:glossary_name].foreground(:white).background(:green)
           else
@@ -104,6 +108,10 @@ module Logaling::Command
       def note
         note_string = super
         "# #{note_string}" if note_string
+      end
+
+      def hide_glossary_name
+        @render_option[:show_glossary] = false
       end
     end
 
