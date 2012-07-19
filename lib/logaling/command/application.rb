@@ -267,7 +267,7 @@ module Logaling::Command
           case options["output"]
           when "terminal"
             term_renderer = Logaling::Command::Renderers::TermDefaultRenderer.new(term, @repository, @config, options)
-            term_renderer.max_str_size = max_str_size(terms)
+            term_renderer.set_max_str_size(terms)
             term_renderer.render($stdout)
           when "csv"
             term_renderer = Logaling::Command::Renderers::TermCsvRenderer.new(term, @repository, @config, options)
@@ -312,7 +312,7 @@ module Logaling::Command
         run_pager
         terms.each do |term|
           term_renderer = Logaling::Command::Renderers::TermDefaultRenderer.new(term, @repository, @config, options)
-          term_renderer.max_str_size = max_str_size(terms)
+          term_renderer.set_max_str_size(terms)
           term_renderer.hide_glossary_name
           term_renderer.render($stdout)
         end
@@ -377,12 +377,6 @@ module Logaling::Command
     def register_and_index
       @repository.register(@dotfile_path, @config.glossary)
       @repository.index
-    end
-
-    def max_str_size(terms)
-      terms.map{|term|
-        Logaling::Command::Renderers::TermDefaultRenderer.print_size(term[:source_term])
-      }.sort.last
     end
   end
 end

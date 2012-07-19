@@ -76,7 +76,6 @@ module Logaling::Command
         end
         public :padding_print_size, :print_size
       end
-      attr_accessor :max_str_size
 
       def initialize(term, repository, config, options)
         super
@@ -112,6 +111,12 @@ module Logaling::Command
 
       def hide_glossary_name
         @render_option[:show_glossary] = false
+      end
+
+      def set_max_str_size(terms)
+        @max_str_size = terms.map{|term|
+          Logaling::Command::Renderers::TermDefaultRenderer.print_size(term[:source_term])
+        }.sort.last
       end
     end
 
