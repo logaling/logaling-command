@@ -88,8 +88,7 @@ module Logaling::Command
 
       def render(output)
         format = [target_term.strip, note, glossary_name].compact.join("\t")
-        paddinged_source_term = TermDefaultRenderer.padding_print_size(@term[:source_term], source_term, @max_str_size)
-        output.printf("  %s  %s\n", paddinged_source_term, format)
+        output.printf("  %s  %s\n", padded_source_term, format)
       end
 
       def glossary_name
@@ -107,6 +106,10 @@ module Logaling::Command
       def note
         note_string = super
         "# #{note_string}" if note_string
+      end
+
+      def padded_source_term
+        TermDefaultRenderer.padding_print_size(@term[:source_term], source_term, @max_str_size)
       end
 
       def hide_glossary_name
