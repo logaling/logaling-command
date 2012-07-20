@@ -95,7 +95,7 @@ module Logaling::Command
       end
 
       def padded_source_term
-        source_term + " " * padding_print_size(@term[:source_term], @max_source_term_width)
+        source_term + " " * padding_size(@term[:source_term], @max_source_term_width)
       end
 
       def hide_glossary_name
@@ -119,10 +119,8 @@ module Logaling::Command
         char.bytesize == 1 ? 1 : 2
       end
 
-      def padding_print_size(string, max_size)
-        # use size of un-snipped source_term
-        padding_size = max_size - string_display_width(string)
-        padding_size > 0 ? padding_size : 0
+      def padding_size(string, max_display_width)
+        [(max_display_width - string_display_width(string)), 0].max
       end
     end
 
