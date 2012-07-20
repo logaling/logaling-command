@@ -103,9 +103,7 @@ module Logaling::Command
       end
 
       def set_max_source_term_width(terms)
-        @max_source_term_width = terms.map{|term|
-          string_display_width(term[:source_term])
-        }.sort.last
+        @max_source_term_width = terms.map{|term| string_display_width(term[:source_term]) }.max
       end
 
       private
