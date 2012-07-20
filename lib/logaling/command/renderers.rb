@@ -110,7 +110,13 @@ module Logaling::Command
 
       private
       def string_display_width(string)
-        string.each_char.map{|char| char.bytesize == 1 ? 1 : 2}.inject(0, &:+)
+        string.each_char.map{|char| char_display_width(char) }.inject(0, &:+)
+      end
+
+      def char_display_width(char)
+        # Simple and stupid implementation. It would be better to use East_Asian_Width.
+        # See http://ja.wikipedia.org/wiki/%E6%9D%B1%E3%82%A2%E3%82%B8%E3%82%A2%E3%81%AE%E6%96%87%E5%AD%97%E5%B9%85
+        char.bytesize == 1 ? 1 : 2
       end
 
       def padding_print_size(string, max_size)
