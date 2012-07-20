@@ -69,7 +69,7 @@ module Logaling::Command
         @term[:snipped_target_term] = [@term[:target_term]]
         @render_option = {}
         @render_option[:show_glossary] = true
-        @max_str_size = 0
+        @max_source_term_width = 0
       end
 
       def render(output)
@@ -95,15 +95,15 @@ module Logaling::Command
       end
 
       def padded_source_term
-        source_term + " " * padding_print_size(@term[:source_term], @max_str_size)
+        source_term + " " * padding_print_size(@term[:source_term], @max_source_term_width)
       end
 
       def hide_glossary_name
         @render_option[:show_glossary] = false
       end
 
-      def set_max_str_size(terms)
-        @max_str_size = terms.map{|term|
+      def set_max_source_term_width(terms)
+        @max_source_term_width = terms.map{|term|
           print_size(term[:source_term])
         }.sort.last
       end
