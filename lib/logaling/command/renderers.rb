@@ -104,18 +104,18 @@ module Logaling::Command
 
       def set_max_source_term_width(terms)
         @max_source_term_width = terms.map{|term|
-          print_size(term[:source_term])
+          string_display_width(term[:source_term])
         }.sort.last
       end
 
       private
-      def print_size(string)
+      def string_display_width(string)
         string.each_char.map{|char| char.bytesize == 1 ? 1 : 2}.inject(0, &:+)
       end
 
       def padding_print_size(string, max_size)
         # use size of un-snipped source_term
-        padding_size = max_size - print_size(string)
+        padding_size = max_size - string_display_width(string)
         padding_size > 0 ? padding_size : 0
       end
     end
