@@ -108,6 +108,8 @@ module Logaling::Command
 
       private
       def string_display_width(string)
+        # It should refer to the following URL and improve.
+        # https://github.com/test-unit/test-unit/blob/master/lib/test/unit/diff.rb#L349
         string.each_char.map{|char| char_display_width(char) }.inject(0, &:+)
       end
 
