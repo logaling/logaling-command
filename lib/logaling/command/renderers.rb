@@ -73,8 +73,8 @@ module Logaling::Command
       end
 
       def render(output)
-        format = [target_term.strip, note, glossary_name].compact.join("\t")
-        output.printf("  %s  %s\n", padded_source_term, format)
+        formatted_text = [padded_source_term, target_term, note, glossary_name].compact.join("\t")
+        output.printf("  %s\n", formatted_text)
       end
 
       def glossary_name
