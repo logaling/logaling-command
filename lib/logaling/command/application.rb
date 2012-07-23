@@ -90,7 +90,7 @@ module Logaling::Command
       require "logaling/external_glossary"
       Logaling::ExternalGlossary.load
       if options["list"]
-        Logaling::ExternalGlossary.list.each {|glossary_source| say "#{glossary_source.name.bright} : #{glossary_source.description}" }
+        Logaling::ExternalGlossary.list.each {|glossary_source| say "#{glossary_source.name.bright} : #{glossary_source.description} (#{glossary_source.url})" }
       else
         case external_glossary
         when 'tmx'

@@ -19,7 +19,8 @@ require 'open-uri'
 
 module Logaling
   class FreebsdJpman < ExternalGlossary
-    description     'FreeBSD jpman(http://www.jp.freebsd.org/man-jp/)'
+    description     'FreeBSD jpman'
+    url             'http://www.jp.freebsd.org/man-jp/'
     source_language 'en'
     target_language 'ja'
     output_format   'csv'

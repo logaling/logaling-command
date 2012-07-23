@@ -19,7 +19,8 @@ require 'nokogiri'
 
 module Logaling
   class DebianProject < ExternalGlossary
-    description     'Debian JP Project (http://www.debian.or.jp/community/translate/)'
+    description     'Debian JP Project'
+    url             'http://www.debian.or.jp/community/translate/'
     source_language 'en'
     target_language 'ja'
     output_format   'csv'

@@ -17,7 +17,8 @@ require 'open-uri'
 require 'nokogiri'
 module Logaling
   class Tmx < ExternalGlossary
-    description     'TMX 1.4b formatted glossary (http://www.gala-global.org/oscarStandards/tmx/)'
+    description     'TMX 1.4b formatted glossary'
+    url             'http://www.gala-global.org/oscarStandards/tmx/'
     source_language 'en'
     target_language 'ja'
     output_format   'csv'

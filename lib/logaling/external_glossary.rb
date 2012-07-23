@@ -51,6 +51,10 @@ class Logaling::ExternalGlossary
       @description ||= val
     end
 
+    def url val=nil
+      @url ||= val
+    end
+
     def source_language val=nil
       @source_language ||= val
     end
