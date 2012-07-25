@@ -17,7 +17,7 @@
 require 'nokogiri'
 
 module Logaling
-  class Itil < ExternalGlossary
+  class ItilJapanese < ExternalGlossary
     description     'ITIL V3 Glossary of Terms and Acronyms'
     url             'http://www.itil-officialsite.com/InternationalActivities/ITILGlossaries_2.aspx'
     source_language 'en'
