@@ -18,7 +18,7 @@ require 'nokogiri'
 
 module Logaling
   class ItilJapanese < ExternalGlossary
-    description     'ITIL V3 Glossary of Terms and Acronyms'
+    description     'ITIL Japanese 2011 Glossary'
     url             'http://www.itil-officialsite.com/InternationalActivities/ITILGlossaries_2.aspx'
     source_language 'en'
     target_language 'ja'
@@ -26,6 +26,7 @@ module Logaling
 
     private
     def convert_to_csv(csv)
+      # open local html file because web resources are PDF or MS Word file...
       file_path = File.join(File.dirname(__FILE__), "resources", "ITIL_2011_Japanese_Glossary_v1.0.html")
       doc = Nokogiri::HTML(File.open(file_path), nil, "utf-8")
       indexes = [0,2]
