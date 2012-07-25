@@ -26,10 +26,13 @@ module Logaling
 
     private
     def convert_to_csv(csv)
-      file_path = File.join(File.dirname(__FILE__), "resources", "ITILV3_Glossary_Japanese_v3.1.24.html")
-      doc = Nokogiri::HTML(File.open(file_path), nil, "Shift_JIS")
-      doc.xpath("//table/tr").each do |tr|
-        csv << (1..3).map{|i| format_text(tr.search("td[#{i}]").text)}
+      file_path = File.join(File.dirname(__FILE__), "resources", "ITIL_2011_Japanese_Glossary_v1.0.html")
+      doc = Nokogiri::HTML(File.open(file_path), nil, "utf-8")
+      indexes = [0,2]
+      doc.css('table tr')[1..-1].each do |tr|
+        p = tr.children[0].css('p').first
+        indexes = [0,6] and next if p['class'] == 'WLBody'
+        csv << indexes.map{|i| format_text(tr.children[i].text)}
       end
     end
 
