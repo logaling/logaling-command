@@ -29,11 +29,18 @@ module Logaling
       # open local html file because web resources are PDF or MS Word file...
       file_path = File.join(File.dirname(__FILE__), "resources", "ITIL_2011_Japanese_Glossary_v1.0.html")
       doc = Nokogiri::HTML(File.open(file_path), nil, "utf-8")
-      indexes = [0,2]
+      abbreviation = false
       doc.css('table tr')[1..-1].each do |tr|
         p = tr.children[0].css('p').first
-        indexes = [0,6] and next if p['class'] == 'WLBody'
-        csv << indexes.map{|i| format_text(tr.children[i].text)}
+        abbreviation = true and next if p['class'] == 'WLBody'
+
+        source_term = format_text(tr.children[0].text)
+        unless abbreviation
+          target_term = format_text(tr.children[2].text)
+        else
+          target_term = sprintf("%s %s", format_text(tr.children[4].text), format_text(tr.children[6].text))
+        end
+        csv << [source_term, target_term]
       end
     end
 
