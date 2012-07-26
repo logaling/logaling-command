@@ -31,8 +31,8 @@ module Logaling
       doc = Nokogiri::HTML(File.open(file_path), nil, "utf-8")
       abbreviation = false
       doc.css('table tr')[1..-1].each do |tr|
-        p = tr.children[0].css('p').first
-        if p['class'] == 'WLBody'
+        paragraph = tr.children[0].css('p').first
+        if paragraph['class'] == 'WLBody'
           abbreviation = true
           next
         end
