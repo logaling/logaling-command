@@ -32,13 +32,16 @@ module Logaling
       abbreviation = false
       doc.css('table tr')[1..-1].each do |tr|
         p = tr.children[0].css('p').first
-        abbreviation = true and next if p['class'] == 'WLBody'
+        if p['class'] == 'WLBody'
+          abbreviation = true
+          next
+        end
 
         source_term = format_text(tr.children[0].text)
-        unless abbreviation
-          target_term = format_text(tr.children[2].text)
-        else
+        if abbreviation
           target_term = sprintf("%s %s", format_text(tr.children[4].text), format_text(tr.children[6].text))
+        else
+          target_term = format_text(tr.children[2].text)
         end
         csv << [source_term, target_term]
       end
