@@ -37,13 +37,11 @@ module Logaling
           next
         end
 
-        source_term = format_text(tr.children[0].text)
-        if abbreviation
-          target_term = sprintf("%s %s", format_text(tr.children[4].text), format_text(tr.children[6].text))
-        else
+        unless abbreviation
+          source_term = format_text(tr.children[0].text)
           target_term = format_text(tr.children[2].text)
+          csv << [source_term, target_term]
         end
-        csv << [source_term, target_term]
       end
     end
 
