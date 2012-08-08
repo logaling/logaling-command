@@ -90,6 +90,9 @@ module Logaling
       projects = registered_project_paths.map do |project_path|
         Logaling::Project.new(project_path, self)
       end
+      projects += user_glossary_paths.map do |user_glossary_path|
+        Logaling::ImportedProject.new(user_glossary_path, self)
+      end
       projects += imported_glossary_paths.map do |imported_project_path|
         Logaling::ImportedProject.new(imported_project_path, self)
       end
@@ -138,12 +141,20 @@ module Logaling
       File.join(@path, "projects")
     end
 
+    def logaling_user_glossaries_path
+      File.join(@path, "user_glossaries")
+    end
+
     def cache_path
       File.join(@path, "cache")
     end
 
     def registered_project_paths
       Dir[File.join(logaling_projects_path, "*")]
+    end
+
+    def user_glossary_paths
+      Dir[File.join(logaling_user_glossaries_path, "*")]
     end
 
     def imported_glossary_paths
