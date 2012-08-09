@@ -64,9 +64,9 @@ module Logaling::Command
 
     desc 'new [PROJECT NAME] [SOURCE LANGUAGE] [TARGET LANGUAGE(optional)]', 'Create .logaling'
     method_option "no-register", type: :boolean, default: false
-    method_option "no-project", type: :boolean, default: false
+    method_option "personal", type: :boolean, default: false
     def new(project_name, source_language, target_language=nil)
-      unless options['no-project']
+      unless options['personal']
         unless File.exist?(logaling_config_path)
           FileUtils.mkdir_p(File.join(logaling_config_path, "glossary"))
 
@@ -86,7 +86,7 @@ module Logaling::Command
         end
       else
         # raise error if target is nil 
-        @repository.create_user_glossary(project_name, source_language, target_language)
+        @repository.create_personal_glossary(project_name, source_language, target_language)
       end
     end
 

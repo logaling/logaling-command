@@ -44,10 +44,10 @@ module Logaling
       FileUtils.rm_rf(project.path, :secure => true)
     end
 
-    def create_user_glossary(glossary_name, source_language, target_language)
-      FileUtils.mkdir_p(logaling_user_glossaries_path)
+    def create_personal_glossary(glossary_name, source_language, target_language)
+      FileUtils.mkdir_p(personal_path)
       glossary_source_name = [glossary_name, source_language, target_language,'yml'].join('.')
-      FileUtils.touch(File.join(logaling_user_glossaries_path, glossary_source_name))
+      FileUtils.touch(File.join(personal_path, glossary_source_name))
       # raise error if already file exist
       # raise error if same file in /projects
     end
@@ -90,8 +90,8 @@ module Logaling
       projects = registered_project_paths.map do |project_path|
         Logaling::Project.new(project_path, self)
       end
-      projects += user_glossary_paths.map do |user_glossary_path|
-        Logaling::PersonalProject.new(user_glossary_path, self)
+      projects += personal_glossary_paths.map do |personal_glossary_path|
+        Logaling::PersonalProject.new(personal_glossary_path, self)
       end
       projects += imported_glossary_paths.map do |imported_project_path|
         Logaling::ImportedProject.new(imported_project_path, self)
@@ -141,8 +141,8 @@ module Logaling
       File.join(@path, "projects")
     end
 
-    def logaling_user_glossaries_path
-      File.join(@path, "user_glossaries")
+    def personal_path
+      File.join(@path, "personal")
     end
 
     def cache_path
@@ -153,8 +153,8 @@ module Logaling
       Dir[File.join(logaling_projects_path, "*")]
     end
 
-    def user_glossary_paths
-      Dir[File.join(logaling_user_glossaries_path, "*")]
+    def personal_glossary_paths
+      Dir[File.join(personal_path, "*")]
     end
 
     def imported_glossary_paths
