@@ -85,9 +85,11 @@ module Logaling::Command
           say "#{logaling_config_path} already exists."
         end
       else
-        # raise error if target is nil 
+        raise Logaling::CommandFailed, "[TARGET-LANGUAGE] is required when you use '--personal'" unless target_language
         @repository.create_personal_glossary(project_name, source_language, target_language)
       end
+    rescue Logaling::CommandFailed => e
+      say e.message
     end
 
     desc 'import', 'Import external glossary'
