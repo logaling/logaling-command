@@ -46,10 +46,15 @@ module Logaling
 
     def create_personal_glossary(glossary_name, source_language, target_language)
       FileUtils.mkdir_p(personal_path)
+      if project = find_project(glossary_name)
+        if project.glossaries.map(&:to_s).index([glossary_name, source_language, target_language].join('.'))
+          raise Logaling::GlossaryAlreadyRegistered
+        end
+      end
       glossary_source_name = [glossary_name, source_language, target_language,'yml'].join('.')
       FileUtils.touch(File.join(personal_path, glossary_source_name))
-      # raise error if already file exist
-      # raise error if same file in /projects
+    rescue
+      raise Logaling::GlossaryAlreadyRegistered, "The glossary '#{glossary_name}' is already exist."
     end
 
     def import(glossary_source)

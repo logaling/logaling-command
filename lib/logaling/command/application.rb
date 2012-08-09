@@ -90,6 +90,8 @@ module Logaling::Command
       end
     rescue Logaling::CommandFailed => e
       say e.message
+    rescue Logaling::GlossaryAlreadyRegistered => e
+      say e.message
     end
 
     desc 'import', 'Import external glossary'
