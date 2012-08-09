@@ -75,7 +75,7 @@ module Logaling::Command
           config.save(File.join(logaling_config_path, "config"))
 
           unless options["no-register"]
-            @dotfile_path = options["logaling-config"] ? options["logaling-config"] : Logaling::Project.find_dotfile
+            @dotfile_path = options["logaling-config"] || Logaling::Project.find_dotfile
             @project_config_path = File.join(@dotfile_path, 'config')
             @config.load(@project_config_path)
             register_and_index
