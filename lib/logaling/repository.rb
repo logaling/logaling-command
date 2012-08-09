@@ -54,7 +54,7 @@ module Logaling
       glossary_source_name = [glossary_name, source_language, target_language,'yml'].join('.')
       FileUtils.touch(File.join(personal_path, glossary_source_name))
     rescue
-      raise Logaling::GlossaryAlreadyRegistered, "The glossary '#{glossary_name}' is already exist."
+      raise Logaling::GlossaryAlreadyRegistered, "The glossary '#{glossary_name}' already exists."
     end
 
     def import(glossary_source)
