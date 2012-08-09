@@ -91,7 +91,7 @@ module Logaling
         Logaling::Project.new(project_path, self)
       end
       projects += user_glossary_paths.map do |user_glossary_path|
-        Logaling::ImportedProject.new(user_glossary_path, self)
+        Logaling::PersonalProject.new(user_glossary_path, self)
       end
       projects += imported_glossary_paths.map do |imported_project_path|
         Logaling::ImportedProject.new(imported_project_path, self)

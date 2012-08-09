@@ -87,6 +87,17 @@ module Logaling
       name, source_language, target_language, type = File.basename(@path).split(/\./)
       [GlossarySource.create(@path, glossary(source_language, target_language))]
     end
+  end
+
+  class PersonalProject < Project
+    def name
+      File.basename(@path).split(/\./).first
+    end
+
+    def glossary_sources
+      name, source_language, target_language, type = File.basename(@path).split(/\./)
+      [GlossarySource.create(@path, glossary(source_language, target_language))]
+    end
 
     def glossary_source_path
       File.dirname(@path)
