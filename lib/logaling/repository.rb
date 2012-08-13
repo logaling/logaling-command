@@ -44,6 +44,13 @@ module Logaling
       FileUtils.rm_rf(project.path, :secure => true)
     end
 
+    def create_personal_project(project_name, source_language, target_language)
+      if glossary_exists?(project_name, source_language, target_language)
+        raise Logaling::GlossaryAlreadyRegistered, "The glossary '#{project_name}' already exists."
+      end
+      PersonalProject.create(personal_glossary_root_path, project_name, source_language, target_language)
+    end
+
     def import(glossary_source)
       FileUtils.mkdir_p(cache_path)
       Dir.chdir(cache_path) do
@@ -81,6 +88,9 @@ module Logaling
     def projects
       projects = registered_project_paths.map do |project_path|
         Logaling::Project.new(project_path, self)
+      end
+      projects += personal_glossary_paths.map do |personal_glossary_path|
+        Logaling::PersonalProject.new(personal_glossary_path, self)
       end
       projects += imported_glossary_paths.map do |imported_project_path|
         Logaling::ImportedProject.new(imported_project_path, self)
@@ -130,6 +140,10 @@ module Logaling
       File.join(@path, "projects")
     end
 
+    def personal_glossary_root_path
+      File.join(@path, "personal")
+    end
+
     def cache_path
       File.join(@path, "cache")
     end
@@ -138,8 +152,21 @@ module Logaling
       Dir[File.join(logaling_projects_path, "*")]
     end
 
+    def personal_glossary_paths
+      Dir[File.join(personal_glossary_root_path, "*")]
+    end
+
     def imported_glossary_paths
       Dir[File.join(cache_path, "*")]
+    end
+
+    def glossary_exists?(project_name, source_language, target_language)
+      project = find_project(project_name)
+      if project && project.has_glossary?(source_language, target_language)
+        true
+      else
+        false
+      end
     end
   end
 end

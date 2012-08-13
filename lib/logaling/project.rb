@@ -72,6 +72,10 @@ module Logaling
       end
     end
 
+    def has_glossary?(source_language, target_language)
+      glossaries.any? {|glossary| glossary.to_s == [name, source_language, target_language].join('.') }
+    end
+
     private
     def all_glossary_source_path
       Dir.glob(File.join(glossary_source_path, "*"))
@@ -86,6 +90,37 @@ module Logaling
     def glossary_sources
       name, source_language, target_language, type = File.basename(@path).split(/\./)
       [GlossarySource.create(@path, glossary(source_language, target_language))]
+    end
+
+    def glossary_source_path
+      File.dirname(@path)
+    end
+  end
+
+  class PersonalProject < Project
+    def self.create(root_path, glossary_name, source_language, target_language)
+      project_name = [glossary_name, source_language, target_language, 'yml'].join('.')
+      project_path = File.join(root_path, project_name)
+      project = PersonalProject.new(project_path)
+      project.initialize_glossary(source_language, target_language)
+      project
+    end
+
+    def name
+      File.basename(@path).split(/\./).first
+    end
+
+    def glossary_sources
+      name, source_language, target_language, type = File.basename(@path).split(/\./)
+      [GlossarySource.create(@path, glossary(source_language, target_language))]
+    end
+
+    def glossary_source_path
+      File.dirname(@path)
+    end
+
+    def initialize_glossary(source_language, target_language)
+      glossary(source_language, target_language).initialize_glossary_source
     end
   end
 end

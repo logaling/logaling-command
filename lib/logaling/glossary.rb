@@ -75,6 +75,10 @@ module Logaling
       end
     end
 
+    def initialize_glossary_source
+      glossary_source.initialize_source
+    end
+
     def to_s
       [@name, @source_language, @target_language].join('.')
     end

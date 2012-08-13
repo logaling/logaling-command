@@ -64,24 +64,35 @@ module Logaling::Command
 
     desc 'new [PROJECT NAME] [SOURCE LANGUAGE] [TARGET LANGUAGE(optional)]', 'Create .logaling'
     method_option "no-register", type: :boolean, default: false
+    method_option "personal", type: :boolean, default: false
     def new(project_name, source_language, target_language=nil)
-      unless File.exist?(logaling_config_path)
-        FileUtils.mkdir_p(File.join(logaling_config_path, "glossary"))
+      unless options['personal']
+        unless File.exist?(logaling_config_path)
+          FileUtils.mkdir_p(File.join(logaling_config_path, "glossary"))
 
-        config = Logaling::Config.new("glossary" => project_name, "source-language" => source_language)
-        config.merge!("target-language" => target_language) if target_language
-        config.save(File.join(logaling_config_path, "config"))
+          config = Logaling::Config.new("glossary" => project_name, "source-language" => source_language)
+          config.merge!("target-language" => target_language) if target_language
+          config.save(File.join(logaling_config_path, "config"))
 
-        unless options["no-register"]
-          @dotfile_path = options["logaling-config"] ? options["logaling-config"] : Logaling::Project.find_dotfile
-          @project_config_path = File.join(@dotfile_path, 'config')
-          @config.load(@project_config_path)
-          register_and_index
+          unless options["no-register"]
+            @dotfile_path = options["logaling-config"] || Logaling::Project.find_dotfile
+            @project_config_path = File.join(@dotfile_path, 'config')
+            @config.load(@project_config_path)
+            register_and_index
+          end
+          say "Successfully created #{logaling_config_path}"
+        else
+          say "#{logaling_config_path} already exists."
         end
-        say "Successfully created #{logaling_config_path}"
       else
-        say "#{logaling_config_path} already exists."
+        raise Logaling::CommandFailed, "[TARGET-LANGUAGE] is required when you use '--personal'" unless target_language
+        personal_project = @repository.create_personal_project(project_name, source_language, target_language)
+        say "Successfully created #{personal_project.path}"
       end
+    rescue Logaling::CommandFailed => e
+      say e.message
+    rescue Logaling::GlossaryAlreadyRegistered => e
+      say e.message
     end
 
     desc 'import', 'Import external glossary'
@@ -176,6 +187,7 @@ module Logaling::Command
       check_logaling_home_exists
       project = @repository.find_project(@config.glossary)
       raise Logaling::ProjectNotFound unless project
+      raise Logaling::ProjectNotFound if project.class.name == 'Logaling::ImportedProject'
       glossary = project.glossary(@config.source_language, @config.target_language)
       if glossary.bilingual_pair_exists?(source_term, target_term)
         raise Logaling::TermError, "term '#{source_term}: #{target_term}' already exists in '#{@config.glossary}'"
