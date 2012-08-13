@@ -46,11 +46,9 @@ module Logaling
 
     def create_personal_glossary(glossary_name, source_language, target_language)
       if glossary_exists?(glossary_name, source_language, target_language)
-        raise Logaling::GlossaryAlreadyRegistered
+        raise Logaling::GlossaryAlreadyRegistered, "The glossary '#{glossary_name}' already exists."
       end
       PersonalProject.create(personal_glossary_root_path, glossary_name, source_language, target_language)
-    rescue
-      raise Logaling::GlossaryAlreadyRegistered, "The glossary '#{glossary_name}' already exists."
     end
 
     def import(glossary_source)
