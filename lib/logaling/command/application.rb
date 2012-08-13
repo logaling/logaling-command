@@ -54,7 +54,8 @@ module Logaling::Command
         '-U' => :unregister,
         '-L' => :list,
         '-s' => :show,
-        '-v' => :version
+        '-v' => :version,
+        '-c' => :copy
 
     class_option "glossary",        type: :string, aliases: "-g"
     class_option "source-language", type: :string, aliases: "-S"
@@ -353,6 +354,23 @@ module Logaling::Command
         "There is no registered glossary."
       end
     rescue Logaling::CommandFailed, Logaling::GlossaryDBNotFound => e
+      say e.message
+    end
+
+    desc 'copy [GLOSSARY NAME] [SOURCE LANGUAGE] [TARGET LANGUAGE] [NEW GLOSSARY NAME] [NEW SOURCE LANGUAGE] [NEW TARGET LANGUAGE]', 'Copy personal glossary'
+    def copy(project_name, source_language, target_language, new_project_name, new_source_language, new_target_language)
+      check_logaling_home_exists
+      project_original = @repository.find_project(project_name)
+      glossary_original = project_original.glossary(source_language, target_language)
+      glossary_source_path_original = glossary_original.glossary_source.source_path
+
+      project_new = @repository.create_personal_project(new_project_name, new_source_language, new_target_language)
+      glossary_new = project_new.glossary(new_source_language, new_target_language)
+      glossary_source_path_new = glossary_new.glossary_source.source_path
+
+      FileUtils.copy(glossary_source_path_original, glossary_source_path_new)
+
+    rescue Logaling::CommandFailed, Logaling::GlossaryAlreadyRegistered => e
       say e.message
     end
 
