@@ -346,8 +346,13 @@ module Logaling::Command
       projects = @repository.projects
       unless projects.empty?
         run_pager
-        projects.each do |project|
-          printf("  %s\n", project.name)
+        # 用語集の一覧といいつつプロジェクトの一覧を出していて、
+        # かつ個人用のプロジェクトと .logaling によるプロジェクトで
+        # プロジェクトとして表現しているスコープが異なっているために、
+        # 重複した名前のプロジェクトが表示されるケースが存在する
+        #TODO 表示する情報の単位を整理後に見直す
+        projects.map(&:name).uniq.each do |project_name|
+          printf("  %s\n", project_name)
         end
       else
         "There is no registered glossary."
