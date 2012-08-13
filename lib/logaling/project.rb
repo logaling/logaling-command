@@ -98,6 +98,14 @@ module Logaling
   end
 
   class PersonalProject < Project
+    def self.create(root_path, glossary_name, source_language, target_language)
+      project_name = [glossary_name, source_language, target_language, 'yml'].join('.')
+      project_path = File.join(root_path, project_name)
+      project = PersonalProject.new(project_path)
+      project.initialize_glossary(source_language, target_language)
+      project
+    end
+
     def name
       File.basename(@path).split(/\./).first
     end
@@ -109,6 +117,10 @@ module Logaling
 
     def glossary_source_path
       File.dirname(@path)
+    end
+
+    def initialize_glossary(source_language, target_language)
+      glossary(source_language, target_language).initialize_glossary_source
     end
   end
 end

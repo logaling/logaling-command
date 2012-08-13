@@ -48,9 +48,7 @@ module Logaling
       if glossary_exists?(glossary_name, source_language, target_language)
         raise Logaling::GlossaryAlreadyRegistered
       end
-      FileUtils.mkdir_p(personal_glossary_root_path)
-      glossary_source_name = [glossary_name, source_language, target_language,'yml'].join('.')
-      FileUtils.touch(File.join(personal_glossary_root_path, glossary_source_name))
+      PersonalProject.create(personal_glossary_root_path, glossary_name, source_language, target_language)
     rescue
       raise Logaling::GlossaryAlreadyRegistered, "The glossary '#{glossary_name}' already exists."
     end
