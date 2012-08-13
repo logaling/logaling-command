@@ -45,14 +45,14 @@ module Logaling
     end
 
     def create_personal_glossary(glossary_name, source_language, target_language)
-      FileUtils.mkdir_p(personal_path)
+      FileUtils.mkdir_p(personal_glossary_root_path)
       if project = find_project(glossary_name)
         if project.glossaries.map(&:to_s).index([glossary_name, source_language, target_language].join('.'))
           raise Logaling::GlossaryAlreadyRegistered
         end
       end
       glossary_source_name = [glossary_name, source_language, target_language,'yml'].join('.')
-      FileUtils.touch(File.join(personal_path, glossary_source_name))
+      FileUtils.touch(File.join(personal_glossary_root_path, glossary_source_name))
     rescue
       raise Logaling::GlossaryAlreadyRegistered, "The glossary '#{glossary_name}' already exists."
     end
@@ -146,7 +146,7 @@ module Logaling
       File.join(@path, "projects")
     end
 
-    def personal_path
+    def personal_glossary_root_path
       File.join(@path, "personal")
     end
 
@@ -159,7 +159,7 @@ module Logaling
     end
 
     def personal_glossary_paths
-      Dir[File.join(personal_path, "*")]
+      Dir[File.join(personal_glossary_root_path, "*")]
     end
 
     def imported_glossary_paths
