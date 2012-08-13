@@ -73,7 +73,7 @@ module Logaling
     end
 
     def has_glossary?(source_language, target_language)
-      glossaries.map(&:to_s).any? {|glossary_name| glossary_name == [name, source_language, target_language].join('.') }
+      glossaries.any? {|glossary| glossary.to_s == [name, source_language, target_language].join('.') }
     end
 
     private
