@@ -166,7 +166,7 @@ module Logaling
 
     def glossary_exists?(glossary_name, source_language, target_language)
       project = find_project(glossary_name)
-      if project && project.glossaries.map(&:to_s).index([glossary_name, source_language, target_language].join('.'))
+      if project && project.has_glossary?(source_language, target_language)
         true
       else
         false

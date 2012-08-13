@@ -72,6 +72,10 @@ module Logaling
       end
     end
 
+    def has_glossary?(source_language, target_language)
+      glossaries.map(&:to_s).index([name, source_language, target_language].join('.'))
+    end
+
     private
     def all_glossary_source_path
       Dir.glob(File.join(glossary_source_path, "*"))
