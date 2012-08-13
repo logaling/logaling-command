@@ -17,6 +17,7 @@
 module Logaling
   class Glossary
     SUPPORTED_FILE_TYPE = %w(yml tsv csv)
+    SUPPORTED_ANNOTATION = %w(wip)
 
     attr_reader :name, :source_language, :target_language
 
@@ -27,12 +28,13 @@ module Logaling
       @project = project
     end
 
-    def terms
+    def terms(annotation_word)
       raise Logaling::GlossaryDBNotFound unless File.exist?(@project.glossary_db_path)
       index
       terms = []
+      filter_option = annotation_word ? '@' + annotation_word : annotation_word
       Logaling::GlossaryDB.open(@project.glossary_db_path, "utf8") do |db|
-        terms = db.translation_list(self)
+        terms = db.translation_list(self, filter_option)
       end
       terms
     end

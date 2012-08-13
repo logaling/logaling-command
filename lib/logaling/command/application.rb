@@ -308,6 +308,7 @@ module Logaling::Command
 
     desc 'show', 'Show terms in glossary.'
     method_option "no-pager", type: :boolean, default: false
+    method_option "annotation", type: :string, aliases: "-A"
     def show
       required_options = {
         "glossary" => "input glossary name '-g <glossary name>'",
@@ -319,7 +320,7 @@ module Logaling::Command
       project = @repository.find_project(@config.glossary)
       raise Logaling::ProjectNotFound unless project
       glossary = project.glossary(@config.source_language, @config.target_language)
-      terms = glossary.terms
+      terms = glossary.terms(options["annotation"])
       unless terms.empty?
         run_pager
         terms.each do |term|

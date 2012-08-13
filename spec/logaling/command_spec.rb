@@ -463,7 +463,7 @@ describe Logaling::Command::Application do
     context 'when .logaling exists' do
       before do
         command.options = base_options.merge("no-pager" => true)
-        @stdout = capture(:stdout) {command.show}
+        @stdout = capture(:stdout) { command.show }
       end
 
       it 'should show translation list' do
@@ -474,6 +474,49 @@ describe Logaling::Command::Application do
 
     after do
       FileUtils.rm_rf(csv_path)
+    end
+  end
+
+  describe "#show with annotation option" do
+    before do
+      command.new('spec', 'en', 'ja')
+      command.add("spec-test2", "スペックてすと2", "@wip")
+      command.add("spec-test", "スペックてすと1", "備考")
+    end
+
+    context 'when glossary contains annotated word' do
+      before do
+        command.options = base_options.merge("no-pager" => true)
+        command.options.merge!("annotation" => "wip")
+        @stdout = capture(:stdout) { command.show }
+      end
+
+      it 'should show annotated word' do
+        @stdout.should include "スペックてすと2"
+      end
+
+      context 'after annotation removed' do
+        before do
+          command.options = base_options.clone
+          command.update("spec-test2", "スペックてすと2", "スペックてすと2", "")
+        end
+
+        it 'should not show annotated word' do
+          @stdout.should_not include "スペックてすと1"
+        end
+      end
+    end
+
+    context 'when glossary does not contain annotated word' do
+      before do
+        command.options = base_options.merge("no-pager" => true)
+        command.options.merge!("annotation" => "wip")
+        @stdout = capture(:stdout) { command.show }
+      end
+
+      it 'should not show un-annotated word' do
+        @stdout.should_not include "スペックてすと1"
+      end
     end
   end
 
