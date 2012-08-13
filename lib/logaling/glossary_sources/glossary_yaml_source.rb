@@ -34,7 +34,7 @@ module Logaling::GlossarySources
     end
 
     def add(source_term, target_term, note)
-      dump_glossary_source([]) unless File.exist?(source_path)
+      initialize_source unless File.exist?(source_path)
 
       glossary_source = self.load
       glossary_source << build_term(source_term, target_term, note)
@@ -86,6 +86,10 @@ module Logaling::GlossarySources
           "If you really want to delete, please put `loga delete [SOURCE_TERM] --force`\n" +
           " or `loga delete [SOURCE_TERM] [TARGET_TERM]`"
       end
+    end
+
+    def initialize_source
+      dump_glossary_source([])
     end
 
     private
