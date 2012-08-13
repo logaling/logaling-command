@@ -86,8 +86,8 @@ module Logaling::Command
         end
       else
         raise Logaling::CommandFailed, "[TARGET-LANGUAGE] is required when you use '--personal'" unless target_language
-        personal_glossary = @repository.create_personal_glossary(project_name, source_language, target_language)
-        say "Successfully created #{personal_glossary.path}"
+        personal_project = @repository.create_personal_project(project_name, source_language, target_language)
+        say "Successfully created #{personal_project.path}"
       end
     rescue Logaling::CommandFailed => e
       say e.message
