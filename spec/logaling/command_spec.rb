@@ -551,8 +551,38 @@ describe Logaling::Command::Application do
     end
   end
 
+  describe '#copy' do
+    let(:copied_glossary_path) { File.join(logaling_home, 'personal', 'spec.en.fr.yml') }
+    before do
+      command.new('spec', 'en', 'ja')
+      command.add('spec logaling', 'すぺっくろがりん')
+    end
+
+    context 'when new glossary does not exist' do
+      before do
+        command.copy('spec', 'en', 'ja', 'spec', 'en', 'fr')
+        @yaml = YAML::load_file(copied_glossary_path).find{|h| h["source_term"] == "spec logaling" }
+      end
+
+      it 'should copy from original glossary' do
+        @yaml.should == {"source_term"=>"spec logaling", "target_term"=>"すぺっくろがりん", "note"=>""}
+      end
+    end
+
+    context 'when same glossary exists in glossary list' do
+      before do
+        @stdout = capture(:stdout) {command.copy('spec', 'en', 'ja', 'spec', 'en', 'ja')}
+      end
+
+      it 'should not copy glossary' do
+        @stdout.should include "already exists"
+      end
+    end
+  end
+
   after do
     FileUtils.rm_rf(logaling_config)
     FileUtils.rm_rf(File.join(logaling_home, 'projects', 'spec'))
+    FileUtils.rm_rf(File.join(logaling_home, 'personal'))
   end
 end
