@@ -168,13 +168,22 @@ module Logaling
       struct_result(records, snippet)
     end
 
-    def translation_list(glossary, order='ascending')
+    def translation_list(glossary, filter_option, order='ascending')
       records_raw = Groonga["translations"].select do |record|
-        [
-          record.glossary == glossary.name,
-          record.source_language == glossary.source_language,
-          record.target_language == glossary.target_language
-        ]
+        if filter_option
+          [
+            record.glossary == glossary.name,
+            record.source_language == glossary.source_language,
+            record.target_language == glossary.target_language,
+            record.note =~ filter_option
+          ]
+        else
+          [
+            record.glossary == glossary.name,
+            record.source_language == glossary.source_language,
+            record.target_language == glossary.target_language
+          ]
+        end
       end
 
       records = records_raw.sort([
