@@ -75,7 +75,7 @@ module Logaling
       end
     end
 
-    def copy_from(glossary)
+    def merge!(glossary)
       glossary.terms.each do |term|
         add(term[:source_term], term[:target_term], term[:note])
       end

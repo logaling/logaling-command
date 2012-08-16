@@ -369,7 +369,7 @@ module Logaling::Command
       dest_project = @repository.create_personal_project(new_project_name, new_source_language, new_target_language)
       dest_glossary = dest_project.glossary(new_source_language, new_target_language)
 
-      dest_glossary.copy_from(src_glossary)
+      dest_glossary.merge!(src_glossary)
     rescue Logaling::CommandFailed, Logaling::GlossaryAlreadyRegistered, Logaling::GlossaryNotFound => e
       say e.message
     end
