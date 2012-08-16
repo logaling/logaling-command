@@ -360,18 +360,14 @@ module Logaling::Command
     desc 'copy [GLOSSARY NAME] [SOURCE LANGUAGE] [TARGET LANGUAGE] [NEW GLOSSARY NAME] [NEW SOURCE LANGUAGE] [NEW TARGET LANGUAGE]', 'Copy personal glossary'
     def copy(project_name, source_language, target_language, new_project_name, new_source_language, new_target_language)
       check_logaling_home_exists
-      projects = @repository.projects
-      project_candidates = projects.reject { |project| project.name != project_name }
-      project_original = project_candidates.detect do |project|
-        project.has_glossary?(source_language, target_language)
-      end
-      unless project_original
+      glossary_original = @repository.find_glossary(project_name, source_language, target_language)
+      unless glossary_original
         raise Logaling::GlossaryNotFound, "Can't found #{project_name}.#{source_language}.#{target_language}"
       end
 
       project_new = @repository.create_personal_project(new_project_name, new_source_language, new_target_language)
       glossary_new = project_new.glossary(new_source_language, new_target_language)
-      project_original.glossary(source_language, target_language).terms.each do |term|
+      glossary_original.terms.each do |term|
         glossary_new.add(term[:source_term], term[:target_term], term[:note])
       end
 

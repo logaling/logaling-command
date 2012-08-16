@@ -131,6 +131,14 @@ module Logaling
       project = projects.detect{|project| project.name == project_name}
     end
 
+    def find_glossary(project_name, source_language, target_language)
+      project_candidates = projects.reject { |project| project.name != project_name }
+      project = project_candidates.detect do |project|
+        project.has_glossary?(source_language, target_language)
+      end
+      project ? project.glossary(source_language, target_language) : nil
+    end
+
     def logaling_db_home
       File.join(@path, "db")
     end
@@ -161,11 +169,7 @@ module Logaling
     end
 
     def glossary_exists?(project_name, source_language, target_language)
-      project_candidates = projects.reject{|project| project.name != project_name}
-      project = project_candidates.detect do |project|
-        project.has_glossary?(source_language, target_language)
-      end
-      project ? true : false
+      glossary = find_glossary(project_name, source_language, target_language) ? true : false
     end
   end
 end
