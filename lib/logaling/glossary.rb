@@ -75,6 +75,12 @@ module Logaling
       end
     end
 
+    def copy_from(glossary)
+      glossary.terms.each do |term|
+        add(term[:source_term], term[:target_term], term[:note])
+      end
+    end
+
     def initialize_glossary_source
       glossary_source.initialize_source
     end
