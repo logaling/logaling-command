@@ -161,12 +161,11 @@ module Logaling
     end
 
     def glossary_exists?(project_name, source_language, target_language)
-      project = find_project(project_name)
-      if project && project.has_glossary?(source_language, target_language)
-        true
-      else
-        false
+      project_candidates = projects.reject{|project| project.name != project_name}
+      project = project_candidates.detect do |project|
+        project.has_glossary?(source_language, target_language)
       end
+      project ? true : false
     end
   end
 end
