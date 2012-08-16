@@ -318,9 +318,8 @@ module Logaling::Command
       }
       @config.check_required_option(required_options)
       check_logaling_home_exists
-      project = @repository.find_project(@config.glossary)
-      raise Logaling::ProjectNotFound unless project
-      glossary = project.glossary(@config.source_language, @config.target_language)
+      glossary = @repository.find_glossary(@config.glossary, @config.source_language, @config.target_language)
+      raise Logaling::GlossaryNotFound unless glossary
       terms = glossary.terms(options["annotation"])
       unless terms.empty?
         run_pager
@@ -335,7 +334,7 @@ module Logaling::Command
       end
     rescue Logaling::CommandFailed, Logaling::GlossaryDBNotFound => e
       say e.message
-    rescue Logaling::ProjectNotFound
+    rescue Logaling::GlossaryNotFound
       say "glossary <#{@config.glossary}> not found."
       say "Try 'loga list' and confirm glossary name."
     end
