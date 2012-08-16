@@ -28,7 +28,7 @@ module Logaling
       @project = project
     end
 
-    def terms(annotation_word)
+    def terms(annotation_word=nil)
       raise Logaling::GlossaryDBNotFound unless File.exist?(@project.glossary_db_path)
       index
       terms = []
