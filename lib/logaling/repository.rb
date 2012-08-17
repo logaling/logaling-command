@@ -133,7 +133,7 @@ module Logaling
 
     def find_glossary(project_name, source_language, target_language)
       project = projects.detect do |project|
-        project.has_glossary?(source_language, target_language) if project.name == project_name
+        project.name == project_name and project.has_glossary?(source_language, target_language)
       end
       project ? project.glossary(source_language, target_language) : nil
     end
