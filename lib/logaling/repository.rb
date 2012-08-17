@@ -169,7 +169,7 @@ module Logaling
     end
 
     def glossary_exists?(project_name, source_language, target_language)
-      find_glossary(project_name, source_language, target_language) ? true : false
+      not find_glossary(project_name, source_language, target_language).nil?
     end
   end
 end
