@@ -122,7 +122,7 @@ module Logaling::GlossarySources
 
     def dump_glossary_source(glossary_source)
       File.open(source_path, "w") do |f|
-        YAML.dump(glossary_source, f)
+        f << YAML.dump(glossary_source)
       end
     end
   end
