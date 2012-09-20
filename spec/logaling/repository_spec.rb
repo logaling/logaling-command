@@ -118,6 +118,8 @@ module Logaling
           File.open(glossary_source_path, 'w') do |f|
             YAML.dump([], f)
           end
+          # in order to index certainly
+          sleep(1)
           glossary.add("spec_logaling", "スペック", "備考")
           repository.index
           @terms = repository.lookup("spec_logaling", glossary)

@@ -190,13 +190,12 @@ module Logaling::Command
       raise Logaling::ProjectNotFound unless project
       raise Logaling::ProjectNotFound if project.imported?
       glossary = project.glossary(@config.source_language, @config.target_language)
-      if glossary.bilingual_pair_exists?(source_term, target_term)
-        raise Logaling::TermError, "term '#{source_term}: #{target_term}' already exists in '#{@config.glossary}'"
-      end
 
       glossary.add(source_term, target_term, note)
-    rescue Logaling::CommandFailed, Logaling::TermError => e
+    rescue Logaling::CommandFailed => e
       say e.message
+    rescue Logaling::TermError => e
+      say "term '#{source_term}: #{target_term}' already exists in '#{@config.glossary}'"
     rescue Logaling::GlossaryNotFound => e
       say "Try 'loga new or register' first."
     rescue Logaling::ProjectNotFound
@@ -244,13 +243,12 @@ module Logaling::Command
       project = @repository.find_project(@config.glossary)
       raise Logaling::ProjectNotFound unless project
       glossary = project.glossary(@config.source_language, @config.target_language)
-      if glossary.bilingual_pair_exists?(source_term, new_target_term, note)
-        raise Logaling::TermError, "term '#{source_term}: #{new_target_term}' already exists in '#{@config.glossary}'"
-      end
 
       glossary.update(source_term, target_term, new_target_term, note)
-    rescue Logaling::CommandFailed, Logaling::TermError => e
+    rescue Logaling::CommandFailed => e
       say e.message
+    rescue Logaling::TermError => e
+      say "term '#{source_term}: #{new_target_term}' already exists in '#{@config.glossary}'"
     rescue Logaling::GlossaryNotFound => e
       say "Try 'loga new or register' first."
     rescue Logaling::ProjectNotFound
