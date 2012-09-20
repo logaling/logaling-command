@@ -341,11 +341,12 @@ describe Logaling::Command::Application do
 
     context 'with exisiting bilingual pair and note' do
       before do
-        @stdout = capture(:stdout) { command.update("spec", "テスト", "テスト", "備考") }
+        command.update("spec", "テスト", "テスト", "備考")
+        @yaml = YAML::load_file(glossary_source_path).find{|h| h["source_term"] == "spec" }
       end
 
-      it 'should show error message' do
-        @stdout.should include "already exists"
+      it "term's target_term should not be updated" do
+        @yaml.should == {"source_term"=>"spec", "target_term"=>"テスト", "note"=>"備考"}
       end
     end
 
