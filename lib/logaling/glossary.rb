@@ -39,7 +39,7 @@ module Logaling
       terms
     end
 
-    def get_bilingual_pair(source_term, target_term, note=nil)
+    def find_bilingual_pairs(source_term, target_term, note=nil)
       raise Logaling::GlossaryDBNotFound unless File.exist?(@project.glossary_db_path)
       index
       terms = []
@@ -50,7 +50,7 @@ module Logaling
     end
 
     def bilingual_pair_exists?(source_term, target_term, note=nil)
-      !get_bilingual_pair(source_term, target_term, note).empty?
+      !find_bilingual_pairs(source_term, target_term, note).empty?
     end
 
     def add(source_term, target_term, note)
