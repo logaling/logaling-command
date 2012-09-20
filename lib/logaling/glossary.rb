@@ -46,7 +46,7 @@ module Logaling
       Logaling::GlossaryDB.open(@project.glossary_db_path, "utf8") do |db|
         terms = db.get_bilingual_pair(source_term, target_term, @name, note)
       end
-      !terms.empty?
+      !terms.delete_if {|t| t[:target_language] != @target_language.to_sym }.empty?
     end
 
     def add(source_term, target_term, note)
