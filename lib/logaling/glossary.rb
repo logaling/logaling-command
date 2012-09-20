@@ -39,14 +39,18 @@ module Logaling
       terms
     end
 
-    def bilingual_pair_exists?(source_term, target_term, note=nil)
+    def get_bilingual_pair(source_term, target_term, note=nil)
       raise Logaling::GlossaryDBNotFound unless File.exist?(@project.glossary_db_path)
       index
       terms = []
       Logaling::GlossaryDB.open(@project.glossary_db_path, "utf8") do |db|
         terms = db.get_bilingual_pair(source_term, target_term, @name, note)
       end
-      !terms.delete_if {|t| t[:target_language] != @target_language.to_sym }.empty?
+      terms.delete_if {|t| t[:target_language] != @target_language }
+    end
+
+    def bilingual_pair_exists?(source_term, target_term, note=nil)
+      !get_bilingual_pair(source_term, target_term, note).empty?
     end
 
     def add(source_term, target_term, note)
