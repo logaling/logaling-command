@@ -76,6 +76,10 @@ module Logaling
       glossaries.any? {|glossary| glossary.to_s == [name, source_language, target_language].join('.') }
     end
 
+    def imported?
+      false
+    end
+
     private
     def all_glossary_source_path
       Dir.glob(File.join(glossary_source_path, "*"))
@@ -94,6 +98,10 @@ module Logaling
 
     def glossary_source_path
       File.dirname(@path)
+    end
+
+    def imported?
+      true
     end
   end
 

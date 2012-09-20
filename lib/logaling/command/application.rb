@@ -188,7 +188,7 @@ module Logaling::Command
       check_logaling_home_exists
       project = @repository.find_project(@config.glossary)
       raise Logaling::ProjectNotFound unless project
-      raise Logaling::ProjectNotFound if project.class.name == 'Logaling::ImportedProject'
+      raise Logaling::ProjectNotFound if project.imported?
       glossary = project.glossary(@config.source_language, @config.target_language)
       if glossary.bilingual_pair_exists?(source_term, target_term)
         raise Logaling::TermError, "term '#{source_term}: #{target_term}' already exists in '#{@config.glossary}'"
