@@ -99,7 +99,7 @@ module Logaling
     end
 
     def index
-      all_glossary_sources = projects.map{|project| project.glossary_sources}.flatten
+      all_glossary_sources = projects.map {|project| project.glossary_sources }.flatten
 
       Logaling::GlossaryDB.open(logaling_db_home, "utf8") do |db|
         db.recreate_table
@@ -128,7 +128,7 @@ module Logaling
     end
 
     def find_project(project_name)
-      projects.detect{|project| project.name == project_name}
+      projects.detect {|project| project.name == project_name }
     end
 
     def find_glossary(project_name, source_language, target_language)
