@@ -128,7 +128,7 @@ module Logaling
     end
 
     def find_project(project_name)
-      project = projects.detect{|project| project.name == project_name}
+      projects.detect{|project| project.name == project_name}
     end
 
     def find_glossary(project_name, source_language, target_language)
