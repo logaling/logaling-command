@@ -89,7 +89,16 @@ module Logaling
           term = yaml.index({"source_term"=>"user", "target_term"=>"ユーザ", "note"=>""})
           term.should_not be_nil
         end
+      end
 
+      context 'same [source-term, taget-term] pair can not exist' do
+        before do
+          glossary.add("user", "ゆーざー", "")
+        end
+
+        it {
+          -> { glossary.update("user", "ゆーざー", "ユーザ", "") }.should raise_error(Logaling::TermError)
+        }
       end
     end
 
