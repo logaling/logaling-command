@@ -59,7 +59,10 @@ module Logaling
     end
 
     def update(source_term, target_term, new_target_term, note)
-      raise Logaling::TermError if bilingual_pair_exists?(source_term, new_target_term, note)
+      if (target_term != new_target_term) && bilingual_pair_exists?(source_term, new_target_term)
+        raise Logaling::TermError
+      end
+
       glossary_source.update(source_term, target_term, new_target_term, note)
     end
 
