@@ -55,7 +55,8 @@ module Logaling::Command
         '-L' => :list,
         '-s' => :show,
         '-v' => :version,
-        '-c' => :copy
+        '-c' => :config,
+        '-C' => :copy
 
     class_option "glossary",        type: :string, aliases: "-g"
     class_option "source-language", type: :string, aliases: "-S"
