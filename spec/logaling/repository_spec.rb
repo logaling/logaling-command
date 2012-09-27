@@ -169,6 +169,36 @@ module Logaling
       end
     end
 
+    describe "#remove_personal_project" do
+      let(:rm_glossary_name) { "rm_personal_project" }
+      let(:rm_source_language) { "en" }
+      let(:rm_target_language) { "ja" }
+      before do
+        FileUtils.rm_rf(File.join(logaling_home, 'personal'), :secure => true)
+        repository.create_personal_project(rm_glossary_name, rm_source_language, rm_target_language)
+      end
+
+      context "when target personal project exists" do
+        before do
+          repository.remove_personal_project(rm_glossary_name, rm_source_language, rm_target_language)
+          @projects = repository.projects
+        end
+
+        it "should remove personal project" do
+          @projects.size.should == 1
+        end
+      end
+
+      context "when target personal project not exist" do
+        it "should raise Logaling::GlossaryNotFound" do
+          @name = rm_glossary_name + "foo"
+          lambda{
+            repository.remove_personal_project(@name, rm_source_language, rm_target_language)
+          }.should raise_error(Logaling::GlossaryNotFound)
+        end
+      end
+    end
+
     after do
       FileUtils.rm_rf(File.join(logaling_home, 'projects', 'spec'), :secure => true)
     end
