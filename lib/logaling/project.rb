@@ -106,12 +106,22 @@ module Logaling
   end
 
   class PersonalProject < Project
-    def self.create(root_path, glossary_name, source_language, target_language, repository=nil)
-      project_name = [glossary_name, source_language, target_language, 'yml'].join('.')
-      project_path = File.join(root_path, project_name)
-      project = PersonalProject.new(project_path, repository)
-      project.initialize_glossary(source_language, target_language)
-      project
+    class << self
+      def create(root_path, glossary_name, source_language, target_language, repository=nil)
+        project_name = [glossary_name, source_language, target_language, 'yml'].join('.')
+        project_path = File.join(root_path, project_name)
+        project = PersonalProject.new(project_path, repository)
+        project.initialize_glossary(source_language, target_language)
+        project
+      end
+
+      def remove(root_path, glossary_name, source_language, target_language, repository=nil)
+        project_name = [glossary_name, source_language, target_language, 'yml'].join('.')
+        project_path = File.join(root_path, project_name)
+        project = PersonalProject.new(project_path, repository)
+        FileUtils.rm_rf(project_path, :secure => true)
+        project
+      end
     end
 
     def name

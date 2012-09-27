@@ -51,6 +51,17 @@ module Logaling
       PersonalProject.create(personal_glossary_root_path, project_name, source_language, target_language, self)
     end
 
+    def remove_personal_project(project_name, source_language, target_language)
+      unless glossary_exists?(project_name, source_language, target_language)
+        raise Logaling::GlossaryNotFound, "The glossary '#{project_name}' not found."
+      end
+      PersonalProject.remove(personal_glossary_root_path, project_name, source_language, target_language, self)
+    rescue Logaling::GlossaryNotFound => e
+      raise e
+    rescue
+      raise Logaling::CommandFailed, "Failed remove the glossary #{project_name}."
+    end
+
     def import(glossary_source)
       FileUtils.mkdir_p(cache_path)
       Dir.chdir(cache_path) do
