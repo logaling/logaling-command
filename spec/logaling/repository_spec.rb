@@ -89,6 +89,31 @@ module Logaling
         end
       end
 
+      context 'with no-annotation option' do
+        let(:annotation_word) { Logaling::Glossary::SUPPORTED_ANNOTATION.first }
+        before do
+          glossary.add("user", "ユーザ", "ユーザーではない")
+          glossary.add("user-logaling", "ユーザ", "ユーザーと迷い中 #{annotation_word}")
+          File.stub!(:mtime).and_return(Time.now - 1)
+          repository.index
+          @terms = repository.lookup("user", glossary, false, true)
+          @result = [{
+            :glossary_name=>"spec",
+            :source_language=>"en",
+            :target_language=>"ja",
+            :source_term=>"user",
+            :snipped_source_term=>["", {:keyword=>"user"}],
+            :target_term=>"ユーザ",
+            :snipped_target_term=>["ユーザ"],
+            :note=>"ユーザーではない"}]
+        end
+
+        it 'succeed at find by term without include annotation' do
+          @terms.should == @result
+        end
+
+      end
+
       context 'when tsv file as glossary exists' do
         let(:tsv_path) { glossary_source_path.sub(/yml$/, 'tsv') }
 

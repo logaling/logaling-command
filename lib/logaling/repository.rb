@@ -82,7 +82,7 @@ module Logaling
       raise Logaling::CommandFailed, "Failed import_tmx #{glossary_source.class.name} to #{cache_path}."
     end
 
-    def lookup(source_term, glossary, dictionary=false)
+    def lookup(source_term, glossary, dictionary=false, no_annotation=false)
       raise Logaling::GlossaryDBNotFound unless File.exist?(logaling_db_home)
 
       terms = []
@@ -92,6 +92,13 @@ module Logaling
         else
           terms = db.lookup(source_term, glossary)
         end
+      end
+      no_annotation ? except_annotation(terms) : terms
+    end
+
+    def except_annotation(terms)
+      Logaling::Glossary::SUPPORTED_ANNOTATION.map do |annotation|
+        terms.delete_if {|term| term[:note].index(annotation) }
       end
       terms
     end
