@@ -101,12 +101,15 @@ module Logaling
       [@name, @source_language, @target_language].join('.')
     end
 
-    private
-    def index
+    def index!
+      index(force: true)
+    end
+
+    def index(options = { force: false })
       Logaling::GlossaryDB.open(@project.glossary_db_path, "utf8") do |db|
         db.recreate_table
         glossary_sources.each do |glossary_source|
-          unless db.glossary_source_exist?(glossary_source)
+          if !db.glossary_source_exist?(glossary_source) || options[:force] == true
             puts "now index #{@name}..."
             db.index_glossary_source(glossary_source)
           end
@@ -119,6 +122,7 @@ module Logaling
       end
     end
 
+    private
     def glossary_sources
       glob_condition = SUPPORTED_FILE_TYPE.map do |type|
         file_name = [self.to_s, type].join('.')
