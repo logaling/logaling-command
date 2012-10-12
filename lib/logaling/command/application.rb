@@ -273,7 +273,7 @@ module Logaling::Command
       else
         glossary = nil
       end
-      terms = @repository.lookup(source_term, glossary, options["dictionary"], options["no-annotation"])
+      terms = @repository.lookup(source_term, glossary, options)
       unless terms.empty?
         run_pager
         terms.each_with_index do |term, i|

@@ -54,7 +54,8 @@ module Logaling
           glossary.add("ゆーざ", "test user-logaling test text", "")
           File.stub!(:mtime).and_return(Time.now - 1)
           repository.index
-          @terms = repository.lookup("user-logaling", glossary, true)
+          options = {"dictionary"=>true}
+          @terms = repository.lookup("user-logaling", glossary, options)
           @result = [{
             :glossary_name=>"spec",
             :source_language=>"en",
@@ -96,7 +97,8 @@ module Logaling
           glossary.add("user-logaling", "ユーザ", "ユーザーと迷い中 #{annotation_word}")
           File.stub!(:mtime).and_return(Time.now - 1)
           repository.index
-          @terms = repository.lookup("user", glossary, false, true)
+          options = {"no-annotation" => true}
+          @terms = repository.lookup("user", glossary, options)
           @result = [{
             :glossary_name=>"spec",
             :source_language=>"en",
