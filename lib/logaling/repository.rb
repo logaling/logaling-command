@@ -97,10 +97,9 @@ module Logaling
     end
 
     def except_annotation(terms)
-      Logaling::Glossary::SUPPORTED_ANNOTATION.map do |annotation|
-        terms.delete_if {|term| term[:note].index(annotation) }
+      terms.delete_if do |term|
+        Logaling::Glossary::SUPPORTED_ANNOTATION.any? {|ann| term[:note].index(ann) }
       end
-      terms
     end
 
     def projects
