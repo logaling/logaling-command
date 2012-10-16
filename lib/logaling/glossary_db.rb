@@ -63,7 +63,23 @@ module Logaling
 
     def deindex_glossary(glossary, glossary_source)
       delete_translations_by_glossary_source(glossary_source.source_path)
-      delete_glossary(glossary.name)
+
+      # TODO: wannna move to Glossary#enable_delete?
+      glossary_source_num = 0;
+      get_all_glossary_sources.each do |glossary_source_taken|
+        if glossary_source.belongs_to_personal? && glossary_source_taken.belongs_to_personal?
+          if glossary_source.glossary_name == glossary_source_taken.glossary_name
+            glossary_source_num += 1
+          end
+        elsif glossary_source.belongs_to_project? && glossary_source_taken.belongs_to_project?
+          if glossary_source.project_name == glossary_source_taken.project_name &&
+             glossary_source.glossary_name == glossary_source_taken.glossary_name
+            glossary_source_num += 1
+          end
+        end
+      end
+      delete_glossary(glossary.name) if glossary_source_num <= 1
+
       delete_glossary_source(glossary_source.source_path)
     end
 
