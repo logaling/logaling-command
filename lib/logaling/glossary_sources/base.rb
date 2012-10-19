@@ -37,6 +37,22 @@ module Logaling
       def mtime
         File.mtime(@source_path)
       end
+
+      def belongs_to_personal?
+        @source_path =~ /.+\/personal\/.+/ ? true : false
+      end
+
+      def belongs_to_project?
+        @source_path =~ /.+\/projects\/.+/ ? true : false
+      end
+
+      def glossary_name
+        File.basename(@source_path).split(".", 2)[0]
+      end
+
+      def project_name
+        @source_path =~ /.+\/projects\/([^\/]+).+/ ? $1 : nil
+      end
     end
   end
 end
