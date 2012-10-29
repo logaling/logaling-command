@@ -54,7 +54,8 @@ module Logaling
           glossary.add("ゆーざ", "test user-logaling test text", "")
           File.stub!(:mtime).and_return(Time.now - 1)
           repository.index
-          @terms = repository.lookup("user-logaling", glossary, true)
+          options = {"dictionary"=>true}
+          @terms = repository.lookup("user-logaling", glossary, options)
           @result = [{
             :glossary_name=>"spec",
             :source_language=>"en",
@@ -87,6 +88,32 @@ module Logaling
         it 'succeed at find by term' do
           @terms.should == @result
         end
+      end
+
+      context 'with fixed option' do
+        let(:annotation_word) { Logaling::Glossary::SUPPORTED_ANNOTATION.first }
+        before do
+          glossary.add("user", "ユーザ", "ユーザーではない")
+          glossary.add("user-logaling", "ユーザ", "ユーザーと迷い中 #{annotation_word}")
+          File.stub!(:mtime).and_return(Time.now - 1)
+          repository.index
+          options = {"fixed" => true}
+          @terms = repository.lookup("user", glossary, options)
+          @result = [{
+            :glossary_name=>"spec",
+            :source_language=>"en",
+            :target_language=>"ja",
+            :source_term=>"user",
+            :snipped_source_term=>["", {:keyword=>"user"}],
+            :target_term=>"ユーザ",
+            :snipped_target_term=>["ユーザ"],
+            :note=>"ユーザーではない"}]
+        end
+
+        it 'succeed at find by term without include annotation' do
+          @terms.should == @result
+        end
+
       end
 
       context 'when tsv file as glossary exists' do
