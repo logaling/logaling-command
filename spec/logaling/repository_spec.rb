@@ -90,14 +90,14 @@ module Logaling
         end
       end
 
-      context 'with no-annotation option' do
+      context 'with ifixed option' do
         let(:annotation_word) { Logaling::Glossary::SUPPORTED_ANNOTATION.first }
         before do
           glossary.add("user", "ユーザ", "ユーザーではない")
           glossary.add("user-logaling", "ユーザ", "ユーザーと迷い中 #{annotation_word}")
           File.stub!(:mtime).and_return(Time.now - 1)
           repository.index
-          options = {"no-annotation" => true}
+          options = {"fixed" => true}
           @terms = repository.lookup("user", glossary, options)
           @result = [{
             :glossary_name=>"spec",

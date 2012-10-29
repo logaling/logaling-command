@@ -93,7 +93,7 @@ module Logaling
           terms = db.lookup(source_term, glossary)
         end
       end
-      options['no-annotation'] ? except_annotation(terms) : terms
+      options['fixed'] ? except_annotation(terms) : terms
     end
 
     def except_annotation(terms)

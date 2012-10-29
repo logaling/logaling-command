@@ -262,7 +262,7 @@ module Logaling::Command
     method_option "no-pager", type: :boolean, default: false
     method_option "no-color", type: :boolean, default: false
     method_option "dictionary", type: :boolean, default: false, aliases: "--dict"
-    method_option "no-annotation", type: :boolean, default: false
+    method_option "fixed", type: :boolean, default: false
     def lookup(source_term)
       check_logaling_home_exists
       @repository.index
