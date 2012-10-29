@@ -90,7 +90,7 @@ module Logaling
         end
       end
 
-      context 'with ifixed option' do
+      context 'with fixed option' do
         let(:annotation_word) { Logaling::Glossary::SUPPORTED_ANNOTATION.first }
         before do
           glossary.add("user", "ユーザ", "ユーザーではない")
