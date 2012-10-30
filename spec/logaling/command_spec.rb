@@ -178,6 +178,40 @@ describe Logaling::Command::Application do
     end
   end
 
+  describe '#index' do
+    before do
+      command.options = base_options.merge("output" => "terminal", "no-pager" => true)
+      command.new('spec', 'en', 'ja')
+    end
+
+    context 'when new term added' do
+      before do
+        command.add("spec", "スペック", "備考")
+        command.index
+        @stdout = capture(:stdout) { command.lookup("spec") }
+      end
+
+      it 'should be indexed' do
+        @stdout.should include "spec"
+        @stdout.should include "スペック"
+        @stdout.should include "# 備考"
+        @stdout.should_not include "now index spec..."
+      end
+    end
+
+    context 'when logaling_home does not exists' do
+      before do
+        command.add("spec", "スペック", "備考")
+        FileUtils.rm_rf(logaling_home)
+        @stdout = capture(:stdout) { command.index }
+      end
+
+      it 'should print message and failed index' do
+        @stdout.should include "Input existing directory as logaling-home."
+      end
+    end
+  end
+
   describe '#config' do
     let(:project_config) { File.join(logaling_config, 'config') }
     let(:global_config) { File.join(logaling_home, 'config') }
