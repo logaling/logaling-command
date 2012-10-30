@@ -52,6 +52,7 @@ module Logaling::Command
         '-n' => :new,
         '-r' => :register,
         '-U' => :unregister,
+        '-I' => :index,
         '-L' => :list,
         '-s' => :show,
         '-v' => :version,
@@ -156,6 +157,16 @@ module Logaling::Command
       say e.message
     rescue Logaling::ProjectNotFound => e
       say "#{@config.glossary} is not yet registered."
+    end
+
+    desc 'index', 'Index glossaries'
+    def index
+      check_logaling_home_exists
+
+      @repository.index
+      say 'Complete index.'
+    rescue Logaling::CommandFailed => e
+      say e.message
     end
 
     desc 'config [KEY] [VALUE] [--global(optional)]', 'Set config.'
