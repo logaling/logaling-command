@@ -56,6 +56,7 @@ module Logaling
     def add(source_term, target_term, note)
       raise Logaling::TermError if bilingual_pair_exists?(source_term, target_term)
       glossary_source.add(source_term, target_term, note)
+      index!
     end
 
     def update(source_term, target_term, new_target_term, note)
@@ -64,15 +65,18 @@ module Logaling
       end
 
       glossary_source.update(source_term, target_term, new_target_term, note)
+      index!
     end
 
     def delete(source_term, target_term)
       raise Logaling::TermError unless bilingual_pair_exists?(source_term, target_term)
       glossary_source.delete(source_term, target_term)
+      index!
     end
 
     def delete_all(source_term, force=false)
       glossary_source.delete_all(source_term, force)
+      index!
     end
 
     def glossary_source

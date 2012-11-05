@@ -81,7 +81,7 @@ module Logaling::Command
             @dotfile_path = options["logaling-config"] || Logaling::Project.find_dotfile
             @project_config_path = File.join(@dotfile_path, 'config')
             @config.load(@project_config_path)
-            register_and_index
+            @repository.register(@dotfile_path, @config.glossary)
           end
           say "Successfully created #{logaling_config_path}"
         else
@@ -115,10 +115,8 @@ module Logaling::Command
           end
           glossary = Logaling::Glossary.new(args[0], args[2], args[3])
           @repository.import_tmx(Logaling::ExternalGlossary.get(external_glossary), glossary, url)
-          @repository.index
         else
           @repository.import(Logaling::ExternalGlossary.get(external_glossary))
-          @repository.index
         end
       end
     rescue Logaling::CommandFailed => e
@@ -136,7 +134,7 @@ module Logaling::Command
       @config.check_required_option("glossary" => "Do 'loga register' at project directory.")
       raise Logaling::CommandFailed, "Try 'loga new' first." unless File.exist?(@dotfile_path)
 
-      register_and_index
+      @repository.register(@dotfile_path, @config.glossary)
       say "#{@config.glossary} is now registered to logaling."
     rescue Logaling::CommandFailed => e
       say e.message
@@ -151,7 +149,6 @@ module Logaling::Command
 
       project = @repository.find_project(@config.glossary)
       @repository.unregister(project)
-      @repository.index
       say "#{@config.glossary} is now unregistered."
     rescue Logaling::CommandFailed => e
       say e.message
@@ -204,7 +201,6 @@ module Logaling::Command
       glossary = project.glossary(@config.source_language, @config.target_language)
 
       glossary.add(source_term, target_term, note)
-      glossary.index!
     rescue Logaling::CommandFailed => e
       say e.message
     rescue Logaling::TermError => e
@@ -235,7 +231,6 @@ module Logaling::Command
       else
         glossary.delete_all(source_term, options["force"])
       end
-      glossary.index!
     rescue Logaling::CommandFailed, Logaling::TermError => e
       say e.message
     rescue Logaling::GlossaryNotFound => e
@@ -259,7 +254,6 @@ module Logaling::Command
       glossary = project.glossary(@config.source_language, @config.target_language)
 
       glossary.update(source_term, target_term, new_target_term, note)
-      glossary.index!
     rescue Logaling::CommandFailed => e
       say e.message
     rescue Logaling::TermError => e
@@ -420,11 +414,6 @@ module Logaling::Command
       unless args[0] && args[1]
         raise Logaling::CommandFailed, "Do 'loga import tmx <glossary name> <url or path>'"
       end
-    end
-
-    def register_and_index
-      @repository.register(@dotfile_path, @config.glossary)
-      @repository.index
     end
   end
 end
