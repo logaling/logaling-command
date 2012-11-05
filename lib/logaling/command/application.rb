@@ -204,6 +204,7 @@ module Logaling::Command
       glossary = project.glossary(@config.source_language, @config.target_language)
 
       glossary.add(source_term, target_term, note)
+      glossary.index!
     rescue Logaling::CommandFailed => e
       say e.message
     rescue Logaling::TermError => e
@@ -234,6 +235,7 @@ module Logaling::Command
       else
         glossary.delete_all(source_term, options["force"])
       end
+      glossary.index!
     rescue Logaling::CommandFailed, Logaling::TermError => e
       say e.message
     rescue Logaling::GlossaryNotFound => e
@@ -257,6 +259,7 @@ module Logaling::Command
       glossary = project.glossary(@config.source_language, @config.target_language)
 
       glossary.update(source_term, target_term, new_target_term, note)
+      glossary.index!
     rescue Logaling::CommandFailed => e
       say e.message
     rescue Logaling::TermError => e
@@ -276,7 +279,6 @@ module Logaling::Command
     method_option "fixed", type: :boolean, default: false
     def lookup(source_term)
       check_logaling_home_exists
-      @repository.index
       if @config.glossary
         project = @repository.find_project(@config.glossary)
         raise Logaling::ProjectNotFound unless project
