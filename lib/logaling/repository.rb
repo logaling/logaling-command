@@ -33,6 +33,7 @@ module Logaling
       else
         raise Logaling::GlossaryAlreadyRegistered, register_name
       end
+      index
     rescue Logaling::GlossaryAlreadyRegistered => e
       raise e
     rescue
@@ -42,6 +43,7 @@ module Logaling
     def unregister(project)
       raise Logaling::ProjectNotFound unless project
       FileUtils.rm_rf(project.path, :secure => true)
+      index
     end
 
     def create_personal_project(project_name, source_language, target_language)
@@ -56,6 +58,7 @@ module Logaling
         raise Logaling::GlossaryNotFound, "The glossary '#{project_name}' not found."
       end
       PersonalProject.remove(personal_glossary_root_path, project_name, source_language, target_language, self)
+      index
     rescue Logaling::GlossaryNotFound => e
       raise e
     rescue
@@ -67,6 +70,7 @@ module Logaling
       Dir.chdir(cache_path) do
         glossary_source.import
       end
+      index
     rescue
       raise Logaling::CommandFailed, "Failed import #{glossary_source.class.name} to #{cache_path}."
     end
@@ -76,6 +80,7 @@ module Logaling
       Dir.chdir(cache_path) do
         glossary_source.import(glossary, url)
       end
+      index
     rescue Logaling::GlossaryNotFound => e
       raise e
     rescue

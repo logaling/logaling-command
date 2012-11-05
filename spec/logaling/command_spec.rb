@@ -576,7 +576,6 @@ describe Logaling::Command::Application do
       before do
         project = repository.find_project('spec')
         repository.unregister(project)
-        repository.index
         command.options = base_options.merge("no-pager" => true)
         @stdout = capture(:stdout) {command.list}
       end
