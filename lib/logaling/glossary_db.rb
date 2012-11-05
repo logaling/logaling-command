@@ -20,7 +20,7 @@ require 'cgi'
 
 module Logaling
   class GlossaryDB
-    VERSION = 1
+    VERSION = 1.1
 
     def self.open(base_path, encoding, &blk)
       blk ? GlossaryDB.new.open(base_path, encoding, &blk) : GlossaryDB.new.open(base_path, encoding)
@@ -229,10 +229,13 @@ module Logaling
     def get_all_glossary_sources
       source_paths = Groonga["glossary_sources"].sort([
         {:key=>"_key", :order=>'ascending'}
-      ]).map{|record| record.key}
-      source_paths.map do |source_path|
+      ]).map{|record| {record.key => record.project_type}}
+      source_paths.map do |tmp_hash|
+        source_path = tmp_hash.keys.first
+        project_type = tmp_hash.values.first
         glossary_name, source_language, target_language = File.basename(source_path).split(/\./)
-        glossary = Glossary.new(glossary_name, source_language, target_language)
+        project = Logaling.const_get(project_type).new(Logaling::Project.find_path(source_path))
+        glossary = Glossary.new(glossary_name, source_language, target_language, project)
         GlossarySource.create(source_path, glossary)
       end
     end
@@ -262,7 +265,11 @@ module Logaling
     end
 
     def add_glossary_source(glossary_source)
-      Groonga["glossary_sources"].add(glossary_source.source_path, :indexed_at => glossary_source.mtime)
+      project_type = glossary_source.glossary.project.class.to_s.sub('Logaling::','')
+      Groonga["glossary_sources"].add(
+        glossary_source.source_path, {
+        :indexed_at => glossary_source.mtime,
+        :project_type => project_type})
     end
 
     def delete_glossary(glossary_name)
@@ -341,6 +348,7 @@ module Logaling
                            :type => :hash,
                            :key_type => "ShortText") do |table|
           table.time("indexed_at")
+          table.short_text("project_type")
         end
 
         schema.create_table("glossaries",

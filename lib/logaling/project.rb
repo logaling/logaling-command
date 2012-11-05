@@ -33,6 +33,14 @@ module Logaling
           end
         end
       end
+
+      def find_path(source_path)
+        if source_path =~ /(.+\/projects\/[^\/]+).+/
+          $1
+        else
+          source_path
+        end
+      end
     end
     attr_reader :path, :repository
 

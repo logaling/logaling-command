@@ -19,7 +19,7 @@ module Logaling
     SUPPORTED_FILE_TYPE = %w(yml tsv csv)
     SUPPORTED_ANNOTATION = %w(wip)
 
-    attr_reader :name, :source_language, :target_language
+    attr_reader :name, :source_language, :target_language, :project
 
     def initialize(name, source_language, target_language, project=nil)
       @name = name
