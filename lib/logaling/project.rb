@@ -88,6 +88,14 @@ module Logaling
       false
     end
 
+    def personal?
+      false
+    end
+
+    def normal_project?
+      true
+    end
+
     private
     def all_glossary_source_path
       Dir.glob(File.join(glossary_source_path, "*"))
@@ -110,6 +118,10 @@ module Logaling
 
     def imported?
       true
+    end
+
+    def normal_project?
+      false
     end
   end
 
@@ -147,6 +159,14 @@ module Logaling
 
     def initialize_glossary(source_language, target_language)
       glossary(source_language, target_language).initialize_glossary_source
+    end
+
+    def personal?
+      true
+    end
+
+    def normal_project?
+      false
     end
   end
 end
