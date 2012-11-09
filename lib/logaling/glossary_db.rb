@@ -265,11 +265,10 @@ module Logaling
     end
 
     def add_glossary_source(glossary_source)
-      project_type = glossary_source.glossary.project.class.to_s.sub('Logaling::','')
       Groonga["glossary_sources"].add(
         glossary_source.source_path, {
         :indexed_at => glossary_source.mtime,
-        :project_type => project_type})
+        :project_type => glossary_source.glossary.project.type})
     end
 
     def delete_glossary(glossary_name)

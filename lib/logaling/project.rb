@@ -96,6 +96,10 @@ module Logaling
       true
     end
 
+    def type
+      self.class.to_s.sub('Logaling::','')
+    end
+
     private
     def all_glossary_source_path
       Dir.glob(File.join(glossary_source_path, "*"))
