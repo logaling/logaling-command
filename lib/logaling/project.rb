@@ -97,7 +97,7 @@ module Logaling
     end
 
     def type
-      self.class.to_s.sub('Logaling::','')
+      self.class.to_s.sub('Logaling::', '')
     end
 
     private
