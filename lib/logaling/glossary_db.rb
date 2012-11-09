@@ -229,10 +229,8 @@ module Logaling
     def get_all_glossary_sources
       source_paths = Groonga["glossary_sources"].sort([
         {:key=>"_key", :order=>'ascending'}
-      ]).map{|record| {record.key => record.project_type}}
-      source_paths.map do |tmp_hash|
-        source_path = tmp_hash.keys.first
-        project_type = tmp_hash.values.first
+      ]).map{|record| [record.key, record.project_type]}
+      source_paths.map do |source_path, project_type|
         glossary_name, source_language, target_language = File.basename(source_path).split(/\./)
         project = Logaling.const_get(project_type).new(Logaling::Project.find_path(source_path))
         glossary = Glossary.new(glossary_name, source_language, target_language, project)
