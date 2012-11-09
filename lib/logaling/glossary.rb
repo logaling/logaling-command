@@ -126,6 +126,10 @@ module Logaling
       end
     end
 
+    def same?(glossary)
+      name == glossary.name
+    end
+
     private
     def glossary_sources
       glob_condition = SUPPORTED_FILE_TYPE.map do |type|

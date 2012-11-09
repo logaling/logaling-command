@@ -453,13 +453,13 @@ module Logaling
       get_all_glossary_sources.each do |glossary_source_taken|
         project_taken = glossary_source_taken.glossary.project
         if project.personal? && project_taken.personal?
-          if glossary_source.glossary.name == glossary_source_taken.glossary.name
+          if glossary_source.glossary.same?(glossary_source_taken.glossary)
             glossary_source_num = 1
             break
           end
         elsif project.normal_project? && project_taken.normal_project?
-          if project.name == project_taken.name &&
-             glossary_source.glossary.name == glossary_source_taken.glossary.name
+          if project.same?(project_taken) &&
+             glossary_source.glossary.same?(glossary_source_taken.glossary)
             glossary_source_num = 1
             break
           end

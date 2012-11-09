@@ -100,6 +100,10 @@ module Logaling
       self.class.to_s.sub('Logaling::', '')
     end
 
+    def same?(project)
+      name == project.name
+    end
+
     private
     def all_glossary_source_path
       Dir.glob(File.join(glossary_source_path, "*"))
