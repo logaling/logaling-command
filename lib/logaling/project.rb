@@ -33,6 +33,14 @@ module Logaling
           end
         end
       end
+
+      def find_path(source_path)
+        if source_path =~ /(.+\/projects\/[^\/]+).+/
+          $1
+        else
+          source_path
+        end
+      end
     end
     attr_reader :path, :repository
 
@@ -80,6 +88,22 @@ module Logaling
       false
     end
 
+    def personal?
+      false
+    end
+
+    def normal_project?
+      true
+    end
+
+    def type
+      self.class.to_s.sub('Logaling::', '')
+    end
+
+    def same?(project)
+      name == project.name
+    end
+
     private
     def all_glossary_source_path
       Dir.glob(File.join(glossary_source_path, "*"))
@@ -102,6 +126,10 @@ module Logaling
 
     def imported?
       true
+    end
+
+    def normal_project?
+      false
     end
   end
 
@@ -139,6 +167,14 @@ module Logaling
 
     def initialize_glossary(source_language, target_language)
       glossary(source_language, target_language).initialize_glossary_source
+    end
+
+    def personal?
+      true
+    end
+
+    def normal_project?
+      false
     end
   end
 end

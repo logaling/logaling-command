@@ -19,7 +19,7 @@ module Logaling
     SUPPORTED_FILE_TYPE = %w(yml tsv csv)
     SUPPORTED_ANNOTATION = %w(wip)
 
-    attr_reader :name, :source_language, :target_language
+    attr_reader :name, :source_language, :target_language, :project
 
     def initialize(name, source_language, target_language, project=nil)
       @name = name
@@ -124,6 +124,10 @@ module Logaling
           db.deindex_glossary_source(removed_glossary_source)
         end
       end
+    end
+
+    def same?(glossary)
+      name == glossary.name
     end
 
     private

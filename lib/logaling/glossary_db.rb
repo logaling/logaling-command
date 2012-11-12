@@ -20,7 +20,7 @@ require 'cgi'
 
 module Logaling
   class GlossaryDB
-    VERSION = 1
+    VERSION = 2
 
     def self.open(base_path, encoding, &blk)
       blk ? GlossaryDB.new.open(base_path, encoding, &blk) : GlossaryDB.new.open(base_path, encoding)
@@ -229,10 +229,11 @@ module Logaling
     def get_all_glossary_sources
       source_paths = Groonga["glossary_sources"].sort([
         {:key=>"_key", :order=>'ascending'}
-      ]).map{|record| record.key}
-      source_paths.map do |source_path|
+      ]).map{|record| [record.key, record.project_type]}
+      source_paths.map do |source_path, project_type|
         glossary_name, source_language, target_language = File.basename(source_path).split(/\./)
-        glossary = Glossary.new(glossary_name, source_language, target_language)
+        project = Logaling.const_get(project_type).new(Logaling::Project.find_path(source_path))
+        glossary = Glossary.new(glossary_name, source_language, target_language, project)
         GlossarySource.create(source_path, glossary)
       end
     end
@@ -262,7 +263,10 @@ module Logaling
     end
 
     def add_glossary_source(glossary_source)
-      Groonga["glossary_sources"].add(glossary_source.source_path, :indexed_at => glossary_source.mtime)
+      Groonga["glossary_sources"].add(
+        glossary_source.source_path, {
+        :indexed_at => glossary_source.mtime,
+        :project_type => glossary_source.glossary.project.type})
     end
 
     def delete_glossary(glossary_name)
@@ -341,6 +345,7 @@ module Logaling
                            :type => :hash,
                            :key_type => "ShortText") do |table|
           table.time("indexed_at")
+          table.short_text("project_type")
         end
 
         schema.create_table("glossaries",
@@ -441,16 +446,18 @@ module Logaling
     end
 
     def glossary_source_of_the_same_project_exist?(glossary_source)
+      project = glossary_source.glossary.project
       glossary_source_num = 0
       get_all_glossary_sources.each do |glossary_source_taken|
-        if glossary_source.belongs_to_personal? && glossary_source_taken.belongs_to_personal?
-          if glossary_source.glossary_name == glossary_source_taken.glossary_name
+        project_taken = glossary_source_taken.glossary.project
+        if project.personal? && project_taken.personal?
+          if glossary_source.glossary.same?(glossary_source_taken.glossary)
             glossary_source_num = 1
             break
           end
-        elsif glossary_source.belongs_to_project? && glossary_source_taken.belongs_to_project?
-          if glossary_source.project_name == glossary_source_taken.project_name &&
-             glossary_source.glossary_name == glossary_source_taken.glossary_name
+        elsif project.normal_project? && project_taken.normal_project?
+          if project.same?(project_taken) &&
+             glossary_source.glossary.same?(glossary_source_taken.glossary)
             glossary_source_num = 1
             break
           end
