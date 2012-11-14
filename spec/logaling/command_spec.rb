@@ -83,7 +83,6 @@ describe Logaling::Command::Application do
 
   describe '#register' do
     before do
-      sleep(1)
       @n_projects = Dir[File.join(logaling_home, "projects", "*")].size
     end
 

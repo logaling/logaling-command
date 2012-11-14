@@ -107,8 +107,6 @@ module Logaling
         before do
           glossary.add("delete_logaling", "てすと1", "備考")
           glossary.add("delete_logaling", "てすと2", "備考")
-          # in order to index certainly
-          sleep(1)
           glossary.delete("delete_logaling", "てすと1")
           repository.index
           @result = repository.lookup("delete_logaling", glossary)
