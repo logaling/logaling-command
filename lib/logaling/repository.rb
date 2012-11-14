@@ -145,11 +145,6 @@ module Logaling
       [registered_project_paths, imported_glossary_paths].map(&:size).inject(&:+)
     end
 
-    def config_path
-      path = File.join(@path, "config")
-      File.exist?(path) ? path : nil
-    end
-
     def find_project(project_name)
       projects.detect {|project| project.name == project_name }
     end
@@ -159,6 +154,11 @@ module Logaling
         project.name == project_name and project.has_glossary?(source_language, target_language)
       end
       project ? project.glossary(source_language, target_language) : nil
+    end
+
+    def config_path
+      path = File.join(@path, "config")
+      File.exist?(path) ? path : nil
     end
 
     def logaling_db_home
