@@ -22,7 +22,7 @@ require "logaling/project"
 module Logaling
   class Repository
     def initialize(path)
-      @path = path
+      @logaling_home = path
     end
 
     def register(dot_logaling_path, register_name)
@@ -157,25 +157,25 @@ module Logaling
     end
 
     def config_path
-      path = File.join(@path, "config")
+      path = File.join(@logaling_home, "config")
       File.exist?(path) ? path : nil
     end
 
     def logaling_db_home
-      File.join(@path, "db")
+      File.join(@logaling_home, "db")
     end
 
     private
     def logaling_projects_path
-      File.join(@path, "projects")
+      File.join(@logaling_home, "projects")
     end
 
     def personal_glossary_root_path
-      File.join(@path, "personal")
+      File.join(@logaling_home, "personal")
     end
 
     def cache_path
-      File.join(@path, "cache")
+      File.join(@logaling_home, "cache")
     end
 
     def registered_project_paths
