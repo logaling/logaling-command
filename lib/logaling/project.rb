@@ -44,8 +44,8 @@ module Logaling
     end
     attr_reader :path, :repository
 
-    def initialize(path, repository=nil)
-      @path = path
+    def initialize(relative_path, repository=nil)
+      @path = relative_path
       @repository = repository
     end
 
@@ -58,7 +58,8 @@ module Logaling
     end
 
     def glossary_source_path
-      File.join(@path, "glossary")
+      basepath = @repository.make_full_path(@path)
+      File.join(basepath, "glossary")
     end
 
     def glossary_db_path
@@ -74,8 +75,9 @@ module Logaling
     end
 
     def glossary_sources
-      all_glossary_source_path.map do |source_path|
-        name, source_language, target_language, type = File.basename(source_path).split(/\./)
+      all_glossary_source_path.map do |source_path_full|
+        name, source_language, target_language, type = File.basename(source_path_full).split(/\./)
+        source_path = @repository.make_relative_path(source_path_full)
         GlossarySource.create(source_path, glossary(source_language, target_language))
       end
     end
@@ -121,7 +123,7 @@ module Logaling
     end
 
     def glossary_source_path
-      File.dirname(@path)
+      @repository.make_full_path(@path)
     end
 
     def imported?
@@ -131,23 +133,28 @@ module Logaling
     def normal_project?
       false
     end
+
+    private
+    def all_glossary_source_path
+      Dir.glob(File.join(File.dirname(glossary_source_path), "*"))
+    end
   end
 
   class PersonalProject < Project
     class << self
-      def create(root_path, glossary_name, source_language, target_language, repository=nil)
+      def create(relative_root_path, glossary_name, source_language, target_language, repository=nil)
         project_name = [glossary_name, source_language, target_language, 'yml'].join('.')
-        project_path = File.join(root_path, project_name)
+        project_path = File.join(relative_root_path, project_name)
         project = PersonalProject.new(project_path, repository)
         project.initialize_glossary(source_language, target_language)
         project
       end
 
-      def remove(root_path, glossary_name, source_language, target_language, repository=nil)
+      def remove(relative_root_path, glossary_name, source_language, target_language, repository)
         project_name = [glossary_name, source_language, target_language, 'yml'].join('.')
-        project_path = File.join(root_path, project_name)
+        project_path = File.join(relative_root_path, project_name)
         project = PersonalProject.new(project_path, repository)
-        FileUtils.rm_rf(project_path, :secure => true)
+        FileUtils.rm_rf(repository.make_full_path(project_path), :secure => true)
         project
       end
     end
@@ -162,7 +169,7 @@ module Logaling
     end
 
     def glossary_source_path
-      File.dirname(@path)
+      @repository.make_full_path(@path)
     end
 
     def initialize_glossary(source_language, target_language)
@@ -175,6 +182,11 @@ module Logaling
 
     def normal_project?
       false
+    end
+
+    private
+    def all_glossary_source_path
+      Dir.glob(File.join(File.dirname(glossary_source_path), "*"))
     end
   end
 end

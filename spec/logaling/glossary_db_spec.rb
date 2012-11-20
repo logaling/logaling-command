@@ -32,13 +32,14 @@ module Logaling
     before do
       FileUtils.rm_rf(File.join(project_path, 'spec'))
       FileUtils.mkdir_p(cache_path)
+      FileUtils.mkdir_p(personal_path)
     end
 
     describe "#get_all_glossary_sources" do
       before do
         command.new('spec', 'en', 'fr')
         command.add('spec', 'スペック')
-        command.copy('spec', 'en', 'fr', 'spec', 'en', 'ja')
+        command.copy('spec', 'en', 'fr', 'personal_spec', 'en', 'ja')
         csv_path = File.join(cache_path, 'imported_spec.en.ja.csv')
         FileUtils.touch(csv_path)
         File.open(csv_path, "w"){|f| f.puts "test_logaling,テストろがりん"}

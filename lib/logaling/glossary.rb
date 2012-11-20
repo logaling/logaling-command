@@ -84,9 +84,10 @@ module Logaling
         @glossary_source
       else
         file_name = [@name, @source_language, @target_language, 'yml'].join('.')
-        source_dir = @project.glossary_source_path
+        source_dir = @project.normal_project? ? @project.glossary_source_path : File.dirname(@project.glossary_source_path)
         FileUtils.mkdir_p(source_dir)
-        source_path = File.join(source_dir, file_name)
+        source_path_full = File.join(source_dir, file_name)
+        source_path = @project.repository.make_relative_path(source_path_full)
         @glossary_source = Logaling::GlossarySource.create(source_path, self)
       end
     end
@@ -136,7 +137,10 @@ module Logaling
         file_name = [self.to_s, type].join('.')
         File.join(@project.glossary_source_path, file_name)
       end
-      Dir.glob(glob_condition).map {|source_path| GlossarySource.create(source_path, self)}
+      Dir.glob(glob_condition).map do |source_path_full|
+        source_path = @project.repository.make_relative_path(source_path_full)
+        GlossarySource.create(source_path, self)
+      end
     end
   end
 end

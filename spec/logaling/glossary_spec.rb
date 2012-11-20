@@ -21,13 +21,19 @@ require "fileutils"
 module Logaling
   describe Glossary do
     let(:logaling_home) { @logaling_home }
+    let(:logaling_db_home) { File.join(logaling_home, 'db') }
     let(:repository) { Logaling::Repository.new(logaling_home) }
     let(:glossary) { repository.find_project('spec').glossary('en', 'ja') }
     let(:glossary_source_path) { glossary.glossary_source.source_path }
+    let(:glossary_source_path_full) { glossary.glossary_source.source_path_full }
 
     before do
+      # clear directories and files
       FileUtils.rm_rf(File.join(logaling_home, 'projects', 'spec'), :secure => true)
-      FileUtils.mkdir_p(File.join(logaling_home, 'projects', 'spec'))
+      FileUtils.mkdir_p(File.join(logaling_home, 'projects', 'spec', 'glossary'))
+      FileUtils.touch(glossary_source_path_full)
+      # and clear db too
+      glossary.index!
     end
 
     describe '#add' do
@@ -37,7 +43,7 @@ module Logaling
         end
 
         it 'glossary yaml should have that bilingual pair' do
-          yaml = YAML::load_file(glossary_source_path)
+          yaml = YAML::load_file(glossary_source_path_full)
           term = yaml.index({"source_term"=>"spec", "target_term"=>"スペック", "note"=>"テストスペック"})
           term.should_not be_nil
         end
@@ -49,7 +55,7 @@ module Logaling
         end
 
         it "should create the glossary and add term" do
-          yaml = YAML::load_file(glossary_source_path)
+          yaml = YAML::load_file(glossary_source_path_full)
           term = yaml.index({"source_term"=>"test", "target_term"=>"テスト", "note"=>"テスト"})
           term.should_not be_nil
         end
@@ -85,7 +91,7 @@ module Logaling
         end
 
         it 'should clear note' do
-          yaml = YAML::load_file(glossary_source_path)
+          yaml = YAML::load_file(glossary_source_path_full)
           term = yaml.index({"source_term"=>"user", "target_term"=>"ユーザ", "note"=>""})
           term.should_not be_nil
         end
@@ -97,7 +103,7 @@ module Logaling
         end
 
         it {
-          -> { glossary.update("user", "ゆーざー", "ユーザ", "") }.should raise_error(Logaling::TermError)
+          -> { glossary.update("user", "ゆーざ", "ユーザ", "") }.should raise_error(Logaling::TermError)
         }
       end
     end
@@ -108,7 +114,6 @@ module Logaling
           glossary.add("delete_logaling", "てすと1", "備考")
           glossary.add("delete_logaling", "てすと2", "備考")
           glossary.delete("delete_logaling", "てすと1")
-          repository.index
           @result = repository.lookup("delete_logaling", glossary)
         end
 
@@ -145,7 +150,6 @@ module Logaling
           before do
             glossary.add("user_logaling", "ユーザ", "備考")
             glossary.delete_all("user_logaling")
-            repository.index
             @result = repository.lookup("user_logaling", glossary)
           end
 

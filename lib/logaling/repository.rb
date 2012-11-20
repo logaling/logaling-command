@@ -21,6 +21,7 @@ require "logaling/project"
 
 module Logaling
   class Repository
+    attr_reader :logaling_home
     def initialize(path)
       @logaling_home = path
     end
@@ -42,7 +43,7 @@ module Logaling
 
     def unregister(project)
       raise Logaling::ProjectNotFound unless project
-      FileUtils.rm_rf(project.path, :secure => true)
+      FileUtils.rm_rf(make_full_path(project.path), :secure => true)
       index
     end
 
@@ -50,14 +51,16 @@ module Logaling
       if glossary_exists?(project_name, source_language, target_language)
         raise Logaling::GlossaryAlreadyRegistered, "The glossary '#{project_name}' already exists."
       end
-      PersonalProject.create(personal_glossary_root_path, project_name, source_language, target_language, self)
+      personal_project_path = make_relative_path(personal_glossary_root_path)
+      PersonalProject.create(personal_project_path, project_name, source_language, target_language, self)
     end
 
     def remove_personal_project(project_name, source_language, target_language)
       unless glossary_exists?(project_name, source_language, target_language)
         raise Logaling::GlossaryNotFound, "The glossary '#{project_name}' not found."
       end
-      PersonalProject.remove(personal_glossary_root_path, project_name, source_language, target_language, self)
+      personal_project_path = make_relative_path(personal_glossary_root_path)
+      PersonalProject.remove(personal_project_path, project_name, source_language, target_language, self)
       index
     rescue Logaling::GlossaryNotFound => e
       raise e
@@ -110,13 +113,13 @@ module Logaling
 
     def projects
       projects = registered_project_paths.map do |project_path|
-        Logaling::Project.new(project_path, self)
+        Logaling::Project.new(make_relative_path(project_path), self)
       end
       projects += personal_glossary_paths.map do |personal_glossary_path|
-        Logaling::PersonalProject.new(personal_glossary_path, self)
+        Logaling::PersonalProject.new(make_relative_path(personal_glossary_path), self)
       end
       projects += imported_glossary_paths.map do |imported_project_path|
-        Logaling::ImportedProject.new(imported_project_path, self)
+        Logaling::ImportedProject.new(make_relative_path(imported_project_path), self)
       end
       projects.sort_by(&:path)
     end
@@ -163,6 +166,17 @@ module Logaling
 
     def logaling_db_home
       File.join(@logaling_home, "db")
+    end
+
+    def make_full_path(relative_path)
+      File.expand_path(File.join(@logaling_home, relative_path))
+    end
+
+    def make_relative_path(full_path)
+      require 'pathname'
+      path = Pathname.new(full_path)
+      base = Pathname.new(@logaling_home)
+      path.relative_path_from(base).to_s
     end
 
     private
