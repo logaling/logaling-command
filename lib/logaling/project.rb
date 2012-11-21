@@ -63,6 +63,11 @@ module Logaling
     end
     alias_method :source_directory_path, :glossary_source_path
 
+    def relative_path(glossary_source_file_name)
+      source_path = File.join(source_directory_path, glossary_source_file_name)
+      @repository.make_relative_path(source_path)
+    end
+
     def glossary_db_path
       @repository.logaling_db_home
     end
