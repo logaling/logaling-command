@@ -51,7 +51,7 @@ module Logaling
       if glossary_exists?(project_name, source_language, target_language)
         raise Logaling::GlossaryAlreadyRegistered, "The glossary '#{project_name}' already exists."
       end
-      personal_project_path = make_relative_path(personal_glossary_root_path)
+      personal_project_path = relative_path(personal_glossary_root_path)
       PersonalProject.create(personal_project_path, project_name, source_language, target_language, self)
     end
 
@@ -59,7 +59,7 @@ module Logaling
       unless glossary_exists?(project_name, source_language, target_language)
         raise Logaling::GlossaryNotFound, "The glossary '#{project_name}' not found."
       end
-      personal_project_path = make_relative_path(personal_glossary_root_path)
+      personal_project_path = relative_path(personal_glossary_root_path)
       PersonalProject.remove(personal_project_path, project_name, source_language, target_language, self)
       index
     rescue Logaling::GlossaryNotFound => e
@@ -113,13 +113,13 @@ module Logaling
 
     def projects
       projects = registered_project_paths.map do |project_path|
-        Logaling::Project.new(make_relative_path(project_path), self)
+        Logaling::Project.new(relative_path(project_path), self)
       end
       projects += personal_glossary_paths.map do |personal_glossary_path|
-        Logaling::PersonalProject.new(make_relative_path(personal_glossary_path), self)
+        Logaling::PersonalProject.new(relative_path(personal_glossary_path), self)
       end
       projects += imported_glossary_paths.map do |imported_project_path|
-        Logaling::ImportedProject.new(make_relative_path(imported_project_path), self)
+        Logaling::ImportedProject.new(relative_path(imported_project_path), self)
       end
       projects.sort_by(&:path)
     end
@@ -172,7 +172,7 @@ module Logaling
       File.expand_path(File.join(@logaling_home, relative_path))
     end
 
-    def make_relative_path(full_path)
+    def relative_path(full_path)
       require 'pathname'
       path = Pathname.new(full_path)
       base = Pathname.new(@logaling_home)

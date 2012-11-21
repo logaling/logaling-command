@@ -65,7 +65,7 @@ module Logaling
     # relative_path_from_logaling_home みたいな名前でGlossarySourceにある方が良いかも...
     def relative_path(glossary_source_file_name)
       source_path = File.join(source_directory_path, glossary_source_file_name)
-      @repository.make_relative_path(source_path)
+      @repository.relative_path(source_path)
     end
 
     def glossary_db_path
@@ -83,7 +83,7 @@ module Logaling
     def glossary_sources
       all_glossary_source_path.map do |source_path_full|
         name, source_language, target_language, type = File.basename(source_path_full).split(/\./)
-        source_path = @repository.make_relative_path(source_path_full)
+        source_path = @repository.relative_path(source_path_full)
         GlossarySource.create(source_path, glossary(source_language, target_language))
       end
     end
