@@ -118,57 +118,7 @@ module Logaling
     end
   end
 
-  class ImportedProject < Project
-    def name
-      File.basename(@path).split(/\./).first
-    end
-
-    def glossary_sources
-      name, source_language, target_language, type = File.basename(@path).split(/\./)
-      [GlossarySource.create(@path, glossary(source_language, target_language))]
-    end
-
-    def has_glossary?(source_language, target_language)
-      glossary_source_language, glossary_target_language = File.basename(@path).split(/\./)[1..2]
-      glossary_source_language == source_language && glossary_target_language == target_language
-    end
-
-    def glossary_source_path
-      @repository.expand_path(@path)
-    end
-
-    def imported?
-      true
-    end
-
-    def normal_project?
-      false
-    end
-
-    def source_directory_path
-      File.dirname(glossary_source_path)
-    end
-  end
-
-  class PersonalProject < Project
-    class << self
-      def create(relative_root_path, glossary_name, source_language, target_language, repository=nil)
-        project_name = [glossary_name, source_language, target_language, 'yml'].join('.')
-        project_path = File.join(relative_root_path, project_name)
-        project = PersonalProject.new(project_path, repository)
-        project.initialize_glossary(source_language, target_language)
-        project
-      end
-
-      def remove(relative_root_path, glossary_name, source_language, target_language, repository)
-        project_name = [glossary_name, source_language, target_language, 'yml'].join('.')
-        project_path = File.join(relative_root_path, project_name)
-        project = PersonalProject.new(project_path, repository)
-        FileUtils.rm_rf(repository.expand_path(project_path), :secure => true)
-        project
-      end
-    end
-
+  class FileBasedProject < Project
     def name
       File.basename(@path).split(/\./).first
     end
@@ -188,20 +138,46 @@ module Logaling
     end
     alias_method :glossary_source_path, :expand_path
 
-    def initialize_glossary(source_language, target_language)
-      glossary(source_language, target_language).initialize_glossary_source
-    end
-
-    def personal?
-      true
-    end
-
     def normal_project?
       false
     end
 
     def source_directory_path
       File.dirname(glossary_source_path)
+    end
+  end
+
+  class ImportedProject < FileBasedProject
+    def imported?
+      true
+    end
+  end
+
+  class PersonalProject < FileBasedProject
+    class << self
+      def create(relative_root_path, glossary_name, source_language, target_language, repository=nil)
+        project_name = [glossary_name, source_language, target_language, 'yml'].join('.')
+        project_path = File.join(relative_root_path, project_name)
+        project = PersonalProject.new(project_path, repository)
+        project.initialize_glossary(source_language, target_language)
+        project
+      end
+
+      def remove(relative_root_path, glossary_name, source_language, target_language, repository)
+        project_name = [glossary_name, source_language, target_language, 'yml'].join('.')
+        project_path = File.join(relative_root_path, project_name)
+        project = PersonalProject.new(project_path, repository)
+        FileUtils.rm_rf(repository.expand_path(project_path), :secure => true)
+        project
+      end
+    end
+
+    def initialize_glossary(source_language, target_language)
+      glossary(source_language, target_language).initialize_glossary_source
+    end
+
+    def personal?
+      true
     end
   end
 end
