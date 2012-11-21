@@ -25,7 +25,7 @@ module Logaling
     let(:repository) { Logaling::Repository.new(logaling_home) }
     let(:glossary) { repository.find_project('spec').glossary('en', 'ja') }
     let(:glossary_source_path) { glossary.glossary_source.source_path }
-    let(:glossary_source_path_full) { glossary.glossary_source.source_path_full }
+    let(:glossary_source_expand_path) { glossary.glossary_source.expand_path }
 
     before do
       FileUtils.rm_rf(File.join(logaling_home, 'projects', 'spec'), :secure => true)
@@ -119,7 +119,7 @@ module Logaling
       end
 
       context 'when tsv file as glossary exists' do
-        let(:tsv_path) { glossary_source_path_full.sub(/yml$/, 'tsv') }
+        let(:tsv_path) { glossary_source_expand_path.sub(/yml$/, 'tsv') }
 
         before do
           FileUtils.touch(tsv_path)
@@ -139,12 +139,12 @@ module Logaling
     end
 
     describe '#index' do
-      let(:tsv_path) { File.join(File.dirname(glossary_source_path_full), "spec.en.ja.tsv") }
-      let(:csv_path) { File.join(File.dirname(glossary_source_path_full), "spec.en.ja.csv") }
+      let(:tsv_path) { File.join(File.dirname(glossary_source_expand_path), "spec.en.ja.tsv") }
+      let(:csv_path) { File.join(File.dirname(glossary_source_expand_path), "spec.en.ja.csv") }
 
       context 'when yml file as glossary exists' do
         before do
-          File.open(glossary_source_path_full, 'w') do |f|
+          File.open(glossary_source_expand_path, 'w') do |f|
             YAML.dump([], f)
           end
           glossary.add("spec_logaling", "スペック", "備考")
@@ -157,7 +157,7 @@ module Logaling
         end
 
         after do
-          FileUtils.rm_rf(glossary_source_path_full, :secure => true)
+          FileUtils.rm_rf(glossary_source_expand_path, :secure => true)
         end
       end
 

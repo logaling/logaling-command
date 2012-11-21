@@ -35,10 +35,10 @@ module Logaling
       end
 
       def mtime
-        File.mtime(source_path_full)
+        File.mtime(expand_path)
       end
 
-      def source_path_full
+      def expand_path
         @glossary.project.repository.expand_path(@source_path)
       end
     end
