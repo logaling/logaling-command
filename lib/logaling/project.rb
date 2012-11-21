@@ -44,8 +44,8 @@ module Logaling
     end
     attr_reader :path, :repository
 
-    def initialize(path, repository=nil)
-      @path = path
+    def initialize(relative_path, repository=nil)
+      @path = relative_path
       @repository = repository
     end
 
@@ -58,7 +58,14 @@ module Logaling
     end
 
     def glossary_source_path
-      File.join(@path, "glossary")
+      File.join(@repository.expand_path(@path), "glossary")
+    end
+    alias_method :source_directory_path, :glossary_source_path
+
+    # relative_path_from_logaling_home みたいな名前でGlossarySourceにある方が良いかも...
+    def relative_path(glossary_source_file_name)
+      source_path = File.join(source_directory_path, glossary_source_file_name)
+      @repository.relative_path(source_path)
     end
 
     def glossary_db_path
@@ -74,8 +81,9 @@ module Logaling
     end
 
     def glossary_sources
-      all_glossary_source_path.map do |source_path|
-        name, source_language, target_language, type = File.basename(source_path).split(/\./)
+      all_glossary_source_path.map do |source_path_full|
+        name, source_language, target_language, type = File.basename(source_path_full).split(/\./)
+        source_path = @repository.relative_path(source_path_full)
         GlossarySource.create(source_path, glossary(source_language, target_language))
       end
     end
@@ -110,7 +118,7 @@ module Logaling
     end
   end
 
-  class ImportedProject < Project
+  class FileBasedProject < Project
     def name
       File.basename(@path).split(/\./).first
     end
@@ -120,49 +128,48 @@ module Logaling
       [GlossarySource.create(@path, glossary(source_language, target_language))]
     end
 
-    def glossary_source_path
-      File.dirname(@path)
+    def has_glossary?(source_language, target_language)
+      glossary_source_language, glossary_target_language = File.basename(@path).split(/\./)[1..2]
+      glossary_source_language == source_language && glossary_target_language == target_language
     end
 
-    def imported?
-      true
+    def absolute_path
+      @repository.expand_path(@path)
     end
+    alias_method :glossary_source_path, :absolute_path
 
     def normal_project?
       false
     end
+
+    def source_directory_path
+      File.dirname(glossary_source_path)
+    end
   end
 
-  class PersonalProject < Project
+  class ImportedProject < FileBasedProject
+    def imported?
+      true
+    end
+  end
+
+  class PersonalProject < FileBasedProject
     class << self
-      def create(root_path, glossary_name, source_language, target_language, repository=nil)
+      def create(relative_root_path, glossary_name, source_language, target_language, repository=nil)
         project_name = [glossary_name, source_language, target_language, 'yml'].join('.')
-        project_path = File.join(root_path, project_name)
+        project_path = File.join(relative_root_path, project_name)
         project = PersonalProject.new(project_path, repository)
         project.initialize_glossary(source_language, target_language)
         project
       end
 
-      def remove(root_path, glossary_name, source_language, target_language, repository=nil)
+      def remove(relative_root_path, glossary_name, source_language, target_language, repository)
         project_name = [glossary_name, source_language, target_language, 'yml'].join('.')
-        project_path = File.join(root_path, project_name)
+        project_path = File.join(relative_root_path, project_name)
         project = PersonalProject.new(project_path, repository)
-        FileUtils.rm_rf(project_path, :secure => true)
+        FileUtils.rm_rf(repository.expand_path(project_path), :secure => true)
         project
       end
-    end
-
-    def name
-      File.basename(@path).split(/\./).first
-    end
-
-    def glossary_sources
-      name, source_language, target_language, type = File.basename(@path).split(/\./)
-      [GlossarySource.create(@path, glossary(source_language, target_language))]
-    end
-
-    def glossary_source_path
-      File.dirname(@path)
     end
 
     def initialize_glossary(source_language, target_language)
@@ -171,10 +178,6 @@ module Logaling
 
     def personal?
       true
-    end
-
-    def normal_project?
-      false
     end
   end
 end

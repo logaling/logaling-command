@@ -20,14 +20,14 @@ module Logaling
     class Base
       attr_reader :source_path, :glossary
 
-      def initialize(source_path, glossary)
-        @source_path = source_path
+      def initialize(relative_source_path, glossary)
+        @source_path = relative_source_path
         @glossary = glossary
       end
 
       def eql?(other)
         return false unless self.class == other.class
-        @source_path == other.source_path
+        source_path == other.source_path
       end
 
       def hash
@@ -35,7 +35,11 @@ module Logaling
       end
 
       def mtime
-        File.mtime(@source_path)
+        File.mtime(absolute_path)
+      end
+
+      def absolute_path
+        @glossary.project.repository.expand_path(@source_path)
       end
     end
   end

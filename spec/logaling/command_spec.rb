@@ -25,7 +25,7 @@ describe Logaling::Command::Application do
   let(:target_project_path) { File.join(logaling_home, "projects", "spec") }
   let(:repository) { Logaling::Repository.new(logaling_home) }
   let(:glossary) { repository.find_project('spec').glossary('en', 'ja') }
-  let(:glossary_source_path) { glossary.glossary_source.source_path }
+  let(:glossary_source_path) { glossary.glossary_source.absolute_path }
 
   before do
     FileUtils.rm_rf(File.join(logaling_home, 'projects', 'spec'))

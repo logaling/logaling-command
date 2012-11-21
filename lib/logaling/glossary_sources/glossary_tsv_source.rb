@@ -22,7 +22,7 @@ module Logaling::GlossarySources
   class GlossaryTsvSource < Base
     def load
       glossary_source = []
-      CSV.open(source_path, "r:utf-8",  {:col_sep => "\t"}) do |tsv|
+      CSV.open(absolute_path, "r:utf-8",  {:col_sep => "\t"}) do |tsv|
         tsv.each do |row|
           glossary_source << {"source_term" => row[0], "target_term" => row[1], "note" => ""} if row.size >= 2
         end

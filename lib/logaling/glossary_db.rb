@@ -20,7 +20,7 @@ require 'cgi'
 
 module Logaling
   class GlossaryDB
-    VERSION = 2
+    VERSION = 3
 
     def self.open(base_path, encoding, &blk)
       blk ? GlossaryDB.new.open(base_path, encoding, &blk) : GlossaryDB.new.open(base_path, encoding)

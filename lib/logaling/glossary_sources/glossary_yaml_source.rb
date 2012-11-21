@@ -28,13 +28,13 @@ require "fileutils"
 module Logaling::GlossarySources
   class GlossaryYamlSource < Base
     def load
-      YAML::load_file(source_path) || []
+      YAML::load_file(absolute_path) || []
     rescue TypeError
       []
     end
 
     def add(source_term, target_term, note)
-      initialize_source unless File.exist?(source_path)
+      initialize_source unless File.exist?(absolute_path)
 
       glossary_source = self.load
       glossary_source << build_term(source_term, target_term, note)
@@ -44,7 +44,7 @@ module Logaling::GlossarySources
     end
 
     def update(source_term, target_term, new_target_term, note)
-      raise Logaling::GlossaryNotFound unless File.exist?(source_path)
+      raise Logaling::GlossaryNotFound unless File.exist?(absolute_path)
 
       glossary_source = self.load
       target_index = find_term_index(glossary_source, source_term, target_term)
@@ -57,7 +57,7 @@ module Logaling::GlossarySources
     end
 
     def delete(source_term, target_term)
-      raise Logaling::GlossaryNotFound unless File.exist?(source_path)
+      raise Logaling::GlossaryNotFound unless File.exist?(absolute_path)
 
       glossary_source = self.load
       target_index = find_term_index(glossary_source, source_term, target_term)
@@ -70,7 +70,7 @@ module Logaling::GlossarySources
     end
 
     def delete_all(source_term, force=false)
-      raise Logaling::GlossaryNotFound unless File.exist?(source_path)
+      raise Logaling::GlossaryNotFound unless File.exist?(absolute_path)
 
       glossary_source = self.load
       delete_candidates = target_terms(glossary_source, source_term)
@@ -121,7 +121,7 @@ module Logaling::GlossarySources
     end
 
     def dump_glossary_source(glossary_source)
-      File.open(source_path, "w") do |f|
+      File.open(absolute_path, "w") do |f|
         f << YAML.dump(glossary_source)
       end
     end
