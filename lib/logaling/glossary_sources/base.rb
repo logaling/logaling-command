@@ -39,7 +39,7 @@ module Logaling
       end
 
       def source_path_full
-        @glossary.project.repository.make_full_path(@source_path)
+        @glossary.project.repository.expand_path(@source_path)
       end
     end
   end

@@ -58,7 +58,7 @@ module Logaling
     end
 
     def glossary_source_path
-      basepath = @repository.make_full_path(@path)
+      basepath = @repository.expand_path(@path)
       File.join(basepath, "glossary")
     end
 
@@ -123,7 +123,7 @@ module Logaling
     end
 
     def glossary_source_path
-      @repository.make_full_path(@path)
+      @repository.expand_path(@path)
     end
 
     def imported?
@@ -154,7 +154,7 @@ module Logaling
         project_name = [glossary_name, source_language, target_language, 'yml'].join('.')
         project_path = File.join(relative_root_path, project_name)
         project = PersonalProject.new(project_path, repository)
-        FileUtils.rm_rf(repository.make_full_path(project_path), :secure => true)
+        FileUtils.rm_rf(repository.expand_path(project_path), :secure => true)
         project
       end
     end
@@ -169,7 +169,7 @@ module Logaling
     end
 
     def glossary_source_path
-      @repository.make_full_path(@path)
+      @repository.expand_path(@path)
     end
 
     def initialize_glossary(source_language, target_language)

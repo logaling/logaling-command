@@ -43,7 +43,7 @@ module Logaling
 
     def unregister(project)
       raise Logaling::ProjectNotFound unless project
-      FileUtils.rm_rf(make_full_path(project.path), :secure => true)
+      FileUtils.rm_rf(expand_path(project.path), :secure => true)
       index
     end
 
@@ -168,7 +168,7 @@ module Logaling
       File.join(@logaling_home, "db")
     end
 
-    def make_full_path(relative_path)
+    def expand_path(relative_path)
       File.expand_path(File.join(@logaling_home, relative_path))
     end
 
