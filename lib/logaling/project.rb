@@ -128,6 +128,11 @@ module Logaling
       [GlossarySource.create(@path, glossary(source_language, target_language))]
     end
 
+    def has_glossary?(source_language, target_language)
+      glossary_source_language, glossary_target_language = File.basename(@path).split(/\./)[1..2]
+      glossary_source_language == source_language && glossary_target_language == target_language
+    end
+
     def glossary_source_path
       @repository.expand_path(@path)
     end
@@ -142,11 +147,6 @@ module Logaling
 
     def source_directory_path
       File.dirname(glossary_source_path)
-    end
-
-    private
-    def all_glossary_source_path
-      Dir.glob(File.join(File.dirname(glossary_source_path), "*"))
     end
   end
 
@@ -178,6 +178,11 @@ module Logaling
       [GlossarySource.create(@path, glossary(source_language, target_language))]
     end
 
+    def has_glossary?(source_language, target_language)
+      glossary_source_language, glossary_target_language = File.basename(@path).split(/\./)[1..2]
+      glossary_source_language == source_language && glossary_target_language == target_language
+    end
+
     def expand_path
       @repository.expand_path(@path)
     end
@@ -197,11 +202,6 @@ module Logaling
 
     def source_directory_path
       File.dirname(glossary_source_path)
-    end
-
-    private
-    def all_glossary_source_path
-      Dir.glob(File.join(File.dirname(glossary_source_path), "*"))
     end
   end
 end
