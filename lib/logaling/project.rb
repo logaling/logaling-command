@@ -61,6 +61,7 @@ module Logaling
       basepath = @repository.expand_path(@path)
       File.join(basepath, "glossary")
     end
+    alias_method :source_directory_path, :glossary_source_path
 
     def glossary_db_path
       @repository.logaling_db_home
@@ -134,6 +135,10 @@ module Logaling
       false
     end
 
+    def source_directory_path
+      File.dirname(glossary_source_path)
+    end
+
     private
     def all_glossary_source_path
       Dir.glob(File.join(File.dirname(glossary_source_path), "*"))
@@ -183,6 +188,10 @@ module Logaling
 
     def normal_project?
       false
+    end
+
+    def source_directory_path
+      File.dirname(glossary_source_path)
     end
 
     private

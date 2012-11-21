@@ -84,7 +84,7 @@ module Logaling
         @glossary_source
       else
         file_name = [@name, @source_language, @target_language, 'yml'].join('.')
-        source_dir = @project.normal_project? ? @project.glossary_source_path : File.dirname(@project.glossary_source_path)
+        source_dir = @project.source_directory_path
         FileUtils.mkdir_p(source_dir)
         source_path_full = File.join(source_dir, file_name)
         source_path = @project.repository.make_relative_path(source_path_full)
