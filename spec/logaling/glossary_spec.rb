@@ -32,6 +32,7 @@ module Logaling
       FileUtils.rm_rf(File.join(logaling_home, 'projects', 'spec'), :secure => true)
       FileUtils.mkdir_p(File.join(logaling_home, 'projects', 'spec', 'glossary'))
       FileUtils.touch(glossary_source_path_full)
+      File.open(glossary_source_path_full, "w") {|f| f << YAML.dump([]) }
       # and clear db too
       glossary.index!
     end
