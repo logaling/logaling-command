@@ -21,9 +21,8 @@ require "logaling/project"
 
 module Logaling
   class Repository
-    attr_reader :logaling_home
     def initialize(path)
-      @logaling_home = path
+      @path = path
     end
 
     def register(dot_logaling_path, register_name)
@@ -160,36 +159,40 @@ module Logaling
     end
 
     def config_path
-      path = File.join(@logaling_home, "config")
+      path = File.join(logaling_home, "config")
       File.exist?(path) ? path : nil
     end
 
     def logaling_db_home
-      File.join(@logaling_home, "db")
+      File.join(logaling_home, "db")
     end
 
     def expand_path(relative_path)
-      File.expand_path(File.join(@logaling_home, relative_path))
+      File.expand_path(File.join(logaling_home, relative_path))
     end
 
     def relative_path(full_path)
       require 'pathname'
       path = Pathname.new(full_path)
-      base = Pathname.new(@logaling_home)
+      base = Pathname.new(logaling_home)
       path.relative_path_from(base).to_s
     end
 
     private
+    def logaling_home
+      @path
+    end
+
     def logaling_projects_path
-      File.join(@logaling_home, "projects")
+      File.join(logaling_home, "projects")
     end
 
     def personal_glossary_root_path
-      File.join(@logaling_home, "personal")
+      File.join(logaling_home, "personal")
     end
 
     def cache_path
-      File.join(@logaling_home, "cache")
+      File.join(logaling_home, "cache")
     end
 
     def registered_project_paths
