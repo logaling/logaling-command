@@ -58,8 +58,7 @@ module Logaling
     end
 
     def glossary_source_path
-      basepath = @repository.expand_path(@path)
-      File.join(basepath, "glossary")
+      File.join(@repository.expand_path(@path), "glossary")
     end
     alias_method :source_directory_path, :glossary_source_path
 
