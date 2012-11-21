@@ -168,9 +168,10 @@ module Logaling
       [GlossarySource.create(@path, glossary(source_language, target_language))]
     end
 
-    def glossary_source_path
+    def expand_path
       @repository.expand_path(@path)
     end
+    alias_method :glossary_source_path, :expand_path
 
     def initialize_glossary(source_language, target_language)
       glossary(source_language, target_language).initialize_glossary_source
