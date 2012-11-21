@@ -133,10 +133,10 @@ module Logaling
       glossary_source_language == source_language && glossary_target_language == target_language
     end
 
-    def expand_path
+    def absolute_path
       @repository.expand_path(@path)
     end
-    alias_method :glossary_source_path, :expand_path
+    alias_method :glossary_source_path, :absolute_path
 
     def normal_project?
       false
