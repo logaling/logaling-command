@@ -25,14 +25,14 @@ module Logaling
     let(:repository) { Logaling::Repository.new(logaling_home) }
     let(:glossary) { repository.find_project('spec').glossary('en', 'ja') }
     let(:glossary_source_path) { glossary.glossary_source.source_path }
-    let(:glossary_source_expand_path) { glossary.glossary_source.expand_path }
+    let(:glossary_source_absolute_path) { glossary.glossary_source.absolute_path }
 
     before do
       # clear directories and files
       FileUtils.rm_rf(File.join(logaling_home, 'projects', 'spec'), :secure => true)
       FileUtils.mkdir_p(File.join(logaling_home, 'projects', 'spec', 'glossary'))
-      FileUtils.touch(glossary_source_expand_path)
-      File.open(glossary_source_expand_path, "w") {|f| f << YAML.dump([]) }
+      FileUtils.touch(glossary_source_absolute_path)
+      File.open(glossary_source_absolute_path, "w") {|f| f << YAML.dump([]) }
       # and clear db too
       glossary.index!
     end
@@ -44,7 +44,7 @@ module Logaling
         end
 
         it 'glossary yaml should have that bilingual pair' do
-          yaml = YAML::load_file(glossary_source_expand_path)
+          yaml = YAML::load_file(glossary_source_absolute_path)
           term = yaml.index({"source_term"=>"spec", "target_term"=>"スペック", "note"=>"テストスペック"})
           term.should_not be_nil
         end
@@ -56,7 +56,7 @@ module Logaling
         end
 
         it "should create the glossary and add term" do
-          yaml = YAML::load_file(glossary_source_expand_path)
+          yaml = YAML::load_file(glossary_source_absolute_path)
           term = yaml.index({"source_term"=>"test", "target_term"=>"テスト", "note"=>"テスト"})
           term.should_not be_nil
         end
@@ -92,7 +92,7 @@ module Logaling
         end
 
         it 'should clear note' do
-          yaml = YAML::load_file(glossary_source_expand_path)
+          yaml = YAML::load_file(glossary_source_absolute_path)
           term = yaml.index({"source_term"=>"user", "target_term"=>"ユーザ", "note"=>""})
           term.should_not be_nil
         end
