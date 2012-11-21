@@ -136,8 +136,9 @@ module Logaling
         file_name = [self.to_s, type].join('.')
         File.join(@project.glossary_source_path, file_name)
       end
-      Dir.glob(glob_condition).map do |source_path_full|
-        source_path = @project.repository.make_relative_path(source_path_full)
+      Dir.glob(glob_condition).map do |source_path|
+        file_name = File.basename(source_path)
+        source_path = @project.relative_path(file_name)
         GlossarySource.create(source_path, self)
       end
     end
