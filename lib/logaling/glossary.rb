@@ -134,7 +134,7 @@ module Logaling
     def glossary_sources
       glob_condition = SUPPORTED_FILE_TYPE.map do |type|
         file_name = [self.to_s, type].join('.')
-        File.join(@project.glossary_source_path, file_name)
+        File.join(@project.source_directory_path, file_name)
       end
       Dir.glob(glob_condition).map do |source_path|
         file_name = File.basename(source_path)
