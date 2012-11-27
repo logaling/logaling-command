@@ -196,6 +196,46 @@ module Logaling
       end
     end
 
+    describe "#create_personal_repository" do
+      let(:glossary_name) { "personal_project" }
+      let(:source_language) { "en" }
+      let(:target_language) { "ja" }
+      before do
+        FileUtils.rm_rf(File.join(logaling_home, 'personal'), :secure => true)
+        repository.create_personal_project(glossary_name, source_language, target_language)
+      end
+
+      context "when just create personal project" do
+        before do
+          glossary = repository.find_glossary(glossary_name, source_language, target_language)
+          Logaling::GlossaryDB.open(repository.logaling_db_home, "utf8") do |db|
+            @ret = db.glossary_source_exist?(glossary.glossary_source)
+          end
+        end
+
+        it "should not be indexed on db" do
+          @ret.should be_false
+        end
+      end
+
+      context "when create personal project and index" do
+        before do
+          glossary = repository.find_glossary(glossary_name, source_language, target_language)
+          glossary.index!
+          Logaling::GlossaryDB.open(repository.logaling_db_home, "utf8") do |db|
+            @ret = db.glossary_source_exist?(glossary.glossary_source)
+          end
+        end
+
+        it "should be indexed on db" do
+          @ret.should be_true
+        end
+      end
+      after do
+        repository.remove_personal_project(glossary_name, source_language, target_language)
+      end
+    end
+
     describe "#remove_personal_project" do
       let(:rm_glossary_name) { "rm_personal_project" }
       let(:rm_source_language) { "en" }
