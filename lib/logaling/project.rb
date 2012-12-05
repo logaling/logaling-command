@@ -151,6 +151,24 @@ module Logaling
     def imported?
       true
     end
+
+    def description
+      external_glossary.class.description
+    end
+
+    def url
+      external_glossary.class.url
+    end
+
+    private
+    def external_glossary
+      unless @external_glossary
+        require 'logaling/external_glossary'
+        Logaling::ExternalGlossary.load
+        @external_glossary = Logaling::ExternalGlossary.get(name)
+      end
+      @external_glossary
+    end
   end
 
   class PersonalProject < FileBasedProject
