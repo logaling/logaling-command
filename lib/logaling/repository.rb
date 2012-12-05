@@ -117,10 +117,14 @@ module Logaling
       projects += personal_glossary_paths.map do |personal_glossary_path|
         Logaling::PersonalProject.new(relative_path(personal_glossary_path), self)
       end
-      projects += imported_glossary_paths.map do |imported_project_path|
+      projects += imported_projects
+      projects.sort_by(&:path)
+    end
+
+    def imported_projects
+      imported_glossary_paths.map do |imported_project_path|
         Logaling::ImportedProject.new(relative_path(imported_project_path), self)
       end
-      projects.sort_by(&:path)
     end
 
     def index
