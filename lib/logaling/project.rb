@@ -123,13 +123,17 @@ module Logaling
       File.basename(@path).split(/\./).first
     end
 
+    def bilingualr_pair
+      File.basename(@path).split(/\./)[1, 2]
+    end
+
     def glossary_sources
-      name, source_language, target_language, type = File.basename(@path).split(/\./)
+      source_language, target_language = bilingualr_pair
       [GlossarySource.create(@path, glossary(source_language, target_language))]
     end
 
     def has_glossary?(source_language, target_language)
-      glossary_source_language, glossary_target_language = File.basename(@path).split(/\./)[1..2]
+      glossary_source_language, glossary_target_language = bilingualr_pair
       glossary_source_language == source_language && glossary_target_language == target_language
     end
 
