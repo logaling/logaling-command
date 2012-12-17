@@ -53,10 +53,10 @@ module Logaling
       !find_bilingual_pairs(source_term, target_term, note).empty?
     end
 
-    def add(source_term, target_term, note)
+    def add(source_term, target_term, note, index_after_adding=true)
       raise Logaling::TermError if bilingual_pair_exists?(source_term, target_term)
       glossary_source.add(source_term, target_term, note)
-      index!
+      index! if index_after_adding
     end
 
     def update(source_term, target_term, new_target_term, note)
