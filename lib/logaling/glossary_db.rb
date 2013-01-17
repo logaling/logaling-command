@@ -130,6 +130,7 @@ module Logaling
         {:key=>"glossary", :order=>'ascending'},
         {:key=>"source_term", :order=>'ascending'},
         {:key=>"target_term", :order=>'ascending'}])
+      records = records.collect {|record| record.value }
 
       options = {:width => 5000,
                  :html_escape => true,
@@ -161,6 +162,7 @@ module Logaling
         {:key=>"_score", :order=>'descending'},
         {:key=>"source_term", :order=>'ascending'},
         {:key=>"target_term", :order=>'ascending'}])
+      records = records.collect {|record| record.value }
 
       options = {:width => 5000,
                  :html_escape => true,
@@ -192,6 +194,7 @@ module Logaling
         {:key => "source_term", :order => order},
         {:key => "target_term", :order => order}
       ])
+      records = records.collect {|record| record.value }
 
       struct_result(records)
     end
@@ -227,9 +230,11 @@ module Logaling
     end
 
     def get_all_glossary_sources
-      source_paths = Groonga["glossary_sources"].sort([
+      records = Groonga["glossary_sources"].sort([
         {:key=>"_key", :order=>'ascending'}
-      ]).map{|record| [record.key, record.project_type]}
+      ])
+      records = records.collect {|record| record.value }
+      source_paths = records.map{|record| [record.key, record.project_type]}
       source_paths.map do |source_path, project_type|
         glossary_name, source_language, target_language = File.basename(source_path).split(/\./)
         project = Logaling.const_get(project_type).new(Logaling::Project.find_path(source_path))
@@ -246,9 +251,11 @@ module Logaling
     end
 
     def get_all_glossary
-      Groonga["glossaries"].sort([
+      records = Groonga["glossaries"].sort([
         {:key=>"_key", :order=>'ascending'}
-      ]).map{|record| record.key}
+      ])
+      records = records.collect {|record| record.value }
+      records.map{|record| record.key}
     end
 
     private
