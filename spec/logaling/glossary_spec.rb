@@ -119,8 +119,8 @@ module Logaling
         end
 
         it 'should delete the bilingual pair' do
-          @result.any?{|term| term[:source_term] == "delete_logaling" && term[:target_term] == "てすと2"}.should be_true
-          @result.any?{|term| term[:source_term] == "delete_logaling" && term[:target_term] == "てすと1"}.should be_false
+          @result.any?{|term| term[:source_term] == "delete_logaling" && term[:target_term] == "てすと2"}.should be_truthy
+          @result.any?{|term| term[:source_term] == "delete_logaling" && term[:target_term] == "てすと1"}.should be_falsey
         end
       end
 
@@ -155,7 +155,7 @@ module Logaling
           end
 
           it 'should delete the term' do
-            @result.any?{|term| term[:source_term] == "user_logaling" && term[:target_term] == "ユーザ"}.should be_false
+            @result.any?{|term| term[:source_term] == "user_logaling" && term[:target_term] == "ユーザ"}.should be_falsey
           end
         end
 
@@ -174,10 +174,10 @@ module Logaling
           }
 
           it "should delete terms when force option is true" do
-            @result.any?{|term| term == {"source_term"=>"delete_logaling", "target_term"=>"てすと1", "note"=>"備考"}}.should be_false
-            @result.any?{|term| term == {"source_term"=>"delete_logaling", "target_term"=>"てすと2", "note"=>"備考"}}.should be_false
-            @result.any?{|term| term == {"source_term"=>"user_logaling", "target_term"=>"ユーザ1", "note"=>"備考"}}.should be_true
-            @result.any?{|term| term == {"source_term"=>"user_logaling", "target_term"=>"ユーザ2", "note"=>"備考"}}.should be_true
+            @result.any?{|term| term == {"source_term"=>"delete_logaling", "target_term"=>"てすと1", "note"=>"備考"}}.should be_falsey
+            @result.any?{|term| term == {"source_term"=>"delete_logaling", "target_term"=>"てすと2", "note"=>"備考"}}.should be_falsey
+            @result.any?{|term| term == {"source_term"=>"user_logaling", "target_term"=>"ユーザ1", "note"=>"備考"}}.should be_truthy
+            @result.any?{|term| term == {"source_term"=>"user_logaling", "target_term"=>"ユーザ2", "note"=>"備考"}}.should be_truthy
           end
         end
       end
