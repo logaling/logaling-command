@@ -38,7 +38,7 @@ module Logaling
         before do
           glossary.add("user-logaling", "ユーザ", "ユーザーではない")
           glossary.add("user-logaling", "ユーザー", "")
-          File.stub(:mtime).and_return(Time.now - 1)
+          allow(File).to receive_message_chain(:mtime).and_return(Time.now - 1)
           repository.index
           @terms = repository.lookup("user-logaling", glossary)
         end
@@ -54,7 +54,7 @@ module Logaling
           glossary.add("user-logaling", "ユーザ", "ユーザーではない")
           glossary.add("user-logaling test", "ユーザーてすと", "")
           glossary.add("ゆーざ", "test user-logaling test text", "")
-          File.stub(:mtime).and_return(Time.now - 1)
+          allow(File).to receive_message_chain(:mtime).and_return(Time.now - 1)
           repository.index
           options = {"dictionary"=>true}
           @terms = repository.lookup("user-logaling", glossary, options)
@@ -97,7 +97,7 @@ module Logaling
         before do
           glossary.add("user", "ユーザ", "ユーザーではない")
           glossary.add("user-logaling", "ユーザ", "ユーザーと迷い中 #{annotation_word}")
-          File.stub(:mtime).and_return(Time.now - 1)
+          allow(File).to receive_message_chain(:mtime).and_return(Time.now - 1)
           repository.index
           options = {"fixed" => true}
           @terms = repository.lookup("user", glossary, options)
