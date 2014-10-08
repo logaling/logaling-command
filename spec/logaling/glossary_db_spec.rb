@@ -60,7 +60,7 @@ module Logaling
               project_get = glossary_source.glossary.project
             end
           end
-          project_get.should_not be nil
+          expect(project_get).not_to be nil
         end
       end
     end

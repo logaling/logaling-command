@@ -44,7 +44,7 @@ module Logaling
         end
 
         it 'succeed at find by term' do
-          @terms.size.should == 2
+          expect(@terms.size).to eq(2)
         end
       end
 
@@ -88,7 +88,7 @@ module Logaling
         end
 
         it 'succeed at find by term' do
-          @terms.should == @result
+          expect(@terms).to eq(@result)
         end
       end
 
@@ -113,7 +113,7 @@ module Logaling
         end
 
         it 'succeed at find by term without include annotation' do
-          @terms.should == @result
+          expect(@terms).to eq(@result)
         end
 
       end
@@ -129,7 +129,7 @@ module Logaling
         end
 
         it 'succeed at find by term' do
-          @terms.size.should == 2
+          expect(@terms.size).to eq(2)
         end
 
         after do
@@ -153,7 +153,7 @@ module Logaling
         end
 
         it 'glossaries should be indexed' do
-          @terms.size.should == 1
+          expect(@terms.size).to eq(1)
         end
 
         after do
@@ -170,7 +170,7 @@ module Logaling
         end
 
         it 'glossaries should be indexed' do
-          @terms.size.should == 1
+          expect(@terms.size).to eq(1)
         end
 
         after do
@@ -187,7 +187,7 @@ module Logaling
         end
 
         it 'glossaries should be indexed' do
-          @terms.size.should == 1
+          expect(@terms.size).to eq(1)
         end
 
         after do
@@ -214,7 +214,7 @@ module Logaling
         end
 
         it "should not be indexed on db" do
-          @ret.should be_falsey
+          expect(@ret).to be_falsey
         end
       end
 
@@ -228,7 +228,7 @@ module Logaling
         end
 
         it "should be indexed on db" do
-          @ret.should be_truthy
+          expect(@ret).to be_truthy
         end
       end
       after do
@@ -253,16 +253,16 @@ module Logaling
         end
 
         it "should remove personal project" do
-          @projects.size.should == 1
+          expect(@projects.size).to eq(1)
         end
       end
 
       context "when target personal project not exist" do
         it "should raise Logaling::GlossaryNotFound" do
           @name = rm_glossary_name + "foo"
-          lambda{
+          expect{
             repository.remove_personal_project(@name, rm_source_language, rm_target_language)
-          }.should raise_error(Logaling::GlossaryNotFound)
+          }.to raise_error(Logaling::GlossaryNotFound)
         end
       end
     end

@@ -37,7 +37,7 @@ module Logaling
 
       context "project has only 'en-ja' glossary" do
         it "should be include 'en-ja' glossary" do
-          project.glossaries.map(&:to_s).should be_include "spec.en.ja"
+          expect(project.glossaries.map(&:to_s)).to be_include "spec.en.ja"
         end
       end
 
@@ -48,7 +48,7 @@ module Logaling
 
         it "should be include 'en-ja' 'fr-ja' glossaries" do
           %w(spec.en.ja spec.fr.ja).each do |glossary_name|
-            project.glossaries.map(&:to_s).should be_include glossary_name
+            expect(project.glossaries.map(&:to_s)).to be_include glossary_name
           end
         end
       end
@@ -59,7 +59,7 @@ module Logaling
         end
 
         it "should count as one glossary" do
-          project.glossaries.size.should == 1
+          expect(project.glossaries.size).to eq(1)
         end
       end
     end

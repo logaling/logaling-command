@@ -46,7 +46,7 @@ module Logaling
         it 'glossary yaml should have that bilingual pair' do
           yaml = YAML::load_file(glossary_source_absolute_path)
           term = yaml.index({"source_term"=>"spec", "target_term"=>"スペック", "note"=>"テストスペック"})
-          term.should_not be_nil
+          expect(term).not_to be_nil
         end
       end
 
@@ -58,7 +58,7 @@ module Logaling
         it "should create the glossary and add term" do
           yaml = YAML::load_file(glossary_source_absolute_path)
           term = yaml.index({"source_term"=>"test", "target_term"=>"テスト", "note"=>"テスト"})
-          term.should_not be_nil
+          expect(term).not_to be_nil
         end
       end
     end
@@ -70,19 +70,19 @@ module Logaling
 
       context 'with new-terget-term show existing bilingual pair' do
         it {
-          -> { glossary.update("user", "ユーザー", "ユーザ", "やっぱりユーザー") }.should raise_error(Logaling::TermError)
+          expect { glossary.update("user", "ユーザー", "ユーザ", "やっぱりユーザー") }.to raise_error(Logaling::TermError)
         }
       end
 
       context 'with source-term show not existing bilingual pair' do
         it {
-          -> { glossary.update("use", "ユーザ", "ユーザー", "やっぱりユーザー") }.should raise_error(Logaling::TermError)
+          expect { glossary.update("use", "ユーザ", "ユーザー", "やっぱりユーザー") }.to raise_error(Logaling::TermError)
         }
       end
 
       context 'with target-term show not existing bilingual pair' do
         it {
-          -> { glossary.update("user", "ユー", "ユーザー", "やっぱりユーザー") }.should raise_error(Logaling::TermError)
+          expect { glossary.update("user", "ユー", "ユーザー", "やっぱりユーザー") }.to raise_error(Logaling::TermError)
         }
       end
 
@@ -94,7 +94,7 @@ module Logaling
         it 'should clear note' do
           yaml = YAML::load_file(glossary_source_absolute_path)
           term = yaml.index({"source_term"=>"user", "target_term"=>"ユーザ", "note"=>""})
-          term.should_not be_nil
+          expect(term).not_to be_nil
         end
       end
 
@@ -104,7 +104,7 @@ module Logaling
         end
 
         it {
-          -> { glossary.update("user", "ゆーざ", "ユーザ", "") }.should raise_error(Logaling::TermError)
+          expect { glossary.update("user", "ゆーざ", "ユーザ", "") }.to raise_error(Logaling::TermError)
         }
       end
     end
@@ -119,8 +119,8 @@ module Logaling
         end
 
         it 'should delete the bilingual pair' do
-          @result.any?{|term| term[:source_term] == "delete_logaling" && term[:target_term] == "てすと2"}.should be_truthy
-          @result.any?{|term| term[:source_term] == "delete_logaling" && term[:target_term] == "てすと1"}.should be_falsey
+          expect(@result.any?{|term| term[:source_term] == "delete_logaling" && term[:target_term] == "てすと2"}).to be_truthy
+          expect(@result.any?{|term| term[:source_term] == "delete_logaling" && term[:target_term] == "てすと1"}).to be_falsey
         end
       end
 
@@ -130,7 +130,7 @@ module Logaling
         end
 
         it {
-          -> { glossary.delete("user_logaling", "ユーザー") }.should raise_error(Logaling::TermError)
+          expect { glossary.delete("user_logaling", "ユーザー") }.to raise_error(Logaling::TermError)
         }
       end
     end
@@ -142,7 +142,7 @@ module Logaling
         end
 
         it {
-          -> { glossary.delete_all("usr_logaling") }.should raise_error(Logaling::TermError)
+          expect { glossary.delete_all("usr_logaling") }.to raise_error(Logaling::TermError)
         }
       end
 
@@ -155,7 +155,7 @@ module Logaling
           end
 
           it 'should delete the term' do
-            @result.any?{|term| term[:source_term] == "user_logaling" && term[:target_term] == "ユーザ"}.should be_falsey
+            expect(@result.any?{|term| term[:source_term] == "user_logaling" && term[:target_term] == "ユーザ"}).to be_falsey
           end
         end
 
@@ -170,14 +170,14 @@ module Logaling
           end
 
           it {
-            -> { glossary.delete_all("user_logaling") }.should raise_error(Logaling::TermError)
+            expect { glossary.delete_all("user_logaling") }.to raise_error(Logaling::TermError)
           }
 
           it "should delete terms when force option is true" do
-            @result.any?{|term| term == {"source_term"=>"delete_logaling", "target_term"=>"てすと1", "note"=>"備考"}}.should be_falsey
-            @result.any?{|term| term == {"source_term"=>"delete_logaling", "target_term"=>"てすと2", "note"=>"備考"}}.should be_falsey
-            @result.any?{|term| term == {"source_term"=>"user_logaling", "target_term"=>"ユーザ1", "note"=>"備考"}}.should be_truthy
-            @result.any?{|term| term == {"source_term"=>"user_logaling", "target_term"=>"ユーザ2", "note"=>"備考"}}.should be_truthy
+            expect(@result.any?{|term| term == {"source_term"=>"delete_logaling", "target_term"=>"てすと1", "note"=>"備考"}}).to be_falsey
+            expect(@result.any?{|term| term == {"source_term"=>"delete_logaling", "target_term"=>"てすと2", "note"=>"備考"}}).to be_falsey
+            expect(@result.any?{|term| term == {"source_term"=>"user_logaling", "target_term"=>"ユーザ1", "note"=>"備考"}}).to be_truthy
+            expect(@result.any?{|term| term == {"source_term"=>"user_logaling", "target_term"=>"ユーザ2", "note"=>"備考"}}).to be_truthy
           end
         end
       end

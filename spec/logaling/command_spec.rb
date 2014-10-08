@@ -43,7 +43,7 @@ describe Logaling::Command::Application do
       end
 
       it 'print message \"<.logaling path> already exists.\"' do
-        @stdout.should include "#{logaling_config} already exists.\n"
+        expect(@stdout).to include "#{logaling_config} already exists.\n"
       end
     end
 
@@ -54,12 +54,12 @@ describe Logaling::Command::Application do
         end
 
         it 'should create .logaling' do
-          File.should be_exist(logaling_config)
+          expect(File).to be_exist(logaling_config)
         end
 
         it 'should register .logaling as project' do
-          File.should be_exist(target_project_path)
-          Dir[File.join(logaling_home, "projects", "*")].size.should == @n_projects + 1
+          expect(File).to be_exist(target_project_path)
+          expect(Dir[File.join(logaling_home, "projects", "*")].size).to eq(@n_projects + 1)
         end
       end
 
@@ -70,12 +70,12 @@ describe Logaling::Command::Application do
         end
 
         it 'should create .logaling' do
-          File.should be_exist(logaling_config)
+          expect(File).to be_exist(logaling_config)
         end
 
         it 'should not register .logaling as project' do
-          File.should_not be_exist(target_project_path)
-          Dir[File.join(logaling_home, "projects", "*")].size.should == @n_projects
+          expect(File).not_to be_exist(target_project_path)
+          expect(Dir[File.join(logaling_home, "projects", "*")].size).to eq(@n_projects)
         end
       end
     end
@@ -94,11 +94,11 @@ describe Logaling::Command::Application do
       end
 
       it 'register nothing' do
-        Dir[File.join(logaling_home, "projects", "*")].size.should == @n_projects
+        expect(Dir[File.join(logaling_home, "projects", "*")].size).to eq(@n_projects)
       end
 
       it "print message \"Do 'loga register' at project directory.\"" do
-        @stdout.should be_include "Do 'loga register' at project directory."
+        expect(@stdout).to be_include "Do 'loga register' at project directory."
       end
     end
 
@@ -109,8 +109,8 @@ describe Logaling::Command::Application do
       end
 
       it 'register .logaling as project' do
-        File.should be_exist(target_project_path)
-        Dir[File.join(logaling_home, "projects", "*")].size.should == @n_projects + 1
+        expect(File).to be_exist(target_project_path)
+        expect(Dir[File.join(logaling_home, "projects", "*")].size).to eq(@n_projects + 1)
       end
     end
   end
@@ -132,7 +132,7 @@ describe Logaling::Command::Application do
         end
 
         it "should print message 'Do \'loga unregister\' at ...'" do
-          @stdout.should be_include "Do 'loga unregister' at project directory."
+          expect(@stdout).to be_include "Do 'loga unregister' at project directory."
         end
       end
 
@@ -143,7 +143,7 @@ describe Logaling::Command::Application do
           @stdout = capture(:stdout) {command.unregister}
         end
         it 'should unregister symlink' do
-          Dir[File.join(logaling_home, "projects", "*")].size.should == @n_projects
+          expect(Dir[File.join(logaling_home, "projects", "*")].size).to eq(@n_projects)
         end
       end
     end
@@ -158,8 +158,8 @@ describe Logaling::Command::Application do
         end
 
         it 'unregister .logaling' do
-          File.should_not be_exist(target_project_path)
-          Dir[File.join(logaling_home, "projects", "*")].size.should == @n_projects
+          expect(File).not_to be_exist(target_project_path)
+          expect(Dir[File.join(logaling_home, "projects", "*")].size).to eq(@n_projects)
         end
       end
 
@@ -171,7 +171,7 @@ describe Logaling::Command::Application do
         end
 
         it "print message \"<glossary name> is not yet registered.\"" do
-          @stdout.should == "spec is not yet registered.\n"
+          expect(@stdout).to eq("spec is not yet registered.\n")
         end
       end
     end
@@ -191,10 +191,10 @@ describe Logaling::Command::Application do
       end
 
       it 'should be indexed' do
-        @stdout.should include "spec"
-        @stdout.should include "スペック"
-        @stdout.should include "# 備考"
-        @stdout.should_not include "now index spec..."
+        expect(@stdout).to include "spec"
+        expect(@stdout).to include "スペック"
+        expect(@stdout).to include "# 備考"
+        expect(@stdout).not_to include "now index spec..."
       end
     end
 
@@ -206,7 +206,7 @@ describe Logaling::Command::Application do
       end
 
       it 'should print message and failed index' do
-        @stdout.should include "Input existing directory as logaling-home."
+        expect(@stdout).to include "Input existing directory as logaling-home."
       end
     end
   end
@@ -224,7 +224,7 @@ describe Logaling::Command::Application do
       end
 
       it 'should overwrite target-language' do
-        should include "--target-language fr"
+        is_expected.to include "--target-language fr"
       end
     end
 
@@ -235,7 +235,7 @@ describe Logaling::Command::Application do
       end
 
       it 'should overwrite source-language' do
-        should include "--source-language ja"
+        is_expected.to include "--source-language ja"
       end
     end
 
@@ -249,7 +249,7 @@ describe Logaling::Command::Application do
       subject { File.read(global_config) }
 
       it 'should create {logaling_home}/config and write target-language' do
-        should include "--target-language ja"
+        is_expected.to include "--target-language ja"
       end
 
       after do
@@ -266,7 +266,7 @@ describe Logaling::Command::Application do
         end
 
         it 'should overwrite target-language' do
-          should include "--target-language fr"
+          is_expected.to include "--target-language fr"
         end
       end
 
@@ -281,7 +281,7 @@ describe Logaling::Command::Application do
         subject { File.read(global_config) }
 
         it 'should create {logaling_home}/config and write target-language' do
-          should include "--target-language ja"
+          is_expected.to include "--target-language ja"
         end
 
         after do
@@ -301,11 +301,11 @@ describe Logaling::Command::Application do
       subject { YAML::load_file(glossary_source_path).find{|h| h["source_term"] == "spec" }}
 
       it "glossary yaml should contain that term" do
-        subject["target_term"].should == "テスト"
+        expect(subject["target_term"]).to eq("テスト")
       end
 
       it "term should note have note" do
-        subject["note"].should == ""
+        expect(subject["note"]).to eq("")
       end
     end
 
@@ -318,11 +318,11 @@ describe Logaling::Command::Application do
       subject { YAML::load_file(glossary_source_path).find{|h| h["source_term"] == "spec" }}
 
       it "glossary yaml should contain that term" do
-        subject["target_term"].should == "テスト"
+        expect(subject["target_term"]).to eq("テスト")
       end
 
       it "term should have note" do
-        subject["note"].should == "備考"
+        expect(subject["note"]).to eq("備考")
       end
     end
 
@@ -344,8 +344,8 @@ describe Logaling::Command::Application do
         end
 
         it "should use global config's TARGET-LANGUAGE" do
-          @stdout.should include "test-logaling"
-          @stdout.should include "設定ファイルのテスト"
+          expect(@stdout).to include "test-logaling"
+          expect(@stdout).to include "設定ファイルのテスト"
         end
       end
 
@@ -368,7 +368,7 @@ describe Logaling::Command::Application do
       end
 
       it "term's target_term should be updated" do
-        @yaml.should == {"source_term"=>"spec", "target_term"=>"スペック", "note"=>"備考"}
+        expect(@yaml).to eq({"source_term"=>"spec", "target_term"=>"スペック", "note"=>"備考"})
       end
     end
 
@@ -379,7 +379,7 @@ describe Logaling::Command::Application do
       end
 
       it "term's target_term should not be updated" do
-        @yaml.should == {"source_term"=>"spec", "target_term"=>"テスト", "note"=>"備考"}
+        expect(@yaml).to eq({"source_term"=>"spec", "target_term"=>"テスト", "note"=>"備考"})
       end
     end
 
@@ -390,7 +390,7 @@ describe Logaling::Command::Application do
       end
 
       it "should update note" do
-        @yaml.should == {"source_term"=>"spec", "target_term"=>"テスト", "note"=>"備考だけ書き換え"}
+        expect(@yaml).to eq({"source_term"=>"spec", "target_term"=>"テスト", "note"=>"備考だけ書き換え"})
       end
     end
   end
@@ -408,9 +408,9 @@ describe Logaling::Command::Application do
       end
 
       it 'succeed at find by term without command.index' do
-        @stdout.should include "spec"
-        @stdout.should include "スペック"
-        @stdout.should include "# 備考"
+        expect(@stdout).to include "spec"
+        expect(@stdout).to include "スペック"
+        expect(@stdout).to include "# 備考"
       end
     end
   end
@@ -431,7 +431,7 @@ describe Logaling::Command::Application do
       end
 
       it 'should delete the term' do
-        @stdout.should_not include "スペックろがりん"
+        expect(@stdout).not_to include "スペックろがりん"
       end
     end
 
@@ -444,7 +444,7 @@ describe Logaling::Command::Application do
         end
 
         it 'should delete the term' do
-          @stdout.should_not include "スペックろがりん"
+          expect(@stdout).not_to include "スペックろがりん"
         end
       end
 
@@ -455,9 +455,9 @@ describe Logaling::Command::Application do
           end
 
           it "should print usage" do
-            @stdout.should include "There are duplicate terms in glossary."
-            @stdout.should include "loga delete [SOURCE_TERM] --force"
-            @stdout.should include "loga delete [SOURCE_TERM] [TARGET_TERM]"
+            expect(@stdout).to include "There are duplicate terms in glossary."
+            expect(@stdout).to include "loga delete [SOURCE_TERM] --force"
+            expect(@stdout).to include "loga delete [SOURCE_TERM] [TARGET_TERM]"
           end
         end
 
@@ -475,8 +475,8 @@ describe Logaling::Command::Application do
           end
 
           it 'should delete bilingual pairs' do
-            @stdout.should_not include "用語1"
-            @stdout.should_not include "用語2"
+            expect(@stdout).not_to include "用語1"
+            expect(@stdout).not_to include "用語2"
           end
         end
       end
@@ -501,8 +501,8 @@ describe Logaling::Command::Application do
       end
 
       it 'should show translation list' do
-        @stdout.should include "スペックてすと"
-        @stdout.should_not include "テストろがりん"
+        expect(@stdout).to include "スペックてすと"
+        expect(@stdout).not_to include "テストろがりん"
       end
     end
 
@@ -526,7 +526,7 @@ describe Logaling::Command::Application do
       end
 
       it 'should show annotated word' do
-        @stdout.should include "スペックてすと2"
+        expect(@stdout).to include "スペックてすと2"
       end
 
       context 'after annotation removed' do
@@ -536,7 +536,7 @@ describe Logaling::Command::Application do
         end
 
         it 'should not show annotated word' do
-          @stdout.should_not include "スペックてすと1"
+          expect(@stdout).not_to include "スペックてすと1"
         end
       end
     end
@@ -549,7 +549,7 @@ describe Logaling::Command::Application do
       end
 
       it 'should not show un-annotated word' do
-        @stdout.should_not include "スペックてすと1"
+        expect(@stdout).not_to include "スペックてすと1"
       end
     end
   end
@@ -567,7 +567,7 @@ describe Logaling::Command::Application do
       end
 
       it 'should list glossaries' do
-        @stdout.should include "spec"
+        expect(@stdout).to include "spec"
       end
     end
 
@@ -580,7 +580,7 @@ describe Logaling::Command::Application do
       end
 
       it 'should not include unregistered glossary' do
-        @stdout.should_not include "spec"
+        expect(@stdout).not_to include "spec"
       end
     end
   end
@@ -599,7 +599,7 @@ describe Logaling::Command::Application do
       end
 
       it 'should copy from original glossary' do
-        @yaml.should == {"source_term"=>"spec logaling", "target_term"=>"すぺっくろがりん", "note"=>""}
+        expect(@yaml).to eq({"source_term"=>"spec logaling", "target_term"=>"すぺっくろがりん", "note"=>""})
       end
     end
 
@@ -609,7 +609,7 @@ describe Logaling::Command::Application do
       end
 
       it 'should not copy glossary' do
-        @stdout.should include "already exists"
+        expect(@stdout).to include "already exists"
       end
     end
   end
