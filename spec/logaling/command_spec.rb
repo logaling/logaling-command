@@ -87,7 +87,7 @@ describe Logaling::Command::Application do
     end
 
     context "when can not find .logaling" do
-      before(:all) do
+      before do
         FileUtils.rm_rf(logaling_config)
         base_options["glossary"] = nil
         @stdout = capture(:stdout) {command.register}
