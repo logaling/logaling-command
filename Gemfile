@@ -1,4 +1,5 @@
 #
+#    Copyright (C) 2015  Kouhei Sutou <kou@clear-code.com>
 #    Copyright (C) 2011  Miho SUZUKI
 #
 #    This program is free software: you can redistribute it and/or modify
@@ -14,7 +15,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-source "http://rubygems.org"
+source "https://rubygems.org"
 
 # Specify your gem's dependencies in logaling-command.gemspec
 gemspec
