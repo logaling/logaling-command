@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #
+# Copyright (C) 2015  Kouhei Sutou <kou@clear-code.com>
 # Copyright (C) 2011  Miho SUZUKI
 #
 # This program is free software: you can redistribute it and/or modify
@@ -17,6 +18,6 @@
 
 module Logaling
   module Command
-    VERSION = "0.2.3"
+    VERSION = "0.2.4"
   end
 end
