@@ -1,7 +1,6 @@
 notifications:
   recipients:
-    - koji.shimada@enishi-tech.com
-    - adzuki34@gmail.com
+    - groonga-commit@lists.sourceforge.jp
 language: ruby
 rvm:
   - 1.9.3
