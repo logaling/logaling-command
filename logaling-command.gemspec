@@ -26,6 +26,7 @@ Gem::Specification.new do |s|
   s.homepage    = "http://logaling.github.com/"
   s.summary     = %q{A command line interface for logaling.}
   s.description = %q{A command line interface for logaling.}
+  s.license     = "GPLv3+"
 
   s.rubyforge_project = "logaling-command"
 
