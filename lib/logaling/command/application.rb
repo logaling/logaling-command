@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #
+# Copyright (C) 2015  Kouhei Sutou <kou@clear-code.com>
 # Copyright (C) 2011  Miho SUZUKI
 #
 # This program is free software: you can redistribute it and/or modify
@@ -16,7 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 require 'thor'
-require 'rainbow'
+require 'rainbow/ext/string'
 require 'pathname'
 require "logaling/repository"
 require "logaling/project"
