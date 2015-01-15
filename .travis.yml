@@ -4,5 +4,8 @@ notifications:
 language: ruby
 rvm:
   - 1.9.3
+  - 2.0
+  - 2.1
+  - 2.2
 before_install:
   - curl --silent --location https://github.com/groonga/groonga/raw/master/data/travis/setup.sh | sh
