@@ -29,8 +29,8 @@ module Logaling
     def convert_to_csv(csv)
       doc = ::Nokogiri::HTML(open("http://osb.sraoss.co.jp/PostgreSQL/Manual/word.html", "r:iso-2022-jp").read.encode("utf-8"))
       doc.css('table table tr')[2..-1].each do |tr|
-        if tr.children[2]
-          csv << [tr.children[2].text, tr.children[4].text]
+        if tr.children[3]
+          csv << [tr.children[3].text, tr.children[5].text]
         end
       end
     end
